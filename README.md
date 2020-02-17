@@ -7,8 +7,6 @@ Here's a list of extensions along with a brief description. Try using your brows
 * **`hello_world`**: A barebones example. Prints "Hello world!" when `hi()` is called.
 
 ## How to Contribute an Extension
-So you want to contribute an extension!
-
 We welcome additional extensions as pull requests.
 
 We want everyone to feel at home in this repo and its environs; please see our [Code of Conduct](CODE_OF_CONDUCT.md) for some rules that govern everyone's participation.
