@@ -13,4 +13,4 @@ jobs:
             - name: Install CI check
               run: go get github.com/windmilleng/tilt-extensions-ci && go install github.com/windmilleng/tilt-extensions-ci
             - name: Running tests
-              run: tilt-extensions-ci tilt-extensions
+              run: echo $PATH && echo $GOPATH && tilt-extensions-ci tilt-extensions
