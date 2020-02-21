@@ -5,6 +5,7 @@ This is the official Tilt Extension Repository. All extensions here have been ve
 Here's a list of extensions along with a brief description. Try using your browsers search functionality to find an extension.
 
 * **`hello_world`**: A barebones example. Prints "Hello world!" when `hi()` is called.
+* **`procfile`**: Creates Tilt resources from a foreman Procfile.
 
 ## How to Contribute an Extension
 We welcome additional extensions as pull requests.

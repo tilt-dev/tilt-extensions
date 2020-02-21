@@ -1,0 +1,20 @@
+def procfile_resources(procfile='Procfile', set_port=False, starting_port=5000):
+  """
+  Creates local resources from a Procfile (e.g., as defined by Foreman: http://blog.daviddollar.org/2011/05/06/introducing-foreman.html)
+
+  Args:
+    procfile (Str): the Procfile to load
+    set_port (Bool): if True, give each process a unique $PORT value
+    starting_port (Int): the number from which to start assigning ports
+  """ 
+  port = starting_port
+  lines = str(read_file(procfile)).splitlines()
+  for line in lines:
+    (name, cmd) = line.split(': ', 2)
+    if set_port:
+      # ideally local_resource would have an env option so that this wouldn't
+      # show up in logs as the command being run (and then we could default
+      # set_port to True)
+      cmd = 'PORT=%d %s' % (port, cmd)
+    local_resource(name, serve_cmd=cmd)
+    port += 1
