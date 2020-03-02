@@ -6,6 +6,7 @@ Here's a list of extensions along with a brief description. Try using your brows
 
 * **`hello_world`**: A barebones example. Prints "Hello world!" when `hi()` is called.
 * **`docker_build_sub`**: Like [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build), but allows you to specify extra Dockerfile directives in your Tiltfile.
+* **`procfile`**: Creates Tilt resources from a foreman Procfile.
 
 ## How to Contribute an Extension
 We welcome additional extensions as pull requests.
