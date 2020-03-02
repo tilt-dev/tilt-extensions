@@ -2,6 +2,8 @@ def procfile_resources(procfile='Procfile', set_port=False, starting_port=5000):
   """
   Creates local resources from a Procfile (e.g., as defined by Foreman: http://blog.daviddollar.org/2011/05/06/introducing-foreman.html)
 
+  See also: local resource docs: https://docs.tilt.dev/local_resource.html
+
   Args:
     procfile (Str): the path to the Procfile to load
     set_port (Bool): if True, give each process a unique $PORT value
