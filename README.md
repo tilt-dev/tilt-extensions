@@ -1,19 +1,13 @@
 # Tilt Extensions
-This is the official Tilt Extension Repository. All extensions here have been vetted and approved by the Tilt Team.
+This is the official Tilt Extensions Repository. All extensions here have been vetted and approved by the Tilt team.
 
-## Finding an Extension
-Here's a list of extensions along with a brief description. Try using your browsers search functionality to find an extension.
+- [`api_server_logs`](/api_server_logs): Print API server logs. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
+- [`docker_build_sub`](/docker_build_sub): Specify extra Dockerfile directives in your Tiltfile beyond [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build).
+- [`hello_world`](/hello_world): Print "Hello world!".
+- [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
+- [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
 
-* **`hello_world`**: A barebones example. Prints "Hello world!" when `hi()` is called.
-* **`docker_build_sub`**: Like [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build), but allows you to specify extra Dockerfile directives in your Tiltfile.
-* [print_tiltfile_dir](/print_tiltfile_dir/Tiltfile): Print all files in the same immediate directory as where the Tiltfile is located. If recursive is set to True, also prints files in all recursive subdirectories.
-* **`procfile`**: Creates Tilt resources from a foreman Procfile.
-
-## How to Contribute an Extension
-We welcome additional extensions as pull requests.
+## Contribute an Extension
+See [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
 
 We want everyone to feel at home in this repo and its environs; please see our [Code of Conduct](CODE_OF_CONDUCT.md) for some rules that govern everyone's participation.
-
-Each extension should live in its own directory in the root of this repo and have at least a Tiltfile, and optionally other files. For a very simple example see the [hello world extension](https://github.com/windmilleng/tilt-extensions/tree/master/hello_world). For a more complex example, see the [Tilt Extension Authoring guide](TODO).
-
-Be sure to add your extension to the extension index in README.md.
