@@ -1,0 +1,8 @@
+# Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
+
+def print_tiltfile_dir(recursive=False):
+  cwd = os.getcwd()
+  files = listdir(cwd, recursive=recursive)
+  print('Directory where Tiltfile is located: ', cwd)
+  for file in files:
+    print(file)
