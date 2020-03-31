@@ -1,0 +1,2 @@
+def jest(path):
+  local_resource("jest", "", serve_cmd="cd %s && yarn run jest --bail" % path)
