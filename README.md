@@ -1,5 +1,7 @@
 # Tilt Extensions
-This is the official Tilt Extensions Repository. All extensions here have been vetted and approved by the Tilt team.
+This is the official Tilt Extensions Repository. Read more in [docs](https://docs.tilt.dev/extensions.html).
+
+All extensions have been vetted and approved by the Tilt team.
 
 - [`api_server_logs`](/api_server_logs): Print API server logs. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
 - [`docker_build_sub`](/docker_build_sub): Specify extra Dockerfile directives in your Tiltfile beyond [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build).
@@ -8,7 +10,6 @@ This is the official Tilt Extensions Repository. All extensions here have been v
 - [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
 - [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
-
 
 ## Contribute an Extension
 See [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
