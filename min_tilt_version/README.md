@@ -1,5 +1,7 @@
 # Min Tilt Version
 
+Author: [David Rubin](https://github.com/drubin)
+
 Specify a minimum Tilt version to run this TiltFile
 
 If the minimum version is not met, Tilt will stop executing using the `fail` api
