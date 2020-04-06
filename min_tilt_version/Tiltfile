@@ -1,0 +1,27 @@
+def min_tilt_version(min_version):
+  # this assumes that the tit version command always returns
+  # v0.13.0, built 2020-04-01
+  # Also supports dev versions
+  # v0.13.0-dev, built 2020-04-03
+
+  ver_string = str(local('tilt version', quiet=True))
+  # Clean out the version file so its in the format 0.13.0
+  versions = ver_string.split(', ')
+  # pull first string and remove the `v` and `-dev`
+  version = versions[0].replace('v', '').replace('-dev', '')
+
+  # Python allows you to compare two tuples
+  # (0, 12, 0) < (0, 12, 1)
+  tup_version = _version_tuple(version)
+  tup_min_version = _version_tuple(min_version)
+
+  if tup_version < tup_min_version:
+    print('+--+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+')
+    print('|                      Tilt Version is out of date!                          |')
+    print('|       Please upgrade https://docs.tilt.dev/upgrade.html                    |')
+    print('+--+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+')
+    fail('Tilt version is out of date minimum required version is [%s]' % min_version)
+
+# Private methods
+def _version_tuple(v):
+  return [int(str_num) for str_num in v.split(".")]
