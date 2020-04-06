@@ -1,12 +1,12 @@
 # Min Tilt Version
 
-Allows you to specify a minimum tilt version to run required this TiltFile
+Specify a minimum Tilt version to run this TiltFile
 
-Requiring a minimum will cause tilt to stop execution using `fail` api
+If the minimum version is not met, Tilt will stop executing using the `fail` api
 
 ## Usage
 
-Its advisable to include this as close to the top of the `Tiltfile` as possible.
+It's advisable to include this as close to the top of the Tiltfile as possible.
 
 Include patch version
 
