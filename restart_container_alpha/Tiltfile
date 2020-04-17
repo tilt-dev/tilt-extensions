@@ -23,7 +23,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     for step in live_update:
         if type(step) == TYPE_RESTART_CONTAINER_STEP:
             fail("`docker_build_with_restart` is not compatible with live_update step: "+
-                 "`restart_container()` (this extension is meant to REPLACE restart_container() )")s
+                 "`restart_container()` (this extension is meant to REPLACE restart_container() )")
 
     # rename the original image to make it a base image and declare a docker_build for it
     base_ref = '{}{}'.format(ref, base_suffix)
@@ -39,6 +39,11 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     COPY --from=base /entr /
   '''.format(base_ref, restart_file)
 
+    # since we'll be passing the `dockerfile_contents` arg below,
+    # clean the kwargs of any args that might conflict
+    rm_key_if_exists(kwargs, 'dockerfile')
+    rm_key_if_exists(kwargs, 'dockerfile_contents')
+
     # Change the entrypoint to use entr.
     # entr allows you to run commands when files change: https://github.com/eradman/entr/
     # this invocation says: whenever $restart_file changes, re-execute $entrypoint
@@ -50,3 +55,9 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
 
     docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
                  live_update=live_update, **kwargs)
+
+
+def rm_key_if_exists(dict, key):
+    # we don't care if the key exists, but `pop` throws an error
+    # if key exists and no default value, so specify default value
+    dict.pop(key, None)
