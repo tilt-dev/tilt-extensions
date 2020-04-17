@@ -1,0 +1,31 @@
+RESTART_FILE = '/.restart-proc'
+
+def docker_build_with_restart(ref, context, entrypoint, live_update=[],
+                              base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
+    """DOCS blah blah docs"""
+
+    # rename the original image to make it a base image and declare a docker_build for it
+    base_ref = '{}{}'.format(ref, base_suffix)
+    docker_build(base_ref, context, **kwargs)
+
+    # declare a new docker build that starts from the base image and:
+    # 1. adds static binary of entr that Tilt compiled previously
+    # 2. changes the entrypoint to use entr
+    df = '''
+    FROM tiltdev/entr as base
+
+    FROM {}
+    RUN touch {}
+    COPY --from=base /entr /
+  '''.format(base_ref, restart_file)
+
+    # entr allows you to run commands when files change: https://github.com/eradman/entr/
+    # this invocation says: whenever $restart_file changes, re-execute $entrypoint
+    entrypoint_with_entr = "echo '{}' | /entr -rz {}".format(restart_file, entrypoint)
+
+    # last live_update step should always be to touch $restart_file, which
+    # triggers entr to rerun $entrypoint
+    live_update.append(run('touch {}'.format(restart_file)))
+
+    docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
+                 live_update=live_update, **kwargs)
