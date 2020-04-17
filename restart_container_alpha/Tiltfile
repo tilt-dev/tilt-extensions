@@ -1,16 +1,24 @@
 RESTART_FILE = '/.restart-proc'
+TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
 def docker_build_with_restart(ref, context, entrypoint, live_update=[],
                               base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
     """DOCS blah blah docs"""
 
+    # first, validate the given live_update steps
+    if len(live_update) == 0:
+        fail("`docker_build_with_restart` requires at least one live_update step")
+    for step in live_update:
+        if type(step) == TYPE_RESTART_CONTAINER_STEP:
+            fail("`docker_build_with_restart` is not compatible with live_update step: "+
+                 "`restart_container()` (this extension is meant to REPLACE restart_container() )")s
+
     # rename the original image to make it a base image and declare a docker_build for it
     base_ref = '{}{}'.format(ref, base_suffix)
     docker_build(base_ref, context, **kwargs)
 
-    # declare a new docker build that starts from the base image and:
-    # 1. adds static binary of entr that Tilt compiled previously
-    # 2. changes the entrypoint to use entr
+    # declare a new docker build that adds a static binary of entr (previously
+    # compiled by tilt) to the user's image
     df = '''
     FROM tiltdev/entr as base
 
@@ -19,6 +27,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update=[],
     COPY --from=base /entr /
   '''.format(base_ref, restart_file)
 
+    # Change the entrypoint to use entr.
     # entr allows you to run commands when files change: https://github.com/eradman/entr/
     # this invocation says: whenever $restart_file changes, re-execute $entrypoint
     entrypoint_with_entr = "echo '{}' | /entr -rz {}".format(restart_file, entrypoint)
