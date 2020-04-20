@@ -1,4 +1,4 @@
-# Restart Container (Alpha)
+# Restart Process (Alpha)
 
 🚨 Still Under Development! 🚨
 This extension is still actively in development, use at your own risk.
