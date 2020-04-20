@@ -32,17 +32,14 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # declare a new docker build that adds a static binary of entr (previously
     # compiled by tilt) to the user's image
     df = '''
-    FROM tiltdev/entr:2020-16-04 as base
+    FROM tiltdev/entr:2020-16-04 as entr-img
 
     FROM {}
-    RUN touch {}
-    COPY --from=base /entr /
+    RUN ["touch", "{}"]
+    COPY --from=entr-img /entr /
   '''.format(base_ref, restart_file)
 
-    # since we'll be passing the `dockerfile_contents` arg below,
-    # clean the kwargs of any args that might conflict
-    rm_key_if_exists(kwargs, 'dockerfile')
-    rm_key_if_exists(kwargs, 'dockerfile_contents')
+    clean_kwargs(kwargs)
 
     # Change the entrypoint to use entr.
     # entr allows you to run commands when files change: https://github.com/eradman/entr/
@@ -56,6 +53,22 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
                  live_update=live_update, **kwargs)
 
+
+def clean_kwargs(kwargs):
+    """
+        Clean kwargs for building the child image (which builds on user's specified
+        image and copies in entr). In practice, this means removing kwargs that were
+        relevant to building the user's specified image but are NOT relevant to building
+        the child image / may conflict with args we specifically pass for the child image.
+    """
+    # since we'll be passing the `dockerfile_contents` when building the child image,
+    # remove any kwargs that might conflict
+    rm_key_if_exists(kwargs, 'dockerfile')
+    rm_key_if_exists(kwargs, 'dockerfile_contents')
+
+    # 'target' isn't relevant to our child build--it will just fail to find the
+    # specified stage and error
+    rm_key_if_exists(kwargs, 'target')
 
 def rm_key_if_exists(dict, key):
     # we don't care if the key exists, but `pop` throws an error
