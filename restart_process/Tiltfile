@@ -49,9 +49,9 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # this invocation says: whenever $restart_file changes, re-execute $entrypoint
     entrypoint_with_entr = "echo '{}' | /entr -rz {}".format(restart_file, entrypoint)
 
-    # last live_update step should always be to touch $restart_file, which
+    # last live_update step should always be to modify $restart_file, which
     # triggers entr to rerun $entrypoint
-    live_update.append(run('touch {}'.format(restart_file)))
+    live_update.append(run('date > {}'.format(restart_file)))
 
     docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
                  live_update=live_update, **kwargs)
