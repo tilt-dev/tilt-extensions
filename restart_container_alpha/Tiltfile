@@ -32,7 +32,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # declare a new docker build that adds a static binary of entr (previously
     # compiled by tilt) to the user's image
     df = '''
-    FROM tiltdev/entr as base
+    FROM tiltdev/entr:2020-16-04 as base
 
     FROM {}
     RUN touch {}
