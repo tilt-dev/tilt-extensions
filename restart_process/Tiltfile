@@ -1,6 +1,17 @@
 RESTART_FILE = '/.restart-proc'
 TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
+KWARGS_BLACKLIST = [
+    # since we'll be passing `dockerfile_contents` when building the
+    # child image, remove any kwargs that might conflict
+    'dockerfile', 'dockerfile_contents',
+
+    # 'target' isn't relevant to our child build--if we pass this arg,
+    # Docker will just fail to find the specified stage and error out
+    'target',
+]
+
+
 def docker_build_with_restart(ref, context, entrypoint, live_update,
                               base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
@@ -39,7 +50,11 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     COPY --from=entr-img /entr /
   '''.format(base_ref, restart_file)
 
-    clean_kwargs(kwargs)
+    # Clean kwargs for building the child image (which builds on user's specified
+    # image and copies in entr). In practice, this means removing kwargs that were
+    # relevant to building the user's specified image but are NOT relevant to building
+    # the child image / may conflict with args we specifically pass for the child image.
+    cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in KWARGS_BLACKLIST}
 
     # Change the entrypoint to use entr.
     # entr allows you to run commands when files change: https://github.com/eradman/entr/
@@ -48,29 +63,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
 
     # last live_update step should always be to modify $restart_file, which
     # triggers entr to rerun $entrypoint
-    live_update.append(run('date > {}'.format(restart_file)))
+    live_update = live_update + [run('date > {}'.format(restart_file))]
 
     docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
-                 live_update=live_update, **kwargs)
-
-
-def clean_kwargs(kwargs):
-    """
-        Clean kwargs for building the child image (which builds on user's specified
-        image and copies in entr). In practice, this means removing kwargs that were
-        relevant to building the user's specified image but are NOT relevant to building
-        the child image / may conflict with args we specifically pass for the child image.
-    """
-    # since we'll be passing the `dockerfile_contents` when building the child image,
-    # remove any kwargs that might conflict
-    rm_key_if_exists(kwargs, 'dockerfile')
-    rm_key_if_exists(kwargs, 'dockerfile_contents')
-
-    # 'target' isn't relevant to our child build--it will just fail to find the
-    # specified stage and error
-    rm_key_if_exists(kwargs, 'target')
-
-def rm_key_if_exists(dict, key):
-    # we don't care if the key exists, but `pop` throws an error
-    # if key exists and no default value, so specify default value
-    dict.pop(key, None)
+                 live_update=live_update, **cleaned_kwargs)
