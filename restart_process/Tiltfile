@@ -1,4 +1,3 @@
-RESTART_FILE = '/.restart-proc'
 TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
 KWARGS_BLACKLIST = [
@@ -13,10 +12,9 @@ KWARGS_BLACKLIST = [
 
 
 def docker_build_with_restart(ref, context, entrypoint, live_update,
-                              base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
+                              base_suffix='-base', shell=False, **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
-
 
      Args:
       ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in docker_build
@@ -24,7 +22,6 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
       entrypoint: the command to be (re-)executed when the container starts or when a live_update is run
       live_update: set of steps for updating a running container; as the parameter of the same name in docker_build
       base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
-      restart_file: file that Tilt will `touch` during a live_update to signal the entrypoint to rerun
       **kwargs: will be passed to the underlying `docker_build` call
     """
 
@@ -40,30 +37,36 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     base_ref = '{}{}'.format(ref, base_suffix)
     docker_build(base_ref, context, **kwargs)
 
-    # declare a new docker build that adds a static binary of entr (previously
-    # compiled by tilt) to the user's image
+    # declare a new docker build that adds Tilt's process wrapper scripts to the user's image
+    # TODO(maia): should the name of the `restart-scripts` image be configurable?
     df = '''
-    FROM tiltdev/entr:2020-16-04 as entr-img
+    FROM tiltdev/restart-scripts:2020-22-04 as scripts-helper
 
     FROM {}
-    RUN ["touch", "{}"]
-    COPY --from=entr-img /entr /
-  '''.format(base_ref, restart_file)
+    COPY --from=scripts-helper /start.sh /
+    COPY --from=scripts-helper /restart.sh /
+  '''.format(base_ref)
 
-    # Clean kwargs for building the child image (which builds on user's specified
-    # image and copies in entr). In practice, this means removing kwargs that were
+    # Clean kwargs for building the child image (which builds on user's specified image
+    # and copies in some scripts). In practice, this means removing kwargs that were
     # relevant to building the user's specified image but are NOT relevant to building
     # the child image / may conflict with args we specifically pass for the child image.
     cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in KWARGS_BLACKLIST}
 
-    # Change the entrypoint to use entr.
-    # entr allows you to run commands when files change: https://github.com/eradman/entr/
-    # this invocation says: whenever $restart_file changes, re-execute $entrypoint
-    entrypoint_with_entr = "echo '{}' | /entr -rz {}".format(restart_file, entrypoint)
+    # Override this image's command to execute the given entrypoint via `start.sh`
+    # (this allows us to later RE-execute the process by running `restart.sh`)
+    if type(entrypoint) == type(""):
+        if shell:
+            entrypoint_with_start_sh = ["/start.sh", "sh", "-c", entrypoint]
+        else:
+            entrypoint_with_start_sh = ["/start.sh", entrypoint]
+    elif type(entrypoint) == type([]):
+        entrypoint_with_start_sh = ["/start.sh"] + entrypoint
+    else:
+        fail("`entrypoint` must be a string or list of strings: got {}".format(type(entrypoint)))
 
-    # last live_update step should always be to modify $restart_file, which
-    # triggers entr to rerun $entrypoint
-    live_update = live_update + [run('date > {}'.format(restart_file))]
+    # last live_update step is to run `restart.sh`, which re-executes the given entrypoint
+    live_update = live_update + [run('/restart.sh')]
 
-    docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
+    docker_build(ref, context, entrypoint=entrypoint_with_start_sh, dockerfile_contents=df,
                  live_update=live_update, **cleaned_kwargs)

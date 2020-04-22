@@ -1,8 +1,5 @@
-FROM alpine/git
+FROM alpine
 
-RUN apk update && apk add make
-RUN apk add build-base
-
-# TODO(maia): specify commit instead of just using latest master?
-RUN git clone https://github.com/eradman/entr.git /entr
-RUN cd /entr; ./configure; CFLAGS="-static" make install
+RUN wget --output-document /restart.sh --quiet https://raw.githubusercontent.com/windmilleng/rerun-process-wrapper/master/restart.sh
+RUN wget --output-document /start.sh --quiet https://raw.githubusercontent.com/windmilleng/rerun-process-wrapper/master/start.sh
+RUN chmod +x /start.sh && chmod +x /restart.sh
