@@ -63,9 +63,25 @@ run('date > /.restart-proc')
 Because `entr` will re-execute the entrypoint whenever `/.restart-proc'` changes, the above `run` step will cause the entrypoint to re-run.
 
 #### Provide `entr`
-For this all to work, the `entr` binary must be available on the Docker image.
+For this all to work, the `entr` binary must be available on the Docker image. The easiest solution would be to call e.g. `apt-get install entr` in the Dockerfile, but different base images will have different package mangers; rather than grapple with that, we've made a statically linked binary available on Docker image: [`tiltdev/entr`](https://hub.docker.com/repository/docker/tiltdev/entr).
 
+If you want to build `image-foo`, this extension will:
+- build your requested image as `image-foo-base` via `docker_build` call with all of your specified args/kwargs
+- build `image-foo` (the actual image that will be used in your resource) as a _child_ of `image-foo-base`:
+```Dockerfile
+FROM tiltdev/entr:2020-16-04 as entr-img
 
+FROM image-foo-base
+
+# we'll use this file to signal restarts,
+# make sure it exists
+RUN ["touch", "/.restart-proc"]
+
+# make the entr binary available on this image
+COPY --from=entr-img /entr /
+```
+
+Thus, the final image produced is tagged `image-foo` and has all the properties of your original `docker_build`, plus access to the `entr` binary.
 
 ## Unsupported Cases
 This extension does NOT support process restarts for:
