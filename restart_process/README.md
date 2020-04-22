@@ -44,7 +44,28 @@ The call above looks just like the initial `docker_build` call except for one ad
 
 ## What's Happening Under the Hood
 
-TODO(maia) 👀
+This extension makes use of [`entr`](https://github.com/eradman/entr/), a utility for running arbitrary commands when files change. Specifically, we override the container's entrypoint with the following:
+
+```python
+echo '/.restart-proc' | entr -rz <entrypoint>
+```
+
+This invocation says:
+- when the container starts, run <entrypoint>
+- whenever the `/.restart-proc` file changes, re-execute <entrypoint>
+- `-z`: if <entrypoint> exits, `entr` should exit as well (so that k8s/Tilt can detect that the container has stopped)[¹](#fn1).
+
+We also set the following as the last `live_update` step:
+```python
+run('date > /.restart-proc')
+```
+
+Because `entr` will re-execute the entrypoint whenever `/.restart-proc'` changes, the above `run` step will cause the entrypoint to re-run.
+
+#### Provide `entr`
+For this all to work, the `entr` binary must be available on the Docker image.
+
+
 
 ## Unsupported Cases
 This extension does NOT support process restarts for:
@@ -57,3 +78,7 @@ Run into a bug? Need a use case that we don't yet support? Let us know---[open a
 
 ## For Maintainers: Releasing
 TODO(maia) 👀
+
+---
+### Notes
+<a name="fn1"></a>**1**: the `-z` flag is only available in `entr` >= [v4.5](https://github.com/eradman/entr/releases/tag/4.5)
