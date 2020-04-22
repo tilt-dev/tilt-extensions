@@ -1,6 +1,7 @@
 # Restart Process (Alpha)
 
-🚨 Still Under Development! 🚨
+### 🚨 Still Under Development! 🚨
+
 This extension is still actively in development, use at your own risk.
 
 This extension wraps a `docker_build` call such that at the end of a `live_update`, the container's process will rerun itself. (Use it in place of the `restart_container()` Live Update step, which doesn't work for all users and will soon be deprecated.)
@@ -10,7 +11,7 @@ Use this extension when you have an image (via `docker_build`) and you want to r
 
 E.g. if your app is a static binary, you'll probably need to re-execute the binary for any changes you made to take effect.
 
-(If your app has hot reloading capabilities---i.e. it can detect and incorporate changes to its source code without needing to restart---you probably don't need this extension.)
+(If your app has hot reloading capabilities--i.e. it can detect and incorporate changes to its source code without needing to restart--you probably don't need this extension.)
 
 ## How to Use
 
@@ -90,7 +91,7 @@ This extension does NOT support process restarts for:
 - `custom_build`
 - ???
 
-Run into a bug? Need a use case that we don't yet support? Let us know---[open an issue](https://github.com/windmilleng/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
+Run into a bug? Need a use case that we don't yet support? Let us know--[open an issue](https://github.com/windmilleng/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
 
 ## For Maintainers: Releasing
 TODO(maia) 👀
