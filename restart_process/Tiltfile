@@ -12,7 +12,7 @@ KWARGS_BLACKLIST = [
 
 
 def docker_build_with_restart(ref, context, entrypoint, live_update,
-                              base_suffix='-base', shell=False, **kwargs):
+                              base_suffix='-base', shell_path=None, **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
 
@@ -22,9 +22,9 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
       entrypoint: the command to be (re-)executed when the container starts or when a live_update is run
       live_update: set of steps for updating a running container; as the parameter of the same name in docker_build
       base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
+      shell_path: the path to the container's shell, if not found by shebang "#!usr/bin/env sh"
       **kwargs: will be passed to the underlying `docker_build` call
     """
-
     # first, validate the given live_update steps
     if len(live_update) == 0:
         fail("`docker_build_with_restart` requires at least one live_update step")
@@ -38,7 +38,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     docker_build(base_ref, context, **kwargs)
 
     # declare a new docker build that adds Tilt's process wrapper scripts to the user's image
-    # TODO(maia): should the name of the `restart-scripts` image be configurable?
+    # TODO(maia): should the name of the `scripts-helper` image be configurable?
     df = '''
     FROM tiltdev/restart-scripts:2020-22-04 as scripts-helper
 
@@ -56,17 +56,20 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # Override this image's command to execute the given entrypoint via `start.sh`
     # (this allows us to later RE-execute the process by running `restart.sh`)
     if type(entrypoint) == type(""):
-        if shell:
-            entrypoint_with_start_sh = ["/start.sh", "sh", "-c", entrypoint]
-        else:
-            entrypoint_with_start_sh = ["/start.sh", entrypoint]
+        entrypoint_with_start_sh = ["/start.sh", entrypoint]
     elif type(entrypoint) == type([]):
         entrypoint_with_start_sh = ["/start.sh"] + entrypoint
     else:
         fail("`entrypoint` must be a string or list of strings: got {}".format(type(entrypoint)))
 
+    if shell_path:
+        entrypoint_with_start_sh = [shell_path] + entrypoint_with_start_sh
+
     # last live_update step is to run `restart.sh`, which re-executes the given entrypoint
-    live_update = live_update + [run('/restart.sh')]
+    restart_cmd = "/restart.sh"
+    if shell_path:
+        restart_cmd = "{} {}".format(shell_path, restart_cmd)
+    live_update = live_update + [run(restart_cmd)]
 
     docker_build(ref, context, entrypoint=entrypoint_with_start_sh, dockerfile_contents=df,
                  live_update=live_update, **cleaned_kwargs)
