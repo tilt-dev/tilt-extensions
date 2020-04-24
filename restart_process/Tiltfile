@@ -40,29 +40,36 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     base_ref = '{}{}'.format(ref, base_suffix)
     docker_build(base_ref, context, **kwargs)
 
-    # declare a new docker build that adds a static binary of entr (previously
-    # compiled by tilt) to the user's image
+    # declare a new docker build that adds a static binary of tilt-restart-wrapper
+    # (which makes use of entr to watch files and restart processes) to the user's image
     df = '''
-    FROM tiltdev/entr:2020-16-04 as entr-img
+    FROM tiltdev/entr:2020-04-24 as entr-img
 
     FROM {}
     RUN ["touch", "{}"]
     COPY --from=entr-img /entr /
+    COPY --from=entr-img /tilt-restart-wrapper /
   '''.format(base_ref, restart_file)
 
     # Clean kwargs for building the child image (which builds on user's specified
-    # image and copies in entr). In practice, this means removing kwargs that were
-    # relevant to building the user's specified image but are NOT relevant to building
-    # the child image / may conflict with args we specifically pass for the child image.
+    # image and copies in Tilt's restart wrapper). In practice, this means removing
+    # kwargs that were relevant to building the user's specified image but are NOT
+    # relevant to building the child image / may conflict with args we specifically
+    # pass for the child image.
     cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in KWARGS_BLACKLIST}
 
-    # Change the entrypoint to use entr.
-    # entr allows you to run commands when files change: https://github.com/eradman/entr/
-    # this invocation says: whenever $restart_file changes, re-execute $entrypoint
-    entrypoint_with_entr = "echo '{}' | /entr -rz {}".format(restart_file, entrypoint)
+    # Change the entrypoint to use `tilt-restart-wrapper`.
+    # `tilt-restart-wrapper` makes use of entr (https://github.com/eradman/entr/) to
+    # re-execute $entrypoint whenever $restart_file changes
+    if type(entrypoint) == type(""):
+        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watchfile={}".format(restart_file), "sh", "-c", entrypoint]
+    elif type(entrypoint) == type([]):
+        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watchfile={}".format(restart_file)] + entrypoint
+    else:
+        fail("`entrypoint` must be a string or list of strings: got {}".format(type(entrypoint)))
 
     # last live_update step should always be to modify $restart_file, which
-    # triggers entr to rerun $entrypoint
+    # triggers the process wrapper to rerun $entrypoint
     live_update = live_update + [run('date > {}'.format(restart_file))]
 
     docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
