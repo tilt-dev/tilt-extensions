@@ -8,6 +8,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`hello_world`](/hello_world): Print "Hello world!". Used in [Extensions](https://docs.tilt.dev/extensions.html).
 - [`jest_test_runner`](/jest_test_runner): Jest JavaScript test runner. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
 - [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
+- [`pack`](/pack): Build container images using [pack](https://buildpacks.io/docs/install-pack/) and [buildpacks](https://buildpacks.io/).
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
 - [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
 
