@@ -1,0 +1,54 @@
+# -*- mode: Python -*-
+
+CONFTEST_ARGS = [
+    'all_namespaces',
+    'combine',
+    'data',
+    'fail_on_warn',
+    'input',
+    'namespace',
+    'output',
+    'trace',
+    'update',
+    'policy',
+]
+
+def conftest(path, name='conftest', policy='policy', **kwargs):
+    """
+    Test configuration files against Open Policy Agent policies using Conftest
+
+    Args:
+      path: path to file to test
+      name: a name for the resource, defaults to conftest. Useful if you want multiple invocations
+      all_namespaces: use rules from all namespaces
+      combine: combine all files passed in into one structure
+      data: a list of paths to load additional data from
+      fail_on_warn: fail even if only warnings are found
+      input: input type if different from that autodetected from the file extension
+      namespace: the namespace to use for rules, defauls to main
+      output: the output format, can be stdout, json, tap or table
+      trace: whether or not to show the full policy trace, useful for debugging
+      update: download policies based on local configuration or from explicit repositories
+      policy: where to find the policy files, defaults to a directory called policy
+    """
+
+    # we want to support being able to pass arguments through to the local_resource function
+    # but first we need to split any kwargs explicitly intennded for conftest out
+    conftest_kwargs = {k.replace("_", "-"): v for k, v in kwargs.items() if k in CONFTEST_ARGS}
+    local_resource_kwargs = {k: v for k, v in kwargs.items() if k not in CONFTEST_ARGS}
+
+
+    # we build a string of the conftest arguments
+    args = ""
+    for key,value in conftest_kwargs.items():
+        if key in ['all-namespaces', 'fail-on-warn', 'combine', 'trace']:
+            if type(value) != 'bool':
+                fail('%s takes a boolean value, instead is is set to "%s"' % (key, value))
+        args += "--%s=%s " % (key, value)
+
+    local_resource(
+        name,
+        deps=[path, policy],
+        cmd='conftest test %s %s' % (args, path),
+        **local_resource_kwargs
+    )
