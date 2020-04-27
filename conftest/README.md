@@ -1,5 +1,7 @@
 # Use Conftest to test your configuration files
 
+Author: [Gareth Rushgrove](https://github.com/garethr)
+
 [Conftest](https://conftest.dev) is a utility to help you write tests against structured configuration data, including  write tests for your Kubernetes configurations. This Tilt eextension makes it easy to run Conftest as part of your development environment.
 
 ## Usage
