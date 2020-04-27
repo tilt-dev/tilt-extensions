@@ -1,0 +1,19 @@
+# -*- mode: Python -*-
+
+def pack(name, path=".", builder="gcr.io/paketo-buildpacks/builder:base", **kwargs):
+    """
+    Build a container image using pack and buildpacks.
+
+    Args:
+      name: name of the image to build
+      path: path to application directory, defaults to current working directory
+      builder: builder image, defaults to gcr.io/paketo-buildpacks/builder:base
+      **kwargs: will be passed to the underlying `custom_build` call
+
+    """
+    custom_build(
+        name,
+        "pack build $EXPECTED_REF -p %s --builder %s" % (path, builder),
+        [path],
+        **kwargs
+    )
