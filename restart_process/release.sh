@@ -16,5 +16,7 @@ docker push $IMAGE_NAME
 docker tag tiltdev/entr $IMAGE_WITH_TAG
 docker push $IMAGE_WITH_TAG
 
+echo "Successfully built and pushed $IMAGE_WITH_TAG"
+
 
 

@@ -11,23 +11,15 @@ import (
 )
 
 var defaultWatchFile = "/.restart-proc"
-var watchFile = flag.String("watchfile", "", "File that entr will watch for changes; changes to this file trigger entr to rerun the command(s) passed")
+var watchFile = flag.String("watch_file", "", "File that entr will watch for changes; changes to this file trigger entr to rerun the command(s) passed")
+var entrPath = flag.String("entr_path", "/entr", "Path to `entr` executable")
 
 func main() {
 	flag.Parse()
 
-	args := os.Args[1:]
-	if *watchFile == "" {
-		*watchFile = defaultWatchFile
-	} else {
-		// user passed this arg, make sure we don't pass it along to entr
-		args = os.Args[2:]
-	}
-	fmt.Println("Hello, world.")
-	fmt.Println("args:", args)
-	cmd := exec.Command("/entr", "-rz")
+	cmd := exec.Command(*entrPath, "-rz")
 	cmd.Stdin = strings.NewReader(fmt.Sprintf("%s\n", *watchFile))
-	cmd.Args = append(cmd.Args, args...)
+	cmd.Args = append(cmd.Args, flag.Args()...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -35,10 +27,20 @@ func main() {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			// The program has exited with an exit code != 0
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				if len(flag.Args()) == 0 {
+					log.Println("`tilt-restart-wrapper` requires at least one positional arg " +
+						"(a command or set of args to be  executed / rerun whenever `watch_file` changes)")
+				}
 				os.Exit(status.ExitStatus())
 			}
 		} else {
 			log.Fatalf("error running command: %v", err)
 		}
+	}
+
+	fmt.Println("hi there")
+	if len(flag.Args()) == 0 {
+		log.Fatal("`tilt-restart-wrapper` requires at least one positional arg "+
+			"(will be passed to `entr` and executed / rerun whenever `watch_file` changes)")
 	}
 }

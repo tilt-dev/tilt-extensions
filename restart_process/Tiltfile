@@ -43,7 +43,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of entr to watch files and restart processes) to the user's image
     df = '''
-    FROM tiltdev/entr:2020-04-24 as entr-img
+    FROM tiltdev/entr:2020-04-27 as entr-img
 
     FROM {}
     RUN ["touch", "{}"]
