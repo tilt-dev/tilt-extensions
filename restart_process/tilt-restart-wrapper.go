@@ -10,8 +10,7 @@ import (
 	"syscall"
 )
 
-var defaultWatchFile = "/.restart-proc"
-var watchFile = flag.String("watch_file", "", "File that entr will watch for changes; changes to this file trigger entr to rerun the command(s) passed")
+var watchFile = flag.String("watch_file", "/.restart-proc", "File that entr will watch for changes; changes to this file trigger `entr` to rerun the command(s) passed")
 var entrPath = flag.String("entr_path", "/entr", "Path to `entr` executable")
 
 func main() {
