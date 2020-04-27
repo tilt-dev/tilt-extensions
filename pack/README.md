@@ -1,5 +1,7 @@
 # Use Pack to build container images
 
+Author: [Gareth Rushgrove](https://github.com/garethr)
+
 Build container images using [pack](https://buildpacks.io/docs/install-pack/) and [buildpacks](https://buildpacks.io/).
 
 ## Usage
