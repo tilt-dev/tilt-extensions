@@ -43,7 +43,15 @@ docker_build_with_restart(
 ```
 The call above looks just like the initial `docker_build` call except for one added parameter, `entrypoint` (in this example, `/go/bin/foo`). This is the command that you want to run on container start and _re-run_ on Live Update.
 
+## Unsupported Cases
+This extension does NOT support process restarts for:
+- Images run in Docker Compose resources
+- `custom_build`
+
+Run into a bug? Need a use case that we don't yet support? Let us know--[open an issue](https://github.com/windmilleng/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
+
 ## What's Happening Under the Hood
+*If you're a casual user/just want to get your app running, you can stop reading now. However, if you want to dig deep and know exactly what's going on, or are trying to debug weird behavior, read on._
 
 This extension wraps commands in `tilt-restart-wrapper`, which makes use of [`entr`](https://github.com/eradman/entr/)
 to run arbitrary commands whenever a specified file changes. Specifically, we override the container's entrypoint with the following:
@@ -90,12 +98,7 @@ In order to make `entr` executable as ARGV rather than as shell, we have wrapped
 
 Note: ideally `entr` could accept files-to-watch via flag instead of stdin, but (for a number of good reasons) this feature isn't likely to be added any time soon (see [entr#33](https://github.com/eradman/entr/issues/33)).
 
-## Unsupported Cases
-This extension does NOT support process restarts for:
-- Images run in Docker Compose resources
-- `custom_build`
-
-Run into a bug? Need a use case that we don't yet support? Let us know--[open an issue](https://github.com/windmilleng/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
-
 ## For Maintainers: Releasing
-TODO(maia) 👀
+If you have push access to the `tiltdev` on DockerHub, you can release a new version of this extension like so:
+1. run `release.sh` (builds `tilt-restart-wrapper` from source, builds and pushes a Docker image with the new binary and a fresh binary of `entr` also installed from source)
+2. update the image tag in the [Tiltfile](/Tiltfile) with the tag you just pushed (you'll find the image referenced in the Dockerfile contents of the child image--look for "FROM tiltdev/restart-helper")
