@@ -45,57 +45,57 @@ The call above looks just like the initial `docker_build` call except for one ad
 
 ## What's Happening Under the Hood
 
-This extension makes use of [`entr`](https://github.com/eradman/entr/), a utility for running arbitrary commands when files change. Specifically, we override the container's entrypoint with the following:
+This extension wraps commands in `tilt-restart-wrapper`, which makes use of [`entr`](https://github.com/eradman/entr/)
+to run arbitrary commands whenever a specified file changes. Specifically, we override the container's entrypoint with the following:
 
-```python
-echo '/.restart-proc' | entr -rz <entrypoint>
+```
+/tilt-restart-wrapper --watchfile='/.restart-proc' <entrypoint>
 ```
 
 This invocation says:
 - when the container starts, run <entrypoint>
 - whenever the `/.restart-proc` file changes, re-execute <entrypoint>
-- `-z`: if <entrypoint> exits, `entr` should exit as well (so that k8s/Tilt can detect that the container has stopped)[¹](#fn1).
 
 We also set the following as the last `live_update` step:
 ```python
 run('date > /.restart-proc')
 ```
 
-Because `entr` will re-execute the entrypoint whenever `/.restart-proc'` changes, the above `run` step will cause the entrypoint to re-run.
+Because `tilt-restart-wrapper` will re-execute the entrypoint whenever `/.restart-proc'` changes, the above `run` step will cause the entrypoint to re-run.
 
-#### Provide `entr`
+#### Provide `tilt-restart-wrapper`
 For this all to work, the `entr` binary must be available on the Docker image. The easiest solution would be to call e.g. `apt-get install entr` in the Dockerfile, but different base images will have different package mangers; rather than grapple with that, we've made a statically linked binary available on Docker image: [`tiltdev/entr`](https://hub.docker.com/repository/docker/tiltdev/entr).
 
-If you want to build `image-foo`, this extension will:
-- build your requested image as `image-foo-base` via `docker_build` call with all of your specified args/kwargs
-- build `image-foo` (the actual image that will be used in your resource) as a _child_ of `image-foo-base`:
-```Dockerfile
-FROM tiltdev/entr:2020-16-04 as entr-img
+To build `image-foo`, this extension will:
+- build your image as normal (via `docker_build`, with all of your specified args/kwargs) but with the name `image-foo-base`
+- build `image-foo` (the actual image that will be used in your resource) as a _child_ of `image-foo-base`, with the `tilt-process-wrapper` and its dependencies available
 
-FROM image-foo-base
+Thus, the final image produced is tagged `image-foo` and has all the properties of your original `docker_build`, plus access to the `tilt-restart-wrapper` binary.
 
-# we'll use this file to signal restarts,
-# make sure it exists
-RUN ["touch", "/.restart-proc"]
+#### Why a Wrapper?
+Why bother with `tilt-restart-wrapper` rather than just calling `entr` directly?
 
-# make the entr binary available on this image
-COPY --from=entr-img /entr /
+Because in its canonical invocation, `entr` requires that the file(s) to watch be piped via stdin, i.e. it is invoked like:
+```
+echo "/.restart-proc" | entr -rz /bin/my-app
 ```
 
-Thus, the final image produced is tagged `image-foo` and has all the properties of your original `docker_build`, plus access to the `entr` binary.
+When specified as a `command` in Kubernetes or Docker Compose YAML (this is how Tilt overrides entrypoints), the above would therefore need to be executed as shell:
+```
+/bin/sh -c 'echo "/.restart-proc" | entr -rz /bin/my-app'
+```
+Any `args` specified in Kubernetes/Docker Compose are attached to the end of this call, and therefore in this case would apply TO THE `/bin/sh -c` CALL, rather than to the actual command run by `entr`; that is, any `args` specified by the user would be effectively ignored.
+
+In order to make `entr` executable as ARGV rather than as shell, we have wrapped it in a binary that can be called directly and takes care of the piping under the hood.
+
+Note: ideally `entr` could accept files-to-watch via flag instead of stdin, but (for a number of good reasons) this feature isn't likely to be added any time soon (see [entr#33](https://github.com/eradman/entr/issues/33)).
 
 ## Unsupported Cases
 This extension does NOT support process restarts for:
-- Docker images without shell support (e.g. `scratch`)
 - Images run in Docker Compose resources
 - `custom_build`
-- ???
 
 Run into a bug? Need a use case that we don't yet support? Let us know--[open an issue](https://github.com/windmilleng/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
 
 ## For Maintainers: Releasing
 TODO(maia) 👀
-
----
-### Notes
-<a name="fn1"></a>**1**: the `-z` flag is only available in `entr` >= [v4.5](https://github.com/eradman/entr/releases/tag/4.5)
