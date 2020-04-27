@@ -35,7 +35,7 @@ with a `docker_build_with_restart` call:
 docker_build_with_restart(
     'foo-image',
     './foo',
-    '/go/bin/foo',
+    entrypoint='/go/bin/foo',
     arg1=val1,
     arg2=val2,
     live_update=[x, y, z...]
@@ -43,6 +43,25 @@ docker_build_with_restart(
 ```
 The call above looks just like the initial `docker_build` call except for one added parameter, `entrypoint` (in this example, `/go/bin/foo`). This is the command that you want to run on container start and _re-run_ on Live Update.
 
+### Function Signature
+```python
+def docker_build_with_restart(ref: str, context: str,
+    entrypoint: Union[str, List[str]],
+    live_update: List[LiveUpdateStep],
+    base_suffix: str = '-base',
+    restart_file: str = '/.restart-proc',
+    **kwargs
+):
+    """Args:
+      ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in docker_build
+      context: path to use as the Docker build context; as the parameter of the same name in docker_build
+      entrypoint: the command to be (re-)executed when the container starts or when a live_update is run
+      live_update: set of steps for updating a running container; as the parameter of the same name in docker_build
+      base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
+      restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
+      **kwargs: will be passed to the underlying `docker_build` call
+    """
+```
 ## Unsupported Cases
 This extension does NOT support process restarts for:
 - Images run in Docker Compose resources
