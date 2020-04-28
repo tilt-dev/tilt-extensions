@@ -62,9 +62,9 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # `tilt-restart-wrapper` makes use of `entr` (https://github.com/eradman/entr/) to
     # re-execute $entrypoint whenever $restart_file changes
     if type(entrypoint) == type(""):
-        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watchfile={}".format(restart_file), "sh", "-c", entrypoint]
+        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file), "sh", "-c", entrypoint]
     elif type(entrypoint) == type([]):
-        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watchfile={}".format(restart_file)] + entrypoint
+        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file)] + entrypoint
     else:
         fail("`entrypoint` must be a string or list of strings: got {}".format(type(entrypoint)))
 
