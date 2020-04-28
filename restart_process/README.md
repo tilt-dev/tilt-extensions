@@ -72,7 +72,7 @@ This extension wraps commands in `tilt-restart-wrapper`, which makes use of [`en
 to run arbitrary commands whenever a specified file changes. Specifically, we override the container's entrypoint with the following:
 
 ```
-/tilt-restart-wrapper --watchfile='/.restart-proc' <entrypoint>
+/tilt-restart-wrapper --watch_file='/.restart-proc' <entrypoint>
 ```
 
 This invocation says:
