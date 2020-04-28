@@ -91,7 +91,7 @@ run('date > /.restart-proc')
 Because `tilt-restart-wrapper` will re-execute the entrypoint whenever `/.restart-proc'` changes, the above `run` step will cause the entrypoint to re-run.
 
 #### Provide `tilt-restart-wrapper`
-For this all to work, the `entr` binary must be available on the Docker image. The easiest solution would be to call e.g. `apt-get install entr` in the Dockerfile, but different base images will have different package mangers; rather than grapple with that, we've made a statically linked binary available on Docker image: [`tiltdev/entr`](https://hub.docker.com/repository/docker/tiltdev/entr).
+For this all to work, the `entr` binary must be available on the Docker image. The easiest solution would be to call e.g. `apt-get install entr` in the Dockerfile, but different base images will have different package managers; rather than grapple with that, we've made a statically linked binary available on Docker image: [`tiltdev/entr`](https://hub.docker.com/repository/docker/tiltdev/entr).
 
 To build `image-foo`, this extension will:
 - build your image as normal (via `docker_build`, with all of your specified args/kwargs) but with the name `image-foo-base`
