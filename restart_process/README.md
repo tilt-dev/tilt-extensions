@@ -118,6 +118,6 @@ In order to make `entr` executable as ARGV rather than as shell, we have wrapped
 Note: ideally `entr` could accept files-to-watch via flag instead of stdin, but (for a number of good reasons) this feature isn't likely to be added any time soon (see [entr#33](https://github.com/eradman/entr/issues/33)).
 
 ## For Maintainers: Releasing
-If you have push access to the `tiltdev` on DockerHub, you can release a new version of this extension like so:
+If you have push access to the `tiltdev` repository on DockerHub, you can release a new version of the binaries used by this extension like so:
 1. run `release.sh` (builds `tilt-restart-wrapper` from source, builds and pushes a Docker image with the new binary and a fresh binary of `entr` also installed from source)
 2. update the image tag in the [Tiltfile](/restart_process/Tiltfile) with the tag you just pushed (you'll find the image referenced in the Dockerfile contents of the child image--look for "FROM tiltdev/restart-helper")
