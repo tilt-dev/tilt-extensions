@@ -113,7 +113,7 @@ When specified as a `command` in Kubernetes or Docker Compose YAML (this is how 
 ```
 Any `args` specified in Kubernetes/Docker Compose are attached to the end of this call, and therefore in this case would apply TO THE `/bin/sh -c` CALL, rather than to the actual command run by `entr`; that is, any `args` specified by the user would be effectively ignored.
 
-In order to make `entr` useable without a shell, this extension uses a simple binary that invokes `entr` and writes to its stdin.
+In order to make `entr` usable without a shell, this extension uses [a simple binary](/restart_process/tilt-restart-wrapper.go) that invokes `entr` and writes to its stdin.
 
 Note: ideally `entr` could accept files-to-watch via flag instead of stdin, but (for a number of good reasons) this feature isn't likely to be added any time soon (see [entr#33](https://github.com/eradman/entr/issues/33)).
 
