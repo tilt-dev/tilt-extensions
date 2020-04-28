@@ -3,13 +3,15 @@
 set -e
 
 TIMESTAMP=$(date +'%Y-%m-%d')
-IMAGE_NAME='tiltdev/entr'
+IMAGE_NAME='tiltdev/restart-helper'
 IMAGE_WITH_TAG=$IMAGE_NAME:$TIMESTAMP
 
-# build our binary
+# build binary for tilt-restart-wrapper
 env GOOS=linux GOARCH=amd64 go build tilt-restart-wrapper.go
 
-# build Docker image with our statically compiled entr binary for Linux
+# build Docker image with static binaries of:
+# - tilt-restart-wrapper (compiled above)
+# - entr (dependency of tilt-restart-wrapper)
 docker build . -t $IMAGE_NAME
 docker push $IMAGE_NAME
 
