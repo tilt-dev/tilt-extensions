@@ -62,6 +62,7 @@ def docker_build_with_restart(ref: str, context: str,
 This extension does NOT support process restarts for:
 - Images run in Docker Compose resources
 - `custom_build`
+- Images without a shell (e.g. `scratch`, `distroless`)
 
 Run into a bug? Need a use case that we don't yet support? Let us know--[open an issue](https://github.com/windmilleng/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
 
