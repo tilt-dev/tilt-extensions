@@ -1,3 +1,5 @@
+# -*- mode: Python -*-
+
 RESTART_FILE = '/.restart-proc'
 TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
@@ -58,21 +60,95 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # pass for the child image.
     cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in KWARGS_BLACKLIST}
 
-    # Change the entrypoint to use `tilt-restart-wrapper`.
-    # `tilt-restart-wrapper` makes use of `entr` (https://github.com/eradman/entr/) to
-    # re-execute $entrypoint whenever $restart_file changes
+    wrapped_entrypoint = wrap_entrypoint(entrypoint, restart_file)
+
+    live_update_with_restart = add_restart_to_live_update(live_update, restart_file)
+
+    docker_build(ref, context, entrypoint=wrapped_entrypoint, dockerfile_contents=df,
+                 live_update=live_update_with_restart, **cleaned_kwargs)
+
+
+def wrap_entrypoint(entrypoint, restart_file):
+    """
+    Change the entrypoint to use `tilt-restart-wrapper`.
+    `tilt-restart-wrapper` makes use of `entr` (https://github.com/eradman/entr/) to
+    re-execute $entrypoint whenever $restart_file changes.
+    """
     if type(entrypoint) == type(""):
-        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file), "sh", "-c", entrypoint]
+        # Tilt specifies that an entrypoint passed as string will be executed as a shell command;
+        # replicate that behavior as closely as possible
+        return ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file), "sh", "-c", entrypoint]
     elif type(entrypoint) == type([]):
-        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file)] + entrypoint
+        return ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file)] + entrypoint
     else:
         fail("`entrypoint` must be a string or list of strings: got {}".format(type(entrypoint)))
 
-    # last live_update step should always be to modify $restart_file, which
-    # triggers the process wrapper to rerun $entrypoint
-    # NB: write `date` instead of just `touch`ing because `entr` doesn't respond
-    # to timestamp changes, only writes (see https://github.com/eradman/entr/issues/32)
-    live_update = live_update + [run('date > {}'.format(restart_file))]
 
-    docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
-                 live_update=live_update, **cleaned_kwargs)
+def add_restart_to_live_update(live_update, restart_file):
+    """
+    Add a `run` step to the end of the given live_update to trigger a process restart.
+
+    In particular, this is a `run` step which modifies $restart_file, which in turn
+    triggers the process wrapper to rerun $entrypoint.
+
+    NB: write `date` instead of just `touch`ing because `entr` doesn't respond
+    to timestamp changes, only writes (see https://github.com/eradman/entr/issues/32)
+    """
+    return live_update + [run('date > {}'.format(restart_file))]
+
+
+def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
+                              base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
+    """Wrap a docker_build call and its associated live_update steps so that the last step
+    of any live update is to rerun the given entrypoint.
+
+
+     Args:
+      ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in docker_build
+      context: path to use as the Docker build context; as the parameter of the same name in docker_build
+      entrypoint: the command to be (re-)executed when the container starts or when a live_update is run
+      live_update: set of steps for updating a running container; as the parameter of the same name in docker_build
+      base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
+      restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
+      **kwargs: will be passed to the underlying `docker_build` call
+    """
+
+    if kwargs.get('skips_local_docker'):
+        fail('`custom_build_with_restart` cannot be called with `skips_local_docker=True`; ' +
+             'image must be present locally for post-processing')
+
+    # first, validate the given live_update steps
+    if len(live_update) == 0:
+        fail("`docker_build_with_restart` requires at least one live_update step")
+    for step in live_update:
+        if type(step) == TYPE_RESTART_CONTAINER_STEP:
+            fail("`docker_build_with_restart` is not compatible with live_update step: "+
+                 "`restart_container()` (this extension is meant to REPLACE restart_container() )")
+
+    # rename the original image to make it a base image and declare a docker_build for it
+    base_ref = '{}{}'.format(ref, base_suffix)
+    custom_build(base_ref, command, deps, **kwargs)
+    # ( ref , command , deps , tag='' , disable_push=False , skips_local_docker=False , live_update=[] , match_in_env_vars=False , ignore=[] , entrypoint=[] , command_bat='' )
+
+    # declare a new docker build that adds a static binary of tilt-restart-wrapper
+    # (which makes use of `entr` to watch files and restart processes) to the user's image
+    df = '''
+    FROM tiltdev/restart-helper:2020-04-27 as restart-helper
+
+    FROM {}
+    RUN ["touch", "{}"]
+    COPY --from=restart-helper /tilt-restart-wrapper /
+    COPY --from=restart-helper /entr /
+  '''.format(base_ref, restart_file)
+
+    wrapped_entrypoint = wrap_entrypoint(entrypoint, restart_file)
+
+    live_update_with_restart = add_restart_to_live_update(live_update, restart_file)
+
+    docker_build(ref,
+        '.', only=deps,  # fake the context and use ONLY to ensure we watch only deps and nothing extraneous
+        dockerfile_contents=df,
+        entrypoint=wrapped_entrypoint, live_update=live_update_with_restart,
+        # 'ignore' is the only custom_build kwarg that we might care about in a docker_build for the base image. Unclear if the best way to do this is to pull out the args we might care about clean away the args we def don't care about...
+        ignore=kwargs.get('ignore', []),
+    )
