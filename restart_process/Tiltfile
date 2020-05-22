@@ -125,10 +125,11 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
             fail("`docker_build_with_restart` is not compatible with live_update step: "+
                  "`restart_container()` (this extension is meant to REPLACE restart_container() )")
 
-    # rename the original image to make it a base image and declare a docker_build for it
+    # rename the original image to make it a base image, build it via the
+    # user-specified custom_build
     base_ref = '{}{}'.format(ref, base_suffix)
-    custom_build(base_ref, command, deps, **kwargs)
-    # ( ref , command , deps , tag='' , disable_push=False , skips_local_docker=False , live_update=[] , match_in_env_vars=False , ignore=[] , entrypoint=[] , command_bat='' )
+    command_with_subs = command.replace(ref, base_ref)
+    custom_build(base_ref, command_with_subs, deps, **kwargs)
 
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
@@ -146,9 +147,9 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
     live_update_with_restart = add_restart_to_live_update(live_update, restart_file)
 
     docker_build(ref,
-        '.', only=deps,  # fake the context and use ONLY to ensure we watch only deps and nothing extraneous
+        # let the parent image take care of the watching (with deps/ignore/only);
+        # fake the context and ignore everything
+        '.', ignore="*",
         dockerfile_contents=df,
         entrypoint=wrapped_entrypoint, live_update=live_update_with_restart,
-        # 'ignore' is the only custom_build kwarg that we might care about in a docker_build for the base image. Unclear if the best way to do this is to pull out the args we might care about clean away the args we def don't care about...
-        ignore=kwargs.get('ignore', []),
     )
