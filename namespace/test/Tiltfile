@@ -1,0 +1,6 @@
+load('../Tiltfile', 'namespace_create', 'namespace_inject')
+
+namespace_create('namespace-test')
+k8s_yaml(namespace_inject('deployment.yaml', 'namespace-test'))
+k8s_yaml('job.yaml')
+k8s_resource('namespace-test-verify', resource_deps=['namespace-test-busybox'])
