@@ -116,6 +116,10 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
     if kwargs.get('skips_local_docker'):
         fail('`custom_build_with_restart` cannot be called with `skips_local_docker=True`; ' +
              'image must be present locally for post-processing')
+    elif kwargs.get('tag'):
+        fail('`custom_build_with_restart` does not yet support the `tag` param, please ' +
+             'use the $EXPECTED_REF environment variable instead, or restart your ' +
+             'process another way')
 
     # first, validate the given live_update steps
     if len(live_update) == 0:
@@ -128,8 +132,7 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
     # rename the original image to make it a base image, build it via the
     # user-specified custom_build
     base_ref = '{}{}'.format(ref, base_suffix)
-    command_with_subs = command.replace(ref, base_ref)
-    custom_build(base_ref, command_with_subs, deps, **kwargs)
+    custom_build(base_ref, command, deps, **kwargs)
 
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
