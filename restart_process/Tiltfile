@@ -3,7 +3,7 @@
 RESTART_FILE = '/.restart-proc'
 TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
-KWARGS_BLACKLIST = [
+DB_KWARGS_BLACKLIST = [
     # since we'll be passing `dockerfile_contents` when building the
     # child image, remove any kwargs that might conflict
     'dockerfile', 'dockerfile_contents',
@@ -13,59 +13,23 @@ KWARGS_BLACKLIST = [
     'target',
 ]
 
-
-def docker_build_with_restart(ref, context, entrypoint, live_update,
-                              base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
-    """Wrap a docker_build call and its associated live_update steps so that the last step
-    of any live update is to rerun the given entrypoint.
-
-
-     Args:
-      ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in docker_build
-      context: path to use as the Docker build context; as the parameter of the same name in docker_build
-      entrypoint: the command to be (re-)executed when the container starts or when a live_update is run
-      live_update: set of steps for updating a running container; as the parameter of the same name in docker_build
-      base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
-      restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
-      **kwargs: will be passed to the underlying `docker_build` call
-    """
-
-    # first, validate the given live_update steps
-    if len(live_update) == 0:
-        fail("`docker_build_with_restart` requires at least one live_update step")
-    for step in live_update:
-        if type(step) == TYPE_RESTART_CONTAINER_STEP:
-            fail("`docker_build_with_restart` is not compatible with live_update step: "+
-                 "`restart_container()` (this extension is meant to REPLACE restart_container() )")
-
-    # rename the original image to make it a base image and declare a docker_build for it
-    base_ref = '{}{}'.format(ref, base_suffix)
-    docker_build(base_ref, context, **kwargs)
-
-    # declare a new docker build that adds a static binary of tilt-restart-wrapper
-    # (which makes use of `entr` to watch files and restart processes) to the user's image
-    df = '''
+CHILD_IMG_DOCKERFILE = '''
     FROM tiltdev/restart-helper:2020-04-27 as restart-helper
 
     FROM {}
     RUN ["touch", "{}"]
     COPY --from=restart-helper /tilt-restart-wrapper /
     COPY --from=restart-helper /entr /
-  '''.format(base_ref, restart_file)
+  '''
 
-    # Clean kwargs for building the child image (which builds on user's specified
-    # image and copies in Tilt's restart wrapper). In practice, this means removing
-    # kwargs that were relevant to building the user's specified image but are NOT
-    # relevant to building the child image / may conflict with args we specifically
-    # pass for the child image.
-    cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in KWARGS_BLACKLIST}
 
-    wrapped_entrypoint = wrap_entrypoint(entrypoint, restart_file)
-
-    live_update_with_restart = add_restart_to_live_update(live_update, restart_file)
-
-    docker_build(ref, context, entrypoint=wrapped_entrypoint, dockerfile_contents=df,
-                 live_update=live_update_with_restart, **cleaned_kwargs)
+def validate_live_update(lu, fn_name):
+    if len(lu) == 0:
+        fail("`{}` requires at least one live_update step".format(fn_name))
+    for step in lu:
+        if type(step) == TYPE_RESTART_CONTAINER_STEP:
+            fail("`{}` is not compatible with live_update step: `restart_container()` " +
+                 "(this extension is meant to REPLACE restart_container() )".format(fn_name))
 
 
 def wrap_entrypoint(entrypoint, restart_file):
@@ -96,12 +60,10 @@ def add_restart_to_live_update(live_update, restart_file):
     """
     return live_update + [run('date > {}'.format(restart_file))]
 
-
-def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
+def docker_build_with_restart(ref, context, entrypoint, live_update,
                               base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
-
 
      Args:
       ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in docker_build
@@ -113,6 +75,53 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
       **kwargs: will be passed to the underlying `docker_build` call
     """
 
+    # first, validate the given live_update steps
+    validate_live_update(live_update, "docker_build_with_restart")
+
+    # rename the original image to make it a base image and declare a docker_build for it
+    base_ref = '{}{}'.format(ref, base_suffix)
+    docker_build(base_ref, context, **kwargs)
+
+    # declare a new docker build that adds a static binary of tilt-restart-wrapper
+    # (which makes use of `entr` to watch files and restart processes) to the user's image
+    df = CHILD_IMG_DOCKERFILE.format(base_ref, restart_file)
+
+    # Clean kwargs for building the child image (which builds on user's specified
+    # image and copies in Tilt's restart wrapper). In practice, this means removing
+    # kwargs that were relevant to building the user's specified image but are NOT
+    # relevant to building the child image / may conflict with args we specifically
+    # pass for the child image.
+    cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in DB_KWARGS_BLACKLIST}
+
+    wrapped_entrypoint = wrap_entrypoint(entrypoint, restart_file)
+    live_update_with_restart = add_restart_to_live_update(live_update, restart_file)
+
+    docker_build(ref, context, entrypoint=wrapped_entrypoint, dockerfile_contents=df,
+                 live_update=live_update_with_restart, **cleaned_kwargs)
+
+
+def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
+                              base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
+    """Wrap a custom_build call and its associated live_update steps so that the last step
+    of any live update is to rerun the given entrypoint.
+
+    Note that custom_build_with_restart does not support:
+    - custom_build's `tag` parameter (the `command` must make use of `$EXPECTED_REF`)
+    - `skips_local_docker=True`
+
+     Args:
+      ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in custom_build
+      command: a command that, when run in the shell, builds an image puts it in the registry as `ref`; as the parameter of the same name in custom_build
+      deps: a list of files or directories to be added as dependencies to this image; as the parameter of the same name in custom_build
+      entrypoint: the command to be (re-)executed when the container starts or when a live_update is run
+      live_update: set of steps for updating a running container; as the parameter of the same name in docker_build
+      base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
+      restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
+      **kwargs: will be passed to the underlying `docker_build` call
+    """
+
+    # first, validate the inputs
+    validate_live_update(live_update, "custom_build_with_restart")
     if kwargs.get('skips_local_docker'):
         fail('`custom_build_with_restart` cannot be called with `skips_local_docker=True`; ' +
              'image must be present locally for post-processing')
@@ -121,14 +130,6 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
              'use the $EXPECTED_REF environment variable instead, or restart your ' +
              'process another way')
 
-    # first, validate the given live_update steps
-    if len(live_update) == 0:
-        fail("`docker_build_with_restart` requires at least one live_update step")
-    for step in live_update:
-        if type(step) == TYPE_RESTART_CONTAINER_STEP:
-            fail("`docker_build_with_restart` is not compatible with live_update step: "+
-                 "`restart_container()` (this extension is meant to REPLACE restart_container() )")
-
     # rename the original image to make it a base image, build it via the
     # user-specified custom_build
     base_ref = '{}{}'.format(ref, base_suffix)
@@ -136,17 +137,9 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
 
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
-    df = '''
-    FROM tiltdev/restart-helper:2020-04-27 as restart-helper
-
-    FROM {}
-    RUN ["touch", "{}"]
-    COPY --from=restart-helper /tilt-restart-wrapper /
-    COPY --from=restart-helper /entr /
-  '''.format(base_ref, restart_file)
+    df = CHILD_IMG_DOCKERFILE.format(base_ref, restart_file)
 
     wrapped_entrypoint = wrap_entrypoint(entrypoint, restart_file)
-
     live_update_with_restart = add_restart_to_live_update(live_update, restart_file)
 
     docker_build(ref,
