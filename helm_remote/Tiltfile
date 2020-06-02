@@ -1,0 +1,47 @@
+# TODO: =====================================
+#   if it ever becomes possible for loaded files to also load their own extensions
+#   this method can be replaced by `load('ext://namespace', 'namespace_create')
+def namespace_create(name):
+    """Returns YAML for a namespace
+    Args:    name: The namespace name. Currently not validated.
+    """
+    k8s_yaml(blob("""apiVersion: v1
+kind: Namespace
+metadata:
+  name: %s
+""" % name))
+# TODO: end TODO
+#   =====================================
+
+
+def helm_remote(chart, repo_url='', repo_name='', namespace='', values=[], set=[]):
+    if repo_name == '':
+        repo_name = chart
+
+    if namespace == '':
+        namespace = 'default'
+
+    if repo_url != '':
+        local('helm repo add %s %s' % (repo_name, repo_url))  # updates if already added
+
+    if namespace != '':
+        # avoid a namespace not found error
+        namespace_create(namespace)  # do this early so it manages to register before we attempt to install into it
+
+    local('rm -rf helm_deps/%s' % repo_name)
+    local('helm pull %s/%s --untar --destination helm_deps/%s' % (repo_name, chart, repo_name))
+    install_crds('%s-crds' % chart, './helm_deps/%s/%s/crds' % (repo_name, chart))
+
+    # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps, sometimes the crds haven't yet finished installing before the below tries to run
+    if namespace != '':
+        k8s_yaml(helm('helm_deps/%s/%s' % (repo_name, chart), namespace=namespace, values=values, set=set))
+    else:
+        k8s_yaml(helm('helm_deps/%s/%s' % (repo_name, chart), values=values, set=set))
+
+
+def install_crds(name, directory):
+    local_resource(name+'-install', cmd='kubectl apply -f %s' % directory, deps=listdir(directory), ignore=listdir(directory))  # we can wait/depend on this, but it won't cause a proper uninstall
+    k8s_yaml(listdir(directory))  # this will cause a proper uninstall, but we can't wait/depend on it
+
+    # TODO: Figure out how to avoid another named resource showing up in the tilt HUD for this waiter
+    return local_resource(name+'-ready', resource_deps=[name+'-install'], cmd='kubectl wait --for=condition=Established crd --all')  # now we can wait for those crds to finish establishing
