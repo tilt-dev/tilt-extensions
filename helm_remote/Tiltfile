@@ -36,7 +36,7 @@ def helm_remote(chart, repo_url='', repo_name='', values=[], set=[], namespace='
         local('helm repo add %s %s' % (repo_name, repo_url))  # updates if already added
 
     # ======== Create Namespace
-    if namespace != '':
+    if namespace != '' and namespace != 'default':
         # avoid a namespace not found error
         namespace_create(namespace)  # do this early so it manages to register before we attempt to install into it
 
@@ -62,20 +62,27 @@ def helm_remote(chart, repo_url='', repo_name='', values=[], set=[], namespace='
     # ======== Perform Installation
     local('rm -rf %s' % pull_target)
     local(pull_command)
-    install_crds(chart, '%s/crds' % chart_target)
+    install_crds(chart, chart_target)
 
     # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps, sometimes the crds haven't yet finished installing before the below tries to run
     if namespace != '':
-        k8s_yaml(helm(chart_target, namespace=namespace, values=values, set=set))
+        k8s_yaml(helm(chart_target, name=chart, namespace=namespace, values=values, set=set))
     else:
-        k8s_yaml(helm(chart_target, values=values, set=set))
+        k8s_yaml(helm(chart_target, name=chart, values=values, set=set))
 
 
 def install_crds(name, directory):
     name += '-crds'
 
-    local_resource(name+'-install', cmd='kubectl apply -f %s' % directory, deps=listdir(directory))  # we can wait/depend on this, but it won't cause a proper uninstall
-    k8s_yaml(listdir(directory))  # this will cause a proper uninstall, but we can't wait/depend on it
+    files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s | xargs grep -L '^{{-' | head -c -1" % directory))
+    if (files == '') or (files == '(standard input)'):
+        files = []
+    else:
+        files = files.split("\n")
 
-    # TODO: Figure out how to avoid another named resource showing up in the tilt HUD for this waiter
-    return local_resource(name+'-ready', resource_deps=[name+'-install'], cmd='kubectl wait --for=condition=Established crd --all')  # now we can wait for those crds to finish establishing
+    if len(files) != 0:
+        local_resource(name+'-install', cmd='kubectl apply -f %s' % " -f ".join(files), deps=files)  # we can wait/depend on this, but it won't cause a proper uninstall
+        k8s_yaml(files)  # this will cause a proper uninstall, but we can't wait/depend on it
+
+        # TODO: Figure out how to avoid another named resource showing up in the tilt HUD for this waiter
+        local_resource(name+'-ready', resource_deps=[name+'-install'], cmd='kubectl wait --for=condition=Established crd --all')  # now we can wait for those crds to finish establishing
