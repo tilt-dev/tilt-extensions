@@ -13,4 +13,4 @@ jobs:
             - name: Install CI check
               run: GOBIN=$HOME/.bin go get github.com/windmilleng/tilt-extensions-ci && go install github.com/windmilleng/tilt-extensions-ci
             - name: Running tests
-              run: $HOME/.bin/tilt-extensions-ci tilt-extensions
+              run: $HOME/.bin/tilt-extensions-ci $HOME/work/tilt-extensions/tilt-extensions
