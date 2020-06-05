@@ -1,0 +1,88 @@
+
+
+# this is the root directory into which remote helm charts will be pulled/cloned/untar'd
+# use `helm_remote_set_cache_dir(newDir)` to change
+# if customizing this location, you will also need to add the new location to your .tiltignore file to prevent infinite loops processing the main tiltfile
+helm_remote_cache_dir = './.helm'
+
+
+def helm_remote_set_cache_dir(directory):
+    helm_remote_cache_dir = directory
+
+
+# TODO: =====================================
+#   if it ever becomes possible for loaded files to also load their own extensions
+#   this method can be replaced by `load('ext://namespace', 'namespace_create')
+def namespace_create(name):
+    """Returns YAML for a namespace
+    Args:    name: The namespace name. Currently not validated.
+    """
+    k8s_yaml(blob("""apiVersion: v1
+kind: Namespace
+metadata:
+  name: %s
+""" % name))
+# TODO: end TODO
+#   =====================================
+
+
+def helm_remote(chart, repo_url='', repo_name='', values=[], set=[], namespace='', version='', username='', password=''):
+    # ======== Condition Incoming Arguments
+    if repo_name == '':
+        repo_name = chart
+    if namespace == '':
+        namespace = 'default'
+    if repo_url != '':
+        local('helm repo add %s %s' % (repo_name, repo_url))  # updates if already added
+
+    # ======== Create Namespace
+    if namespace != '' and namespace != 'default':
+        # avoid a namespace not found error
+        namespace_create(namespace)  # do this early so it manages to register before we attempt to install into it
+
+    # ======== Initialize
+    # -------- targets
+    pull_target = '%s/%s' % (helm_remote_cache_dir, repo_name)
+    if version != '':
+        pull_target += '/%s' % version
+    else:
+        pull_target += '/latest'
+
+    chart_target = '%s/%s' % (pull_target, chart)
+
+    # -------- commands
+    pull_command = 'helm pull %s/%s --untar --destination %s' % (repo_name, chart, pull_target)
+    if version != '':
+        pull_command += ' --version %s' % version
+    if username != '':
+        pull_command += ' --username %s' % username
+    if password != '':
+        pull_command += ' --password %s' % password
+
+    # ======== Perform Installation
+    local('rm -rf %s' % pull_target)
+    local(pull_command)
+    install_crds(chart, chart_target)
+
+    # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps, sometimes the crds haven't yet finished installing before the below tries to run
+    if namespace != '':
+        k8s_yaml(helm(chart_target, name=chart, namespace=namespace, values=values, set=set))
+    else:
+        k8s_yaml(helm(chart_target, name=chart, values=values, set=set))
+
+
+def install_crds(name, directory):
+    name += '-crds'
+
+    files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s | xargs grep -L '^{{-' | head -c -1" % directory))
+    if (files == '') or (files == '(standard input)'):
+        files = []
+    else:
+        files = files.split("\n")
+
+    if len(files) != 0:
+        local_resource(name+'-install', cmd='kubectl apply -f %s' % " -f ".join(files), deps=files)  # we can wait/depend on this, but it won't cause a proper uninstall
+        k8s_yaml(files)  # this will cause a proper uninstall, but we can't wait/depend on it
+
+        # TODO: Figure out how to avoid another named resource showing up in the tilt HUD for this waiter
+        local_resource(name+'-ready', resource_deps=[name+'-install'], cmd='kubectl wait --for=condition=Established crd --all')  # now we can wait for those crds to finish establishing
