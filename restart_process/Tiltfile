@@ -100,6 +100,18 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
                  live_update=live_update_with_restart, **cleaned_kwargs)
 
 
+"""
+NOTE(maia): this func is a WIP / being temporarily abandoned, because custom_build
+has too many weird edge cases to block the rest of this extension on a one-size-fits-all
+solution.
+
+Current state:
+- requires `skips_local_docker=False`
+- requires use of $EXPECTED_REF rather than `tag` param (b/c we rename the image
+  we're building; if user has this name hardcoded somewhere they're SOL)
+- stuck on how to handle `ignore` param. See writeup:
+  https://app.clubhouse.io/windmill/story/6860/version-of-docker-build-with-restart-for-custom-build#activity-7448
+"""
 def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
                               base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
     """Wrap a custom_build call and its associated live_update steps so that the last step
