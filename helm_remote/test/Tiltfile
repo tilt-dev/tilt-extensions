@@ -1,0 +1,8 @@
+load('../Tiltfile', 'helm_remote')
+
+# Note that .helm is in the .tiltignore!
+helm_remote('memcached', repo_url='https://charts.bitnami.com/bitnami')
+
+docker_build('helm-remote-test-verify', '.')
+k8s_yaml('job.yaml')
+k8s_resource('helm-remote-test-verify', resource_deps=['memcached'])
