@@ -69,8 +69,8 @@ config.define_string('microservice2-path', args=False, usage='Set this to a loca
 options = config.parse()
 
 git_resources = {
-    'microservice1': options.get('microservice1-path') if options.get('microservice1-path') != '' else 'git@example.com/myFirstMicroservice.git',
-    'microservice2': options.get('microservice1-path') if options.get('microservice1-path') != '' else 'git@example.com/mySecondMicroservice.git',
+    'microservice1': options.get('microservice1-path') if options.get('microservice1-path', '') != '' else 'git@example.com/myFirstMicroservice.git',
+    'microservice2': options.get('microservice1-path') if options.get('microservice1-path', '') != '' else 'git@example.com/mySecondMicroservice.git',
 }
 
 for resource_name, resource_path in git_resources.items():
