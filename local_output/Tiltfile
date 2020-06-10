@@ -1,0 +1,2 @@
+def local_output(command):
+  return str(local(command)).rstrip('\n')
