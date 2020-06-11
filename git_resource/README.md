@@ -5,61 +5,199 @@ Author: [Bob Jackman](https://github.com/kogi)
 Deploy a dockerfile from a remote repository -- or specify the path to a local checkout for local development.
 
 ## Usage
-#### Install a Remote Repository
+
+### Install a Remote OR Local Repository
 
 ```python
 load('ext://git_resource', 'git_resource')
-git_resource('myResourceName', 'git@github.com:tilt-dev/tilt-extensions.git')
+git_resource('myResourceName', 'git@github.com:tilt-dev/tilt-extensions.git#master')
+# -- OR --
+git_resource('myResourceName', '/path/to/local/checkout')
 ```
 
-##### Additional Parameters
+This function is syntactic sugar and would be identical to sequentially making calls to `git_checkout()` and `deploy_from_dir()`
+
+##### Parameters
 
 ```python
-git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', yaml='', namespace='default', resource_deps=[], build_callback=None) -> str # return yaml for k8s deployment
+git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None) -> str # return yaml for k8s deployment
 ```
 
 * `resource_name` ( str ) – the name to use for this resource
-* `path_or_repo` ( str ) – either the URL to the remote git repo, or the path to your local checkout
+* `path_or_repo` ( str ) – either the URL to the remote git repo, or the path to your local checkout.  
+If passing a repo url, a branch may be specified with a hash delimiter (i.e. `git@example.com/path/to/repo.git#myBranchNameHere`).  
+If no branch is specified, defaults to `master`
 * `dockerfile` ( str ) – the path to your dockerfile, relative to your git repository's root
-* `yaml` ( str ) – the yaml to pass to k8s to deploy your new resource (this should specify an image name of `<resource_name>-image`). If omitted, a basic, default deployment will be generated.
-* `namespace` ( str ) – the namespace to deploy the chart to. This only applies when `yaml` is omitted.
+* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function.
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
-* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image. See below for more details. 
+* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image. See below for more details.
+* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image. See below for more details. 
 
-#### Custom Docker Builds
 
-By default, git_resource will build your docker image by calling `docker_build(image_name, context, dockerfile)`
+
+### Checkout a Git Repository
+
+```python
+git_checkout('git@github.com:tilt-dev/tilt-extensions.git#master', '/path/to/local/checkout')
+```
+
+If `checkout_dir` does not exist, it will be created.
+
+>**WARNING**: *Do not point this function at an existing local development directory.
+>If `checkout_dir` already exists, the contents of the dir may be overwritten which could cause loss of data if there are any uncommitted changes at this location.*
+
+##### Parameters
+
+```python
+git_checkout(repository_url, checkout_dir='')
+```
+
+* `repository_url` ( str ) – the URL to the remote git repo
+* `checkout_dir` ( str ) – the directory into which to clone the repo. If omitted, defaults to `git_remote_checkout_dir`  
+If this dir does not exist, it will be created.
+
+
+
+### Deploy From a Local Checkout
+
+```python
+deploy_from_dir('myResourceName', '/path/to/local/checkout')
+```
+
+##### Parameters
+
+```python
+deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None)
+```
+
+* `resource_name` ( str ) – the name to use for this resource
+* `directory` ( str ) - the directory to use as the docker build context
+* `dockerfile` ( str ) - the path, relative to `directory` to the Dockerfile to be built
+* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function.
+* `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
+* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image. See below for more details.
+* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image. See below for more details.
+
+
+
+### Deploy From a Git Repository
+
+```python
+deploy_from_repository('myResourceName', '/path/to/local/checkout')
+```
+
+##### Parameters
+
+```python
+deploy_from_repository(resource_name, repository_url, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None)
+```
+
+* `resource_name` ( str ) – the name to use for this resource
+* `repository_url` ( str ) - the URL to the remote git repo. A branch may be specified with a hash delimiter (i.e. `git@example.com/path/to/repo.git#myBranchNameHere`).  
+If no branch is specified, defaults to `master`
+* `dockerfile` ( str ) - the path, relative to `directory` to the Dockerfile to be built
+* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function.
+* `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
+* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image. See below for more details.
+* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image. See below for more details.
+
+
+
+### Custom Docker Builds
+
+By default, `git_resource()`, `deploy_from_dir()`, and `deploy_from_repository()` will build your docker image by calling `docker_build(image_name, context, dockerfile)`
 If your situation requires more nuance/complexity than that, you can pass a `build_callback` function pointer when making your call to `git_resource()`
 This callback should have the following signature:
 
 ```python
-build_callback(resource_name, directory, dockerfile='Dockerfile', yaml='default', namespace='default')
+build_callback(resource_name, context, dockerfile='Dockerfile') # returns resultant image name
 ```
 
 Where:
-* `resource_name` ( str ) – is the name of the resource being build (this is the same value passed as the first argument to `git_resource()`)
-* `directory` ( str ) – this is the local checkout of the git repository which should be used as your build context (if this is a remote git resource, this location will be a temporary directory within your tilt workspace)
+* `resource_name` ( str ) – is the name of the resource being built (this is the same value passed when calling `git_resource()`)
+* `context` ( str ) – this is the root location of the build context (if this is a remote git resource, this location will be a temporary directory within your tilt workspace)
 * `dockerfile` ( str ) – the path to your dockerfile, relative to `directory` (this is the same value passed when calling `git_resource()`)
-* `yaml` ( str ) – if you passed `yaml` when you called `git_resource()` this will hold that value
-* `namespace` ( str ) – if you passed `namespace` when you called `git_resource()` this will hold that value, otherwise, it will contain a generic, default deployment. Can be used to generate/customize your own yaml as needed
 
-Your callback should return a `yaml` string/blob defining a deployment which will be passed to k8s
+Your callback should return a string containing the name of the image that was built (this will subsequently be passed to the `deployment_callback()` if specified)
 
 ##### Example
 
 ```python
-def my_microservice_builder(resource_name, directory, dockerfile, yaml, namespace) -> str:
+def my_microservice_builder(resource_name, directory, dockerfile, yaml, namespace) -> str: # returns resultant image name
     local('some local command')  # customize your build process
     docker_build(<your custom args here>)
     
-    return myCustomDeploymentYaml
+    return myCustomImageName
 
 
 git_resource('myMicroservice', 'git@example.com/myRepo.git', dockerfile='Dockerfile.dev', build_callback=my_microservice_builder) 
 ```
 
-#### Taking it Further
-##### Switch dependencies in/out of local development mode
+
+### Custom Deployment YAML
+
+By default, `git_resource()`, `deploy_from_dir()`, and `deploy_from_repository()` will deploy your docker image by generating a very basic and generic YAML definition.
+If your situation requires more nuance/complexity than that, you can pass a `deployment_callback` function pointer when making your call to `git_resource()`
+This callback should have the following signature:
+
+```python
+deployment_callback(resource_name, image_name, namespace) # returns deployment definition yaml
+```
+
+Where:
+* `resource_name` ( str ) – is the name of the resource being built (this is the same value passed when calling `git_resource()`)
+* `image_name` ( str ) – is the name of the image to use for this deployment (this is the same value returned by your custom `build_callback()` if specified)
+* `namespace` ( str ) – the namespace this image should be deployed to (this is the same value passed when calling `git_resource()`)  
+This can be overridden by the final yaml returned by this function
+
+Your callback should return a string/blob containing the kubernetes yaml definition for your deployment
+
+##### Example
+
+```python
+def my_microservice_deployment_generator(resource_name, image_name, namespace) -> str: # returns deployment definition yaml
+    return blob(f"""apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: {resource_name}
+          namespace: {namespace}
+          labels:
+            app: {resource_name}
+        spec:
+          selector:
+            matchLabels:
+              app: {resource_name}
+          template:
+            metadata:
+              labels:
+                app: {resource_name}
+            spec:
+              containers:
+              - name: {resource_name}
+                image: {image_name}
+                ports:
+                - containerPort: 8080
+                  name: http
+    """)
+
+
+git_resource('myMicroservice', 'git@example.com/myRepo.git', dockerfile='Dockerfile.dev', deployment_callback=my_microservice_deployment_generator)
+```
+
+
+
+#### Change the Cache Location
+
+By default, when calling `deploy_from_repository()`, or using `git_resource()` with a repository url, the repo will be cloned into the `.git-sources` directory at your workspace's root.
+This location can be customized by calling `git_resource_set_checkout_dir(newDirectory)`.
+Whether customizing this value or just using the default location, be sure this directory is added to your project's
+`.tiltignore` file in order to prevent recursive re-processing of the main Tiltfile when the helm cache changes/updates.
+See github [issue #3404](https://github.com/tilt-dev/tilt/issues/3404)
+
+
+
+### Taking it Further
+#### Switching dependencies in/out of local development mode
 ###### Tiltfile
 ```python
 load('ext://git_resource', 'git_resource')
