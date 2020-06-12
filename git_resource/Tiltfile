@@ -8,15 +8,15 @@ def git_resource_set_checkout_dir(directory):
     git_resource_checkout_dir = directory
 
 
-def git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None):
+def git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='default', resource_deps=[], port_forwards=[], build_callback=None, deployment_callback=None):
     is_http = path_or_repo[:4].lower() == 'http'
     is_ssh = path_or_repo[:4].lower() == 'git@'
     is_local = not is_http and not is_ssh
 
     if is_local:
-        deploy_from_dir(resource_name, path_or_repo, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, build_callback=build_callback, deployment_callback=deployment_callback)
+        deploy_from_dir(resource_name, path_or_repo, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, port_forwards=port_forwards, build_callback=build_callback, deployment_callback=deployment_callback)
     else:
-        deploy_from_repository(resource_name, path_or_repo, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, build_callback=build_callback, deployment_callback=deployment_callback)
+        deploy_from_repository(resource_name, path_or_repo, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, port_forwards=[], build_callback=build_callback, deployment_callback=deployment_callback)
 
 
 def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
@@ -44,7 +44,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
     return checkout_dir
 
 
-def deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None):
+def deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='default', resource_deps=[], port_forwards=[], build_callback=None, deployment_callback=None):
     if deployment_callback == None:
         deployment_callback = lambda resource_name, image_name, namespace: _default_deployment_callback(resource_name, image_name, namespace)
 
@@ -55,12 +55,12 @@ def deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace
     yaml = deployment_callback(resource_name, image_name, namespace)
 
     k8s_yaml(yaml)
-    k8s_resource(resource_name, resource_deps=resource_deps)
+    k8s_resource(resource_name, resource_deps=resource_deps, port_forwards=port_forwards)
 
 
-def deploy_from_repository(name, repository_url, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None):
+def deploy_from_repository(name, repository_url, dockerfile='Dockerfile', namespace='default', resource_deps=[], port_forwards=[], build_callback=None, deployment_callback=None):
     checkout_path = git_checkout(repository_url)
-    deploy_from_dir(name, checkout_path, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, build_callback=build_callback, deployment_callback=deployment_callback)
+    deploy_from_dir(name, checkout_path, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, port_forwards=port_forwards, build_callback=build_callback, deployment_callback=deployment_callback)
 
 
 def _parse_repository_url(url):

@@ -21,7 +21,7 @@ This function is syntactic sugar and would be identical to sequentially making c
 ##### Parameters
 
 ```python
-git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None) -> str # return yaml for k8s deployment
+git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='default', resource_deps=[], port_forwards=[], build_callback=None, deployment_callback=None) -> str # return yaml for k8s deployment
 ```
 
 * `resource_name` ( str ) – the name to use for this resource
@@ -31,6 +31,7 @@ If no branch is specified, defaults to `master`
 * `dockerfile` ( str ) – the path to your dockerfile, relative to your git repository's root
 * `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function (see: [Custom Deployment YAML][2])
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
+* `port_forwards` ( List [ str, int ] ) – Local ports to connect to the pod. See [tilt reference][3]
 * `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image (see: [Custom Docker Builds][1])
 * `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image (see: [Custom Deployment YAML][2])
 
@@ -74,7 +75,7 @@ deploy_from_dir('myResourceName', '/path/to/local/checkout')
 ##### Parameters
 
 ```python
-deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None)
+deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='default', resource_deps=[], port_forwards=[], build_callback=None, deployment_callback=None)
 ```
 
 * `resource_name` ( str ) – the name to use for this resource
@@ -82,6 +83,7 @@ deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='de
 * `dockerfile` ( str ) - the path, relative to `directory` to the Dockerfile to be built
 * `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function (see: [Custom Deployment YAML][2]).
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
+* `port_forwards` ( List [ str, int ] ) – Local ports to connect to the pod. See [tilt reference][3]
 * `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image (see: [Custom Docker Builds][1])
 * `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image (see: [Custom Deployment YAML][2])
 
@@ -96,7 +98,7 @@ deploy_from_repository('myResourceName', '/path/to/local/checkout')
 ##### Parameters
 
 ```python
-deploy_from_repository(resource_name, repository_url, dockerfile='Dockerfile', namespace='default', resource_deps=[], build_callback=None, deployment_callback=None)
+deploy_from_repository(resource_name, repository_url, dockerfile='Dockerfile', namespace='default', resource_deps=[], port_forwards=[], build_callback=None, deployment_callback=None)
 ```
 
 * `resource_name` ( str ) – the name to use for this resource
@@ -105,6 +107,7 @@ If no branch is specified, defaults to `master`
 * `dockerfile` ( str ) - the path, relative to `directory` to the Dockerfile to be built
 * `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function (see: [Custom Deployment YAML][2])
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
+* `port_forwards` ( List [ str, int ] ) – Local ports to connect to the pod. See [tilt reference][3]
 * `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image (see: [Custom Docker Builds][1])
 * `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image (see: [Custom Deployment YAML][2])
 
@@ -130,7 +133,7 @@ Your callback should return a string containing the name of the image that was b
 ##### Example
 
 ```python
-def my_microservice_builder(resource_name, directory, dockerfile, yaml, namespace) -> str: # returns resultant image name
+def my_microservice_builder(resource_name, directory, dockerfile) -> str: # returns resultant image name
     local('some local command')  # customize your build process
     docker_build(<your custom args here>)
     
@@ -235,3 +238,4 @@ tilt args -- --microservice1-path '' #switch back to remote mode
 
 [1]: #custom-docker-builds
 [2]: #custom-deployment-yaml
+[3]: https://docs.tilt.dev/api.html#api.k8s_resource
