@@ -2,7 +2,7 @@
 
 # this is the root directory into which remote helm charts will be pulled/cloned/untar'd
 # use `helm_remote_set_cache_dir(newDir)` to change
-# if customizing this location, you will also need to add the new location to your .tiltignore file to prevent infinite loops processing the main tiltfile
+# if customizing this location, you will also need to add the new location to your .tiltignore file to prevent infinite loops processing the main tiltfile (See github [issue #3404](https://github.com/tilt-dev/tilt/issues/3404))
 helm_remote_cache_dir = './.helm'
 
 

@@ -15,6 +15,7 @@ git_resource('myResourceName', 'git@github.com:tilt-dev/tilt-extensions.git#mast
 git_resource('myResourceName', '/path/to/local/checkout')
 ```
 
+This will clone/pull your repo, build your dockerfile, and deploy your image into the cluster all in one fell swoop.
 This function is syntactic sugar and would be identical to sequentially making calls to `git_checkout()` and `deploy_from_dir()`
 
 ##### Parameters
@@ -28,10 +29,10 @@ git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='de
 If passing a repo url, a branch may be specified with a hash delimiter (i.e. `git@example.com/path/to/repo.git#myBranchNameHere`).  
 If no branch is specified, defaults to `master`
 * `dockerfile` ( str ) – the path to your dockerfile, relative to your git repository's root
-* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function.
+* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function (see: [Custom Deployment YAML][2])
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
-* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image. See below for more details.
-* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image. See below for more details. 
+* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image (see: [Custom Docker Builds][1])
+* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image (see: [Custom Deployment YAML][2])
 
 
 
@@ -41,20 +42,26 @@ If no branch is specified, defaults to `master`
 git_checkout('git@github.com:tilt-dev/tilt-extensions.git#master', '/path/to/local/checkout')
 ```
 
-If `checkout_dir` does not exist, it will be created.
+If `checkout_dir` does not exist, it will be created, and the repo will be cloned here.
+If this repo is already checked out at this location, it will be synced with `origin` and the local copy will be updated to `HEAD`
 
->**WARNING**: *Do not point this function at an existing local development directory.
+>**WARNING**: *Be very careful if pointing this function at an existing local development directory.
 >If `checkout_dir` already exists, the contents of the dir may be overwritten which could cause loss of data if there are any uncommitted changes at this location.*
 
 ##### Parameters
 
 ```python
-git_checkout(repository_url, checkout_dir='')
+git_checkout(repository_url, checkout_dir='', unsafe_mode=False)
 ```
 
 * `repository_url` ( str ) – the URL to the remote git repo
 * `checkout_dir` ( str ) – the directory into which to clone the repo. If omitted, defaults to `git_remote_checkout_dir`  
 If this dir does not exist, it will be created.
+For more info about `git_remote_checkout_dir`, see [Changing the Cache Location](#change-the-cache-location)
+* `unsafe_mode` ( bool ) – Defaults to `False`. If set to `True`, then ignore existing modifications within `checkout_dir`
+  * By default (safe mode ON), `git_checkout()` may fail under the following circumstances:
+    * `checkout_dir` already exists and is not a git repository
+    * `checkout_dir` already exists as a git repository, but has uncommitted local changes
 
 
 
@@ -73,10 +80,10 @@ deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='de
 * `resource_name` ( str ) – the name to use for this resource
 * `directory` ( str ) - the directory to use as the docker build context
 * `dockerfile` ( str ) - the path, relative to `directory` to the Dockerfile to be built
-* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function.
+* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function (see: [Custom Deployment YAML][2]).
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
-* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image. See below for more details.
-* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image. See below for more details.
+* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image (see: [Custom Docker Builds][1])
+* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image (see: [Custom Deployment YAML][2])
 
 
 
@@ -96,10 +103,10 @@ deploy_from_repository(resource_name, repository_url, dockerfile='Dockerfile', n
 * `repository_url` ( str ) - the URL to the remote git repo. A branch may be specified with a hash delimiter (i.e. `git@example.com/path/to/repo.git#myBranchNameHere`).  
 If no branch is specified, defaults to `master`
 * `dockerfile` ( str ) - the path, relative to `directory` to the Dockerfile to be built
-* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function.
+* `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function (see: [Custom Deployment YAML][2])
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
-* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image. See below for more details.
-* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image. See below for more details.
+* `build_callback` ( callable() ) – a callback function used to perform a custom build of your docker image (see: [Custom Docker Builds][1])
+* `deployment_callback` ( callable() ) – a callback function used to generate custom deployment yaml for the newly build image (see: [Custom Deployment YAML][2])
 
 
 
@@ -118,7 +125,7 @@ Where:
 * `context` ( str ) – this is the root location of the build context (if this is a remote git resource, this location will be a temporary directory within your tilt workspace)
 * `dockerfile` ( str ) – the path to your dockerfile, relative to `directory` (this is the same value passed when calling `git_resource()`)
 
-Your callback should return a string containing the name of the image that was built (this will subsequently be passed to the `deployment_callback()` if specified)
+Your callback should return a string containing the name of the image that was built (this will subsequently be passed to the `deployment_callback()` if specified (see: [Custom Deployment YAML][2]))
 
 ##### Example
 
@@ -146,7 +153,7 @@ deployment_callback(resource_name, image_name, namespace) # returns deployment d
 
 Where:
 * `resource_name` ( str ) – is the name of the resource being built (this is the same value passed when calling `git_resource()`)
-* `image_name` ( str ) – is the name of the image to use for this deployment (this is the same value returned by your custom `build_callback()` if specified)
+* `image_name` ( str ) – is the name of the image to use for this deployment (this is the same value returned by your custom `build_callback()` if specified (see: [Custom Docker Builds][1]))
 * `namespace` ( str ) – the namespace this image should be deployed to (this is the same value passed when calling `git_resource()`)  
 This can be overridden by the final yaml returned by this function
 
@@ -186,7 +193,7 @@ git_resource('myMicroservice', 'git@example.com/myRepo.git', dockerfile='Dockerf
 
 
 
-#### Change the Cache Location
+### Change the Cache Location
 
 By default, when calling `deploy_from_repository()`, or using `git_resource()` with a repository url, the repo will be cloned into the `.git-sources` directory at your workspace's root.
 This location can be customized by calling `git_resource_set_checkout_dir(newDirectory)`.
@@ -223,3 +230,8 @@ tilt args -- --microservice1-path /path/to/local/checkout
 #now you can make local edits with hot-reloading
 #once you get it working, commit and push to your git repo
 tilt args -- --microservice1-path '' #switch back to remote mode
+```
+
+
+[1]: #custom-docker-builds
+[2]: #custom-deployment-yaml
