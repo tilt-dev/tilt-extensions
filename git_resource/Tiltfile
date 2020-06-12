@@ -31,7 +31,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
         if os.path.exists('%s/.git' % checkout_dir):  # this is a git repo
             has_local_changes = True  # default to True for safety
             if not unsafe_mode:
-                has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l | head -c -1' % checkout_dir, quiet=True))) > 1  # result greater than 1 indicates local modifications are present
+                has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l' % checkout_dir, quiet=True)).strip()) > 1  # result greater than 1 indicates local modifications are present
 
             if unsafe_mode or not has_local_changes:
                 local('cd %s && git checkout -f %s && git pull -f' % (checkout_dir, branch), quiet=True)
@@ -72,7 +72,7 @@ def _parse_repository_url(url):
         branch = parts[-1]  # last item
         url = "#".join(parts[:-1])  # everything else
 
-    repository_name = local('basename %s .git | head -c -1' % url, quiet=True)
+    repository_name = str(local('basename %s .git' % url, quiet=True)).strip()
 
     return url, repository_name, branch
 
