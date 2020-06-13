@@ -1,5 +1,7 @@
 # -*- mode: Python -*-
 
+my_path = os.getcwd()
+
 def pack(name, path=".", builder="gcr.io/paketo-buildpacks/builder:base", **kwargs):
     """
     Build a container image using pack and buildpacks.
@@ -11,9 +13,10 @@ def pack(name, path=".", builder="gcr.io/paketo-buildpacks/builder:base", **kwar
       **kwargs: will be passed to the underlying `custom_build` call
 
     """
+
     custom_build(
         name,
-        "pack build $EXPECTED_REF -p %s --builder %s" % (path, builder),
+        "%s/build.sh $EXPECTED_REF %s %s" % (my_path, builder, path),
         [path],
         **kwargs
     )
