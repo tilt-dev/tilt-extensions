@@ -22,6 +22,6 @@ if int(current_memory_capacity) < int(desired_memory_capacity):
     local('minikube start')
 ```
 
-The `pack` function can takes:
+### Arguments:
 
 - `command`: shell command to execute with `local` function
