@@ -5,6 +5,14 @@
 # if customizing this location, you will also need to add the new location to your .tiltignore file to prevent infinite loops processing the main tiltfile (See github [issue #3404](https://github.com/tilt-dev/tilt/issues/3404))
 helm_remote_cache_dir = './.helm'
 
+# Find top-level Tilt path
+path_prefix = './'
+while not os.path.exists(os.path.abspath(path_prefix + 'tilt_modules')) and os.path.abspath(path_prefix) != '/':
+    path_prefix = '../' + path_prefix
+
+if os.path.exists(os.path.abspath(path_prefix + 'tilt_modules')):
+    helm_remote_cache_dir = path_prefix + helm_remote_cache_dir
+
 
 def helm_remote_set_cache_dir(directory):
     helm_remote_cache_dir = directory
