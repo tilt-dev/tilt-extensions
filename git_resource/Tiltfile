@@ -23,7 +23,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
     if checkout_dir == '' or checkout_dir == None:
         checkout_dir = _get_default_checkout_target(repository_url)
 
-    _, _, branch = _parse_repository_url(repository_url)
+    repository_url, _, branch = _parse_repository_url(repository_url)  # split the branch name away from the repo url
 
     if not os.path.exists(checkout_dir):  # needs clone
         local('git clone %s -b %s %s' % (repository_url, branch, checkout_dir), quiet=True)
