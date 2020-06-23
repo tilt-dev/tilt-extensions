@@ -11,7 +11,7 @@ while not os.path.exists(os.path.abspath(path_prefix + 'tilt_modules')) and os.p
     path_prefix = '../' + path_prefix
 
 if os.path.exists(os.path.abspath(path_prefix + 'tilt_modules')):
-    helm_remote_cache_dir = path_prefix + helm_remote_cache_dir
+    helm_remote_cache_dir = os.abspath(path_prefix + helm_remote_cache_dir)
 
 
 def helm_remote_set_cache_dir(directory):
