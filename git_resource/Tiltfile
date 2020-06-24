@@ -16,7 +16,7 @@ def git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace
     if is_local:
         deploy_from_dir(resource_name, path_or_repo, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, port_forwards=port_forwards, build_callback=build_callback, deployment_callback=deployment_callback)
     else:
-        deploy_from_repository(resource_name, path_or_repo, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, port_forwards=[], build_callback=build_callback, deployment_callback=deployment_callback)
+        deploy_from_repository(resource_name, path_or_repo, dockerfile=dockerfile, namespace=namespace, resource_deps=resource_deps, port_forwards=port_forwards, build_callback=build_callback, deployment_callback=deployment_callback)
 
 
 def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
