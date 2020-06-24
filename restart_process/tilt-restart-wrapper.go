@@ -66,7 +66,6 @@ func main() {
 		}
 	}
 
-	fmt.Println("hi there")
 	if len(flag.Args()) == 0 {
 		log.Fatal("`tilt-restart-wrapper` requires at least one positional arg "+
 			"(will be passed to `entr` and executed / rerun whenever `watch_file` changes)")
