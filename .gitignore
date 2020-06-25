@@ -1,1 +1,2 @@
-helm_remote/test/.helm
+*/test/.helm
+*/test/.git-sources

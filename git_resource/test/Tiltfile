@@ -1,0 +1,9 @@
+os.putenv('TILT_GIT_RESOURCE_CHECKOUT_DIR', os.path.abspath('./.git-sources'))
+load('../Tiltfile', 'git_checkout', 'deploy_from_dir')
+
+repo_dir = git_checkout('https://github.com/tilt-dev/tilt-example-html')
+example_dir = os.path.join(repo_dir, '0-base')
+deploy_from_dir('example-html', example_dir)
+
+if not os.path.exists('./.git-sources/tilt-example-html'):
+  fail('tilt-example-html failed to load in the right directory')
