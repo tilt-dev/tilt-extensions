@@ -1,23 +1,25 @@
 
+def _find_root_tiltfile_dir():
+    # Find top-level Tilt path
+    current = os.path.abspath('./')
+    while current != '/':
+        if os.path.exists(os.path.join(current, 'tilt_modules')):
+            return current
+
+        current = os.path.dirname(current)
+
+    fail('Could not find root Tiltfile')
+
+def _find_cache_dir():
+    from_env = os.getenv('TILT_HELM_REMOTE_CACHE_DIR', '')
+    if from_env != '':
+        return from_env
+    return os.path.join(_find_root_tiltfile_dir(), '.helm')
 
 # this is the root directory into which remote helm charts will be pulled/cloned/untar'd
-# use `helm_remote_set_cache_dir(newDir)` to change
+# use `os.putenv('TILT_HELM_REMOTE_CACHE_DIR', new_dir)` to change
 # if customizing this location, you will also need to add the new location to your .tiltignore file to prevent infinite loops processing the main tiltfile (See github [issue #3404](https://github.com/tilt-dev/tilt/issues/3404))
-helm_remote_cache_dir = './.helm'
-
-# Find top-level Tilt path
-path_prefix = './'
-while not os.path.exists(os.path.abspath(path_prefix + 'tilt_modules')) and os.path.abspath(path_prefix) != '/':
-    path_prefix = '../' + path_prefix
-
-if os.path.exists(os.path.abspath(path_prefix + 'tilt_modules')):
-    abs_path = os.path.abspath(path_prefix + helm_remote_cache_dir)
-    helm_remote_cache_dir = "/".join(abs_path.split('\\'))
-
-
-def helm_remote_set_cache_dir(directory):
-    helm_remote_cache_dir = directory
-
+helm_remote_cache_dir = _find_cache_dir()
 
 # TODO: =====================================
 #   if it ever becomes possible for loaded files to also load their own extensions
@@ -83,7 +85,7 @@ def helm_remote(chart, repo_url='', repo_name='', values=[], set=[], namespace='
 def install_crds(name, directory):
     name += '-crds'
 
-    files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s | xargs -r grep -L '^{{-'" % directory)).strip()
+    files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s | xargs grep -L '^{{-'" % directory)).strip()
     if (files == '') or (files == '(standard input)'):
         files = []
     else:

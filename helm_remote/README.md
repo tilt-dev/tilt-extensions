@@ -36,7 +36,7 @@ helm_remote(chart_name, repo_url='', repo_name='', namespace='', version='', use
 #### Change the Cache Location
 
 By default `helm_remote` will store retrieved helm charts in the `.helm` directory at your workspace's root.
-This location can be customized by calling `helm_remote_set_cache_dir(newDirectory)`.
+This location can be customized by calling `os.putenv('TILT_HELM_REMOTE_CACHE_DIR', new_directory)` before loading the module.
 Whether customizing this value or just using the default location, be sure this directory is added to your project's
 `.tiltignore` file in order to prevent recursive re-processing of the main Tiltfile when the helm cache changes/updates.
 See github [issue #3404](https://github.com/tilt-dev/tilt/issues/3404)

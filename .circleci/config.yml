@@ -7,5 +7,6 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - run: apt update && apt install -y git
       - run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
       - run: with-kind-cluster.sh ./test.sh

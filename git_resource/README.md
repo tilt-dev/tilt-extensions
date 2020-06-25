@@ -199,7 +199,7 @@ git_resource('myMicroservice', 'git@example.com/myRepo.git', dockerfile='Dockerf
 ### Change the Cache Location
 
 By default, when calling `deploy_from_repository()`, or using `git_resource()` with a repository url, the repo will be cloned into the `.git-sources` directory at your workspace's root.
-This location can be customized by calling `git_resource_set_checkout_dir(newDirectory)`.
+This location can be customized by calling `os.putenv('TILT_GIT_RESOURCE_CHECKOUT_DIR', new_directory)` before loading the module.
 Whether customizing this value or just using the default location, be sure this directory is added to your project's
 `.tiltignore` file in order to prevent recursive re-processing of the main Tiltfile when the helm cache changes/updates.
 See github [issue #3404](https://github.com/tilt-dev/tilt/issues/3404)
