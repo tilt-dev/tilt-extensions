@@ -85,7 +85,9 @@ def helm_remote(chart, repo_url='', repo_name='', values=[], set=[], namespace='
 def install_crds(name, directory):
     name += '-crds'
 
-    files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s | xargs grep -L '^{{-'" % directory)).strip()
+    is_mac = str(local('uname -s')).strip().lower() == 'darwin'
+
+    files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s" % directory + " | xargs" + ("" if is_mac else " -r") + " grep -L '^{{-'")).strip()
     if (files == '') or (files == '(standard input)'):
         files = []
     else:
