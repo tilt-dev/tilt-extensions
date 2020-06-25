@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 TIMESTAMP=$(date +'%Y-%m-%d')
 IMAGE_NAME='tiltdev/restart-helper'
@@ -15,7 +15,7 @@ env GOOS=linux GOARCH=amd64 go build tilt-restart-wrapper.go
 docker build . -t $IMAGE_NAME
 docker push $IMAGE_NAME
 
-docker tag tiltdev/entr $IMAGE_WITH_TAG
+docker tag $IMAGE_NAME $IMAGE_WITH_TAG
 docker push $IMAGE_WITH_TAG
 
 echo "Successfully built and pushed $IMAGE_WITH_TAG"
