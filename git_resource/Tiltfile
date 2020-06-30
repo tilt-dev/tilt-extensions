@@ -47,7 +47,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                 has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l' % checkout_dir, quiet=True)).strip()) > 1  # result greater than 1 indicates local modifications are present
 
             if unsafe_mode or not has_local_changes:
-                local('cd %s && git checkout -f %s && git pull -f origin %s' % (checkout_dir, branch, branch), quiet=True)
+                local('cd %s && git fetch -a origin && git checkout -f %s' % (checkout_dir, branch), quiet=True)
             else:
                 fail('git_checkout() failed: local modifications present and safe_mode is enabled')
 
