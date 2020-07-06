@@ -44,7 +44,17 @@ def helm_remote(chart, repo_url='', repo_name='', values=[], set=[], namespace='
     if namespace == '':
         namespace = 'default'
     if repo_url != '':
-        local('helm repo add %s %s' % (repo_name, repo_url))  # updates if already added
+        repo_add_command = 'helm repo add %s %s' % (repo_name, repo_url)
+
+        # Add authentification for adding the repository if credentials are provided
+        if version != '':
+            repo_add_command += ' --version %s' % version
+        if username != '':
+            repo_add_command += ' --username %s' % username
+        if password != '':
+            repo_add_command += ' --password %s' % password
+
+        local(repo_add_command)  # updates if already added
 
     # ======== Create Namespace
     if namespace != '' and namespace != 'default':
