@@ -62,7 +62,7 @@ def _set_k8s_yaml_namespace(o, ns):
 def _set_template_namespace(o, ns):
   if type(o) == 'dict':
     for k, v in o.items():
-      if k == 'template':
+      if k == 'template' and type(v) == 'dict' and type(v.get('metadata', None)) == 'dict':
         v['metadata']['namespace'] = ns
       if type(v) == 'dict' or type(v) == 'list':
         _set_template_namespace(v, ns)
