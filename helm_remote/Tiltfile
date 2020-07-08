@@ -49,8 +49,6 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
         repo_add_command = 'helm repo add %s %s' % (repo_name, repo_url)
 
         # Add authentification for adding the repository if credentials are provided
-        if version != '':
-            repo_add_command += ' --version %s' % version
         if username != '':
             repo_add_command += ' --username %s' % username
         if password != '':
