@@ -7,7 +7,7 @@ namespaces on Kubernetes objects.
 
 ## Functions
 
-### `namespace_yaml(name: str): blob`
+### `namespace_yaml(name: str): Blob`
 
 Returns YAML for a Kubernetes namespace.
 
@@ -20,7 +20,7 @@ load('ext://namespace', 'namespace_yaml')
 k8s_yaml(namespace_yaml('name'))
 ```
 
-### `namespace_inject(objects: Union[str, Blob], namespace: str): str`
+### `namespace_inject(objects: Union[str, Blob], namespace: str): Blob`
 
 Given YAML for Kubernetes objects, return new YAML with a different namespace.
 
