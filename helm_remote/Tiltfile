@@ -83,6 +83,10 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
     # ======== Perform Installation
     local('rm -rf %s' % pull_target)
     local(pull_command)
+
+    if os.name == 'nt':  # windows
+        chart_target = chart_target.replace('\\', '\\\\')  # escape slashes in our path
+
     install_crds(chart, chart_target)
 
     # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps, sometimes the crds haven't yet finished installing before the below tries to run
