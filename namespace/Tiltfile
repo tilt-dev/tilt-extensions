@@ -17,7 +17,7 @@ metadata:
 """ % name)
 
 def namespace_create(name):
-  """Returns YAML for a namespace
+  """Creates a namespace in the current Kubernetes cluster.
 
   Args:
     name: The namespace name. Currently not validated.
