@@ -81,7 +81,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
         pull_command += ' --password %s' % password
 
     # ======== Perform Installation
-    local('rm -rf %s' % pull_target)
+    local('rm -rf %s/%s' % (pull_target, chart))
     local(pull_command)
     install_crds(chart, chart_target)
 
