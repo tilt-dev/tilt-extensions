@@ -1,6 +1,6 @@
 # Restart Process
 
-This extension wraps a `docker_build` call such that at the end of a `live_update`, the container's process will rerun itself. (Use it in place of the `restart_container()` Live Update step, which doesn't work for all users and will soon be deprecated.)
+This extension provides a function `docker_build_with_restart`; this function wraps a `docker_build` call such that at the end of a `live_update`, the container's process will rerun itself. (Use it in place of the `restart_container()` Live Update step, which has been deprecated for Kubernetes resources.)
 
 ## When to Use
 Use this extension when you have an image (via `docker_build`) and you want to re-execute its entrypoint/command as part of a `live_update`.
@@ -8,6 +8,19 @@ Use this extension when you have an image (via `docker_build`) and you want to r
 E.g. if your app is a static binary, you'll probably need to re-execute the binary for any changes you made to take effect.
 
 (If your app has hot reloading capabilities--i.e. it can detect and incorporate changes to its source code without needing to restart--you probably don't need this extension.)
+
+### Unsupported Cases
+This extension does NOT support process restarts for:
+- Images built with `custom_build`
+- Images run in Docker Compose resources (use the [`restart_container()`](https://docs.tilt.dev/api.html#api.restart_container) builtin instead)
+- `custom_build`
+- Images without a shell (e.g. `scratch`, `distroless`)
+- Container commands specified as `command` in Kubernetes YAML will be overridden by this extension.
+  - However, the `args` field is still available; [reach out](https://tilt.dev/contact) if you need help navigating the interplay between Tilt and these YAML values
+
+If this extension doesn't work for your use case, [see our docs for alternatives](https://docs.tilt.dev/live_update_reference.html#restarting-your-process).
+
+Run into a bug? Need a use case that we don't yet support? Let us know--[open an issue](https://github.com/tilt-dev/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
 
 ## How to Use
 
@@ -58,17 +71,6 @@ def docker_build_with_restart(ref: str, context: str,
       **kwargs: will be passed to the underlying `docker_build` call
     """
 ```
-## Unsupported Cases
-This extension does NOT support process restarts for:
-- Images run in Docker Compose resources (use the [`restart_container()`](https://docs.tilt.dev/api.html#api.restart_container) builtin instead)
-- `custom_build`
-- Images without a shell (e.g. `scratch`, `distroless`)
-- Container commands specified as `command` in Kubernetes YAML will be overridden by this extension.
-  - However, the `args` field is still available; [reach out](https://tilt.dev/contact) if you need help navigating the interplay between Tilt and these YAML values
-
-If this extension doesn't work for your use case, [see our docs for alternatives](https://docs.tilt.dev/live_update_reference.html#restarting-your-process).
-
-Run into a bug? Need a use case that we don't yet support? Let us know--[open an issue](https://github.com/tilt-dev/tilt-extensions/issues) or [contact us](https://tilt.dev/contact).
 
 ## What's Happening Under the Hood
 *If you're a casual user/just want to get your app running, you can stop reading now. However, if you want to dig deep and know exactly what's going on, or are trying to debug weird behavior, read on.*
