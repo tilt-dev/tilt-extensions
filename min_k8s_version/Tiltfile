@@ -1,8 +1,7 @@
 def min_k8s_version(min_version):
 
-   #This relies on the fact that the shell command returning something in the form 'gitVersion: vX.X.X'
-    version_str =  str(local('kubectl version --client  -o yaml| grep "gitVersion"', quiet=True))
-   
+   #This relies on the fact that the shell command returning something in the form 'Server Version: vX.X.X'
+    version_str =  str(local('kubectl version --short| grep "Server Version"', quiet=True))
    #Get the string, separate it at the colon, remove the 'v' and any spaces
     version_str = version_str.split(':')[1].replace('v','').strip()
   
@@ -23,4 +22,3 @@ def min_k8s_version(min_version):
 # From David Rubin's minimum tilt version extension
 def _version_tuple(v):
   return [int(str_num) for str_num in v.split(".")]
-
