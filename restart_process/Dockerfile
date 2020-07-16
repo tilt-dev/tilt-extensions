@@ -7,4 +7,8 @@ RUN apk add build-base
 RUN git clone https://github.com/eradman/entr.git /entr
 RUN cd /entr; ./configure; CFLAGS="-static" make install
 
+FROM scratch
+
+COPY --from=0  /usr/local/bin/entr /
+
 ADD tilt-restart-wrapper /
