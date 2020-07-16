@@ -1,0 +1,25 @@
+def min_k8s_version(min_version):
+
+   #This relies on the fact that the shell command returning something in the form 'gitVersion: vX.X.X'
+    version_str =  str(local('kubectl version --short| grep "Server Version"', quiet=True, echo_off=True))
+   #Get the string, separate it at the colon, remove the 'v' and any spaces
+    version_str = version_str.split(':')[1].replace('v','').strip()
+  
+  #David Rubin's helper function returns the version in the form [X, X, X]
+    cur_ver = _version_tuple(version_str)
+    min_ver = _version_tuple(min_version)
+    
+    if cur_ver < min_ver:
+        print(" ---------------------------------------------------------- ")
+        print("|                                                          |")
+        print("|            Minimum Kubernetes Version Not Met!           |")
+        print("|                Current Version : v{}                 |".format(version_str))
+        print("|            Minimum Required Version : v{}            |".format(min_version))
+        print("|            Current Kubernetes Cluster : {}         |".format( k8s_context()))
+        print("|                                                          |")
+        print(" ---------------------------------------------------------- ")
+        fail('Minimum Kubernetes Version Not Met! Current Version is %s' % version_str)
+
+# From David Rubin's minimum tilt version extension
+def _version_tuple(v):
+  return [int(str_num) for str_num in v.split(".")]
