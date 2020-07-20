@@ -93,6 +93,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
     else:
         k8s_yaml(helm(chart_target, name=release_name, values=values, set=set))
 
+# install CRDs as a separate resource and wait for them to be ready
 def install_crds(name, directory):
     name += '-crds'
     files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s || true" % directory)).strip()
@@ -102,8 +103,11 @@ def install_crds(name, directory):
     else:
         files = files.split("\n")
 
-    # If the CRD files contain any Helm preprocessing, skip them.
-    files = [f for f in files if str(read_file(f)).find('{{-') == -1]
+    # we're applying CRDs directly and not using helm preprocessing
+    # this will cause errors!
+    # since installing CRDs in this function is a nice-to-have, just skip
+    # any that have preprocessing
+    files = [f for f in files if str(read_file(f)).find('{{') == -1]
 
     if len(files) != 0:
         local_resource(name+'-install', cmd='kubectl apply -f %s' % " -f ".join(files), deps=files)  # we can wait/depend on this, but it won't cause a proper uninstall
