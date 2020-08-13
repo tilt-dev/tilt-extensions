@@ -6,11 +6,22 @@ Helper functions for creating Kubernetes secrets.
 
 ## Functions
 
-### `secret_yaml_generic(name: str, namespace: str = "", from_file: Union[str, List] = None): Blob`
+### secret_yaml_generic
+
+```
+secret_yaml_generic(name: str, namespace: str = "", from_file: Union[str, List] = None, secret_type: str = None): Blob
+```
 
 Returns YAML for a generic secret.
 
-### `secret_create_generic(name: str, namespace: str = "", from_file: Union[str, List] = None)`
+* `from_file` ( str ) – equivalent to `kubectl create secret --from-file`
+* `secret_type` ( str ) - equivalent to `kubectl create secret --type`
+
+### secret_create_generic
+
+```
+secret_create_generic(name: str, namespace: str = "", from_file: Union[str, List] = None, secret_type: str = None)
+```
 
 Deploys a secret to the cluster. Equivalent to
 
