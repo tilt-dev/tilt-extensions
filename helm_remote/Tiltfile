@@ -37,7 +37,7 @@ metadata:
 #   =====================================
 
 
-def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password=''):
+def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password='', allow_duplicates=False):
     # ======== Condition Incoming Arguments
     if repo_name == '':
         repo_name = chart
@@ -87,11 +87,23 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
 
     install_crds(chart, chart_target)
 
-    # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps, sometimes the crds haven't yet finished installing before the below tries to run
-    if namespace != '':
-        k8s_yaml(helm(chart_target, name=release_name, namespace=namespace, values=values, set=set))
+    # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps,
+    # sometimes the crds haven't yet finished installing before the below tries
+    # to run
+    yaml = helm(chart_target, name=release_name, namespace=namespace, values=values, set=set)
+
+    # The allow_duplicates API is only available in 0.17.1+
+    if allow_duplicates and _version_tuple() >= [0, 17, 1]:
+        k8s_yaml(yaml, allow_duplicates=allow_duplicates)
     else:
-        k8s_yaml(helm(chart_target, name=release_name, values=values, set=set))
+        k8s_yaml(yaml)
+
+def _version_tuple():
+  ver_string = str(local('tilt version', quiet=True))
+  versions = ver_string.split(', ')
+  # pull first string and remove the `v` and `-dev`
+  version = versions[0].replace('-dev', '').replace('v', '')
+  return [int(str_num) for str_num in version.split(".")]
 
 # install CRDs as a separate resource and wait for them to be ready
 def install_crds(name, directory):
