@@ -20,9 +20,11 @@ k8s_resource('example-deployment', port_forwards=8000)
 
 The `pack` function can take a few arguments:
 
-* `name`: name of the image to be built
-* `path`: path to application directory, defaults to the current working directory
-* `builder`: builder image, defaults to gcr.io/paketo-buildpacks/builder:base
+- `name`: name of the image to be built
+- `path`: path to application directory, defaults to the current working directory
+- `builder`: builder image, defaults to gcr.io/paketo-buildpacks/builder:base
+- `buildpacks`: a list of buildpacks to use. (list[str])
+- `env_vars`: a list of environment variables. (list[str])
 
 The function also supports all of the properties of [`custom_build`](https://docs.tilt.dev/api.html#api.custom_build) so
 you can ignore files, override the entrypoint or set live updates as usual.
@@ -39,4 +41,4 @@ pack(
 
 ## Requirements
 
-* The `pack` binary must be on your path
+- The `pack` binary must be on your path.
