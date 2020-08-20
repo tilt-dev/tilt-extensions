@@ -1,19 +1,48 @@
 # -*- mode: Python -*-
 
-def pack(name, path=".", builder="gcr.io/paketo-buildpacks/builder:base", **kwargs):
+def pack(
+  name, 
+  path=".",
+  builder="gcr.io/paketo-buildpacks/builder:base", 
+  buildpacks=[],
+  env_vars=[],
+  **kwargs
+  ):
     """
     Build a container image using pack and buildpacks.
 
     Args:
-      name: name of the image to build
-      path: path to application directory, defaults to current working directory
+      name: name of the image to build.
+      path: path to application directory, defaults to current working directory.
       builder: builder image, defaults to gcr.io/paketo-buildpacks/builder:base
+      buildpacks: A list of buildpacks to use. (list[str])
+      env_vars: A list of environment variables. (list[str])
       **kwargs: will be passed to the underlying `custom_build` call
-
     """
+
+    # Remove possible tag from image name
+    name = name.split(":")[0]
+
+    caching_ref = name + ":tilt-build-pack-caching"
+
+    pack_build_cmd = " ".join([
+      "pack build",
+      caching_ref,
+      "--path " + path,
+      "--builder " + builder,
+      " ".join(["--buildpack " + s for s in buildpacks]),
+      " ".join(["--env " + s for s in env_vars]),
+    ])
+
+    docker_tag_cmd = " ".join([
+      "docker tag",
+      caching_ref,
+      "$EXPECTED_REF",
+    ])
+
     custom_build(
         name,
-        "pack build $EXPECTED_REF -p %s --builder %s" % (path, builder),
+        pack_build_cmd + " && " + docker_tag_cmd,
         [path],
         **kwargs
     )
