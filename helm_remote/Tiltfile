@@ -108,7 +108,7 @@ def _version_tuple():
 # install CRDs as a separate resource and wait for them to be ready
 def install_crds(name, directory):
     name += '-crds'
-    files = str(local(r"grep --include '*.yaml' --include '*.yml' -rEil '\bkind\s*:\s+CustomResourceDefinition\s*$' %s || true" % directory)).strip()
+    files = str(local(r"grep --include='*.yaml' --include='*.yml' -rEil '\bkind[^\w]+CustomResourceDefinition\s*$' %s || exit 0" % directory)).strip()
 
     if (files == ''):
         files = []
