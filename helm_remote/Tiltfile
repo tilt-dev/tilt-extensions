@@ -37,7 +37,7 @@ metadata:
 #   =====================================
 
 
-def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password='', allow_duplicates=False):
+def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password='', allow_duplicates=False, create_namespace=False):
     # ======== Condition Incoming Arguments
     if repo_name == '':
         repo_name = chart
@@ -57,7 +57,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
         local(repo_add_command)  # updates if already added
 
     # ======== Create Namespace
-    if namespace != '' and namespace != 'default':
+    if create_namespace and namespace != '' and namespace != 'default':
         # avoid a namespace not found error
         namespace_create(namespace)  # do this early so it manages to register before we attempt to install into it
 
