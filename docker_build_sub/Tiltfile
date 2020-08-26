@@ -1,4 +1,4 @@
-def docker_build_sub(ref, context, extra_cmds, child_context=None, base_suffix='-base', live_update=[], **kwargs):
+def docker_build_sub(ref, context, extra_cmds, child_context=None, base_suffix='-tilt_docker_build_sub_base', live_update=[], **kwargs):
   """
   Substitutes in a docker image with extra Dockerfile commands.
 

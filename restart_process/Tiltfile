@@ -12,7 +12,7 @@ KWARGS_BLACKLIST = [
 ]
 
 def docker_build_with_restart(ref, context, entrypoint, live_update,
-                              base_suffix='-base', restart_file=RESTART_FILE, **kwargs):
+                              base_suffix='-tilt_docker_build_with_restart_base', restart_file=RESTART_FILE, **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
 
