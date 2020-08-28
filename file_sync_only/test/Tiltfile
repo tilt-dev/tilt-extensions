@@ -6,6 +6,7 @@ file_sync_only("nginx:1.17",
     "./manifest.yaml",
     live_update=[
         sync("testfile", "/"),
+        sync("testdir/", "/"),
     ],
 )
 

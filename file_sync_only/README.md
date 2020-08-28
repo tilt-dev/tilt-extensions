@@ -70,6 +70,5 @@ Sun Aug 23 21:00:00 UTC 2020
 
 ## Requirements
 
-* The `grep` binary must be on your path
-* If you want to sync at the first time, please run something (e.g. `for i in `find . -type f`; do touch $i; sleep 1; done`)
+* The `grep` `cut` `uniq` binary must be on your path
 
