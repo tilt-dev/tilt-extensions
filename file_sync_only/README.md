@@ -46,10 +46,9 @@ file_sync_only("nginx:1.17",
 $ cd test
 $ (tilt up &)
 
-# show file before file sync
+# show file at the first sync
 $ kubectl exec -it nginx-8f48f9474-h7jgg -- cat /testfile
-cat: /testfile: No such file or directory
-command terminated with exit code 1
+Tue Aug 10 07:07:21 JST 2020
 
 # touch file for sync test
 $ date > testfile
