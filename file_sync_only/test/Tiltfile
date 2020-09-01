@@ -4,9 +4,30 @@ load('../Tiltfile', 'file_sync_only')
 
 file_sync_only("nginx:1.17",
     "./manifest.yaml",
+    deps=['testfile', 'testdir'],
     live_update=[
         sync("testfile", "/"),
         sync("testdir/", "/"),
     ],
 )
 
+local_resource(
+  'verify',
+  """
+set -e
+
+sleep 5 # wait for live_update to finish
+
+POD=$(kubectl get pod -l app=nginx -o jsonpath="{.items[*].metadata.name}")
+kubectl cp $POD:testfile ./testfile-out
+EXPECTED=$(cat testfile)
+ACTUAL=$(cat testfile-out)
+rm ./testfile-out
+if [ "$EXPECTED" != "$ACTUAL" ]; then
+  echo "files don't match"
+  exit 1
+fi
+echo "SUCCESS!"
+""",
+  allow_parallel=True,
+  resource_deps=['testfile-sync'])
