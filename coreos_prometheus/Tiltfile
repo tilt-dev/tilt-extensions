@@ -22,6 +22,17 @@ def _find_cache_dir():
 
     return cachedir
 
+def _create_temp_dir():
+    from_env = os.getenv('TILT_COREOS_PROMETHEUS_TEMP_DIR', '')
+
+    if from_env != '':
+        return from_env
+
+    tmpdir = str(local("mktemp -d")).strip()
+    os.putenv('TILT_COREOS_PROMETHEUS_TEMP_DIR', tmpdir)
+
+    return tmpdir
+
 def name(c):
     return c['metadata']['name']
 
@@ -42,19 +53,17 @@ def download_files():
     kube_prometheus_version = 'v0.5.0'
     kube_prometheus_tarball = os.path.join(cachedir, 'coreos-kube-prometheus-%s.tar.gz' % kube_prometheus_version)
 
-    extract_path = os.path.join(cachedir, 'prometheus-operator-kube-prometheus-%s' % kube_prometheus_version)
+    tmpdir = _create_temp_dir()
+    extract_path = os.path.join(tmpdir, 'prometheus-operator-kube-prometheus-%s' % kube_prometheus_version)
 
-    if os.path.exists(kube_prometheus_tarball) and os.path.exists(extract_path):
-        return extract_path
-
-    local("curl -L https://api.github.com/repos/coreos/kube-prometheus/tarball/%s -o %s.tmp" % (kube_prometheus_version, kube_prometheus_tarball))
+    if not os.path.exists(kube_prometheus_tarball):
+	local("curl -L https://api.github.com/repos/coreos/kube-prometheus/tarball/%s -o %s.tmp" % (kube_prometheus_version, kube_prometheus_tarball))
+	# only copy file to final location to prevent redoing the above if the above
+	# have completed successfully.
+	local("mv %s.tmp %s" % (kube_prometheus_tarball, kube_prometheus_tarball))
 
     local("mkdir %s" % extract_path)
-    local("tar -C %s -xzf %s.tmp --strip-components=1 --wildcards 'prometheus-operator-kube-prometheus-*/manifests'" % (extract_path, kube_prometheus_tarball))
-
-    # only copy file to final location to prevent redoing the above if the above
-    # have completed successfully.
-    local("mv %s.tmp %s" % (kube_prometheus_tarball, kube_prometheus_tarball))
+    local("tar -C %s -xzf %s --strip-components=1 --wildcards 'prometheus-operator-kube-prometheus-*/manifests'" % (extract_path, kube_prometheus_tarball))
 
     # return path containing manifests directory
     return extract_path

@@ -4,6 +4,8 @@ This extension deploys CoreOS Prometheus to a monitoring namespace with some
 modifications to the defaults to enable reading alerts defined via
 'PrometheusRule' custom resource definitions.
 
+Author: [Darragh Bailey](https://github.com/electrofelix)
+
 ## Usage
 
 Basic usage
