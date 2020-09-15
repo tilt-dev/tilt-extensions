@@ -38,21 +38,22 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
 
     repository_url, _, branch = _parse_repository_url(repository_url)  # split the branch name away from the repo url
 
-    if not os.path.exists(checkout_dir):  # needs clone
-        local('git clone %s -b %s %s' % (repository_url, branch, checkout_dir), quiet=True)
-    else:  # dir already exists
-        if os.path.exists('%s/.git' % checkout_dir):  # this is a git repo
-            has_local_changes = True  # default to True for safety
-            if not unsafe_mode:
-                has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l' % checkout_dir, quiet=True)).strip()) > 1  # result greater than 1 indicates local modifications are present
+    if config.tilt_subcommand == "up" or config.tilt_subcommand == "ci":
+        if not os.path.exists(checkout_dir):  # needs clone
+            local('git clone %s -b %s %s' % (repository_url, branch, checkout_dir), quiet=True)
+        else:  # dir already exists
+            if os.path.exists('%s/.git' % checkout_dir):  # this is a git repo
+                has_local_changes = True  # default to True for safety
+                if not unsafe_mode:
+                    has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l' % checkout_dir, quiet=True)).strip()) > 1  # result greater than 1 indicates local modifications are present
 
-            if unsafe_mode or not has_local_changes:
-                local('cd %s && git fetch -a origin && git checkout -f %s' % (checkout_dir, branch), quiet=True)
-            else:
-                fail('git_checkout() failed: local modifications present and safe_mode is enabled')
+                if unsafe_mode or not has_local_changes:
+                    local('cd %s && git fetch -a origin && git checkout -f %s' % (checkout_dir, branch), quiet=True)
+                else:
+                    fail('git_checkout() failed: local modifications present and safe_mode is enabled')
 
-        else:  # this isn't a git repo
-            fail('git_checkout() failed: existing checkout_dir is not a git repository')
+            else:  # this isn't a git repo
+                fail('git_checkout() failed: existing checkout_dir is not a git repository')
 
     return checkout_dir
 
