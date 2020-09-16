@@ -1,0 +1,27 @@
+# -*- mode: Python -*-
+#
+os.putenv('TILT_CACHE_DIR', os.path.abspath('./.tilt-cache'))
+
+load(
+    '../Tiltfile',
+    'setup_monitoring',
+    'get_prometheus_dependencies',
+    'get_prometheus_resources',
+)
+
+setup_monitoring()
+
+os.putenv('TILT_HELM_REMOTE_CACHE_DIR', os.path.abspath('./.helm'))
+load('../../helm_remote/Tiltfile', 'helm_remote')
+
+nginx_deployment = helm_remote(
+    'ingress-nginx',
+    repo_url='https://kubernetes.github.io/ingress-nginx',
+    values='./values.yml',
+)
+
+k8s_resource(
+    'ingress-nginx-controller',
+    objects=get_prometheus_resources(nginx_deployment, 'ingress-nginx-controller'),
+    resource_deps=get_prometheus_dependencies(),
+)
