@@ -54,7 +54,15 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
         if password != '':
             repo_add_command += ' --password %s' % password
 
-        local(repo_add_command)  # updates if already added
+
+        # Retry the add command with --force-update if it fails the first time.
+        # This is dumb, but it's the most portable way I can think of to fix
+        # https://github.com/tilt-dev/tilt-extensions/issues/83
+        # without going down the rabbit hole of having a bunch of 'if' blocks
+        # for different Helm versions.
+        repo_add_command_with_retry = '%s || %s --force-update' % (repo_add_command, repo_add_command)
+
+        local(repo_add_command_with_retry)
 
     # ======== Create Namespace
     if create_namespace and namespace != '' and namespace != 'default':
