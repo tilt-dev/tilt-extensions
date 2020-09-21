@@ -1,0 +1,11 @@
+def snyk(path, name='snyk'):
+    """
+    Args:
+      path: path to file to test
+      name: a name for the resource, defaults to snyk. Useful if you want multiple invocations
+    """
+    local_resource(
+        name,
+        deps=[path],
+        cmd= 'snyk iac test %s' % (path)
+    )
