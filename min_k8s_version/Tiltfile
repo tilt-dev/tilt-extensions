@@ -5,7 +5,6 @@ def min_k8s_version(min_version):
    #Get the string, separate it at the colon, remove the 'v' and any spaces
     version_str = version_str.split(':')[1].replace('v','').strip()
   
-  #David Rubin's helper function returns the version in the form [X, X, X]
     cur_ver = _version_tuple(version_str)
     min_ver = _version_tuple(min_version)
     
@@ -20,6 +19,30 @@ def min_k8s_version(min_version):
         print(" ---------------------------------------------------------- ")
         fail('Minimum Kubernetes Version Not Met! Current Version is %s' % version_str)
 
-# From David Rubin's minimum tilt version extension
 def _version_tuple(v):
-  return [int(str_num) for str_num in v.split(".")]
+  # splits a string into a list of contiguous numeric and non-numeric parts, and makes the numeric parts ints, e.g.:
+  # _version_tuple("1.2020.3-beta.2") == [1, ".", 2020, ".", 3, "-beta.", 2]
+  # this allows version comparison such that "1.10" > "1.9"
+
+  ret = []
+  if len(s) == 0:
+    return ret
+
+  cur_part_is_number = s[0].isdigit()
+  cur_part = ''
+  for c in s.elems():
+    if c.isdigit() != cur_part_is_number:
+      if cur_part.isdigit():
+        ret.append(int(cur_part))
+      else:
+        ret.append(cur_part)
+      cur_part = ''
+      cur_part_is_number = c.isdigit()
+    cur_part += c
+
+  if cur_part.isdigit():
+    ret.append(int(cur_part))
+  else:
+    ret.append(cur_part)
+
+  return ret
