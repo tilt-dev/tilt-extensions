@@ -25,12 +25,12 @@ def _version_tuple(v):
   # this allows version comparison such that "1.10" > "1.9"
 
   ret = []
-  if len(s) == 0:
+  if len(v) == 0:
     return ret
 
   cur_part_is_number = s[0].isdigit()
   cur_part = ''
-  for c in s.elems():
+  for c in v.elems():
     if c.isdigit() != cur_part_is_number:
       if cur_part.isdigit():
         ret.append(int(cur_part))
