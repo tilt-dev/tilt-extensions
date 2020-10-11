@@ -26,6 +26,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`restart_process`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your configuration files.
+- [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
 
 ## Contribute an Extension
 
