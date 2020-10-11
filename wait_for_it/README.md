@@ -1,4 +1,4 @@
-# local_output
+# wait_for_it
 
 Author: [Çağatay Yücelen](https://github.com/cyucelen)
 
