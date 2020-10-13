@@ -1,0 +1,29 @@
+def local_output(command):
+  return str(local(command, echo_off=True, quiet=True)).rstrip('\n')
+
+ordinals = {
+  1: 'st',
+  2: 'nd',
+  3: 'rd',
+}
+
+def print_status(retry_count, expected_output, actual_output):
+    print('{}{} retry'.format(retry_count, ordinals.get(retry_count, 'th')))
+    print('-----------------------')
+    print('| Expected output: {}'.format(expected_output))
+    print('| Actual output  : {}'.format(actual_output))
+    print('-----------------------')
+
+def wait_for_it(command, expected_output, backoff=1000, retry_limit=5):
+  print('+--+-+-+-+-+-+-+-+-+-+-+')
+  print('Waiting for \'{}\' to output: \'{}\''.format(command, expected_output))
+  for i in range(retry_limit):
+    actual_output = local_output(command)
+    print_status(i+1, expected_output, actual_output)
+    if actual_output == expected_output:
+      print('Output expectation successfully met!')
+      return
+    print('Sleeping for {}ms'.format(backoff))
+    local('sleep {}'.format(backoff//1000), quiet=True, echo_off=True)
+    print('\n+--+-+-+-+-+-+-+-+-+-+-+\n')
+  fail('Retry limit exceeded!')
