@@ -42,7 +42,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
     df = '''
-    FROM tiltdev/restart-helper:2020-07-16 as restart-helper
+    FROM tiltdev/restart-helper:2020-10-16 as restart-helper
 
     FROM {}
     USER root

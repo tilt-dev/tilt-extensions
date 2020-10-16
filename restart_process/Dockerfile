@@ -3,9 +3,10 @@ FROM alpine/git
 RUN apk update && apk add make
 RUN apk add build-base
 
-# TODO(maia): specify commit instead of just using latest master?
 RUN git clone https://github.com/eradman/entr.git /entr
-RUN cd /entr; ./configure; CFLAGS="-static" make install
+WORKDIR /entr
+RUN git checkout c564e6bdca1dfe2177d1224363cad734158863ad
+RUN ./configure; CFLAGS="-static" make install
 
 FROM scratch
 
