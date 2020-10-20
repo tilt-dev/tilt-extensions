@@ -1,13 +1,13 @@
 
-def snyk(name, path, test_type, k8s_resource, *options):
+def snyk(path, test_type, name='snyk', k8s_dep='', *options):
     """
     Args:
-      name: a name for the resource. useful for labeling when running multiple tests.
-      path: path to the file or container image name:tag to test
+      path: path to the file or container image (name:tag) to test
       test_type: one of 'oss', 'container', or 'iac' corresponding to the various Snyk CLI tests
-      k8s_resource: used for container tests - sets the re-test dependency. ignored by other test types.
-      *options: additional CLI options; appended to the snyk command. see `snyk --help` for usage.
-          - container: this is where to insert the 'file==path/to/Dockerfile' option
+      name: a name for the resource. useful for labeling when running multiple tests. defaults to 'snyk'
+      k8s_dep: used for container tests - sets the re-test dependency for Tilt. Ignored by other test types.
+      *options: additional CLI options; appended to the snyk command. see `snyk --help` for full CLI options.
+          - container: this is where to insert the 'file=path/to/Dockerfile' option
     """
     if test_type == 'oss':
         snyk_cmd = " ".join([
@@ -20,7 +20,7 @@ def snyk(name, path, test_type, k8s_resource, *options):
             "snyk container test",
             path
         ])
-        test_deps = [k8s_resource]
+        test_deps = [k8s_dep]
     elif test_type == 'iac':
         snyk_cmd = " ".join([
             "snyk iac test",
