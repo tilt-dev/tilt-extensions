@@ -30,7 +30,7 @@ The function takes a number of arguments:
 * **test_type**: one of 'oss', 'container', or 'iac' corresponding to the various Snyk CLI tests
 * **name**: a name for the resource. useful for labeling when running multiple tests. Defaults to 'snyk'.
 * **k8s_dep**: used for test_type=='container' and sets Tilt re-test dependency. Ignored by other test types.
-* ***options**: additional CLI options; appended to the snyk command. see `snyk --help` for CLI options.
+* **extra_opts**: additional CLI options; appended to the snyk command. see `snyk --help` for CLI options.
   * container: this is where to insert the 'file==path/to/Dockerfile' option
   * ' --severity-threshold=[high|medium|low]' is another useful consideration
 
