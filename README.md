@@ -25,7 +25,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
 - [`restart_process`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
 - [`secret`](/secret): Functions for creating secrets.
-- [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your configuration files.
+- [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
 
 ## Contribute an Extension

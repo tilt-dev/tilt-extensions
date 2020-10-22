@@ -1,11 +1,40 @@
-def snyk(path, name='snyk'):
+def snyk(path, test_type, name='snyk', k8s_dep='', extra_opts=''):
     """
     Args:
-      path: path to file to test
-      name: a name for the resource, defaults to snyk. Useful if you want multiple invocations
+      name: a name for the resource. useful for labeling when running multiple tests.
+      path: path to the file or container image name:tag to test
+      test_type: one of 'oss', 'container', or 'iac' corresponding to the various Snyk CLI tests
+      k8s_resource: used for container tests - sets the re-test dependency. ignored by other test types.
+      extra_opts: additional CLI options; appended to the snyk command. see `snyk --help` for usage.
+          - container: this is where to insert the 'file=path/to/Dockerfile' option
     """
+    if test_type == 'oss':
+        snyk_cmd = " ".join([
+            "snyk test --all-projects",
+            path
+        ])
+        test_deps = [path]
+    elif test_type == 'container':
+        snyk_cmd = " ".join([
+            "snyk container test",
+            path
+        ])
+        test_deps = [k8s_dep]
+    elif test_type == 'iac':
+        snyk_cmd = " ".join([
+            "snyk iac test",
+            path
+        ])
+        test_deps = [path]
+    else:
+        fail("Snyk test_type should be one of oss, container, or iac.")
+
+    if (len(extra_opts) > 0):
+        snyk_cmd = " ".join([snyk_cmd, extra_opts])
+
     local_resource(
         name,
-        deps=[path],
-        cmd= 'snyk iac test %s' % (path)
+        deps = test_deps,
+        cmd = snyk_cmd,
+        trigger_mode=TRIGGER_MODE_MANUAL
     )
