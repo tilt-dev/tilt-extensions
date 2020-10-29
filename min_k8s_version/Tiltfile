@@ -28,7 +28,7 @@ def _version_tuple(v):
   if len(v) == 0:
     return ret
 
-  cur_part_is_number = s[0].isdigit()
+  cur_part_is_number = v[0].isdigit()
   cur_part = ''
   for c in v.elems():
     if c.isdigit() != cur_part_is_number:
