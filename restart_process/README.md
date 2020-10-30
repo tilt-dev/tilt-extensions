@@ -1,9 +1,16 @@
 # Restart Process
 
-This extension provides a function `docker_build_with_restart`; this function wraps a `docker_build` call such that at the end of a `live_update`, the container's process will rerun itself. (Use it in place of the `restart_container()` Live Update step, which has been deprecated for Kubernetes resources.)
+This extension helps create images that can restart on `live_update`:
+
+- `docker_build_with_restart`: wraps a `docker_build` call
+- `custom_build_with_restart`: wraps a `custom_build` call
+
+At the end of a `live_update`, the container's process will rerun itself.
+
+(Use it in place of the `restart_container()` Live Update step, which has been deprecated for Kubernetes resources.)
 
 ## When to Use
-Use this extension when you have an image (via `docker_build`) and you want to re-execute its entrypoint/command as part of a `live_update`.
+Use this extension when you have an image and you want to re-execute its entrypoint/command as part of a `live_update`.
 
 E.g. if your app is a static binary, you'll probably need to re-execute the binary for any changes you made to take effect.
 
@@ -52,7 +59,20 @@ docker_build_with_restart(
 ```
 The call above looks just like the initial `docker_build` call except for one added parameter, `entrypoint` (in this example, `/go/bin/foo`). This is the command that you want to run on container start and _re-run_ on Live Update.
 
-### Function Signature
+A custom_build call looks similar:
+
+```python
+load('ext://restart_process', 'custom_build_with_restart')
+
+custom_build_with_restart(
+    'foo-image',
+    'docker build -t $EXPECTED_REF ./foo',
+    deps=['./foo'],
+    live_update=[sync(...)]
+)
+```
+
+### API
 ```python
 def docker_build_with_restart(ref: str, context: str,
     entrypoint: Union[str, List[str]],
@@ -69,6 +89,27 @@ def docker_build_with_restart(ref: str, context: str,
       base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
       restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
       **kwargs: will be passed to the underlying `docker_build` call
+    """
+    
+
+def custom_build_with_restart(ref: str, command: str, deps: List[str], entrypoint,
+
+    entrypoint: Union[str, List[str]],
+    live_update: List[LiveUpdateStep],
+    base_suffix: str = '-base',
+    restart_file: str = '/.restart-proc',
+    , **kwargs
+):
+    """
+     Args:
+      ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in custom_build
+      command: build command for building your image
+      deps: source dependencies of the custom build
+      entrypoint: the command to be (re-)executed when the container starts or when a live_update is run
+      live_update: set of steps for updating a running container; as the parameter of the same name in custom_build
+      base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
+      restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
+      **kwargs: will be passed to the underlying `custom_build` call
     """
 ```
 
