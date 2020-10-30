@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distroless
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: distroless
+  template:
+    metadata:
+      labels:
+        app: distroless
+    spec:
+      containers:
+      - name: distroless
+        image: distroless-image
+      readinessProbe:
+        httpGet: /
+        initialDelaySeconds: 1
+        periodSeconds: 1
+        port: 8081
+        

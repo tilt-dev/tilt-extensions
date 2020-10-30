@@ -27,11 +27,11 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, *
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
     df = '''
-    FROM tiltdev/restart-helper:2020-10-16 as restart-helper
+    FROM tiltdev/restart-helper:2020-10-30 as restart-helper
 
     FROM {}
     USER root
-    RUN ["touch", "{}"]
+    COPY --from=restart-helper /.restart-proc {}
     COPY --from=restart-helper /tilt-restart-wrapper /
     COPY --from=restart-helper /entr /
     '''.format(base_ref, restart_file)
@@ -40,7 +40,10 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, *
     # `tilt-restart-wrapper` makes use of `entr` (https://github.com/eradman/entr/) to
     # re-execute $entrypoint whenever $restart_file changes
     if type(entrypoint) == type(""):
-        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file), "sh", "-c", entrypoint]
+        if " " in entrypoint:
+            entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file), "sh", "-c", entrypoint]
+        else:
+            entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file), entrypoint]
     elif type(entrypoint) == type([]):
         entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file)] + entrypoint
     else:
