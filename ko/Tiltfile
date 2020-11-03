@@ -1,0 +1,31 @@
+# -*- mode: Python -*-
+
+def ko_build(ref, import_path, deps=[]):
+  """Use Ko (https://github.com/google/ko) to build images for Tilt.
+
+  Args:
+    ref: The name of the image to build. Must match the image
+      name in the Kubernetes resources you're deploying.
+    import_path: A Go import path of the binary to build.
+    deps: A list of dependencies that can trigger rebuilds.
+  """
+  commands = [
+    "set -eo pipefail",
+  ]
+
+  if not import_path.startswith("."):
+    # Ko needs the source code to be checked out.
+    # https://github.com/google/ko/issues/237
+    commands += ["go get {import_path}".format(import_path=import_path)]
+
+  commands += [
+    "IMAGE=$(ko publish --local {import_path})".format(import_path=import_path),
+    "docker tag $IMAGE $EXPECTED_REF",
+  ]
+  custom_build(
+    ref=ref,
+    command=["bash", "-c", ";\n".join(commands)],
+    # We add the extra file as a workaround for
+    # https://github.com/tilt-dev/tilt/issues/3891
+    deps=deps + [__file__],
+  )
