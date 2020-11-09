@@ -17,6 +17,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`helm_remote`](/helm_remote): Install a remote Helm chart (in a way that gets properly uninstalled when running `tilt down`)
 - [`jest_test_runner`](/jest_test_runner): Jest JavaScript test runner. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
 - [`local_output`](/local_output): Run a `local` command and get the output as string
+- [`ko`](/ko): Use [Ko](https://github.com/google/ko) to build Go-based container images
 - [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
 - [`min_k8s_version`](/min_k8s_version): Require a minimum Kubernetes version to run this Tiltfile.
 - [`namespace`](/namespace): Functions for interacting with namespaces.
