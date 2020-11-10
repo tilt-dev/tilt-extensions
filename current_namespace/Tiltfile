@@ -1,0 +1,2 @@
+def current_namespace():
+  return str(local("kubectl config view --minify --output 'jsonpath={..namespace}'"))
