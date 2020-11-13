@@ -1,5 +1,7 @@
 # Current Namespace
 
+Author: [Ash Kamel](https://github.com/ajkamel)
+
 The purpose of this extension is to easily fetch the active namespace within your kubernetes environment
 
 You can use this to quickly setup remote deployments using Tilt without having to hardcode any namespace within your tiltfile
