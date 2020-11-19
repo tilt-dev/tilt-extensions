@@ -3,6 +3,7 @@
 cd $(dirname $0)
 
 set -ex
+configmap/test/test.sh
 file_sync_only/test/test.sh
 git_resource/test/test.sh
 namespace/test/test.sh

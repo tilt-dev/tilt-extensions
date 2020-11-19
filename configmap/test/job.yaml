@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: configmap-verify
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+      - name: configmap-verify
+        image: alpine
+        command: ["cat", "/etc/my-job/my-job.ini"]
+        volumeMounts:
+        - name: job-config
+          mountPath: /etc/my-job
+      restartPolicy: Never
+      volumes:
+      - name: job-config
+        configMap:
+          name: job-config
