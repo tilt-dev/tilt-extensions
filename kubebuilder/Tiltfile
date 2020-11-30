@@ -46,7 +46,7 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest'):
     deps = ['controllers', 'main.go']
     deps.append('api')
     
-    local_resource('Watch/Compile', generate() + binary(), deps=deps, ignore=['*/*/zz_generated.deepcopy.go'])
+    local_resource('Watch&Compile', generate() + binary(), deps=deps, ignore=['*/*/zz_generated.deepcopy.go'])
     
     local_resource('Sample YAML', 'kubectl apply -f ./config/samples', deps=["./config/samples"], resource_deps=[DIRNAME + "-controller-manager"])
     
