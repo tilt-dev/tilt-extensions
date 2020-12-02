@@ -40,7 +40,10 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
 
     if config.tilt_subcommand == "up" or config.tilt_subcommand == "ci":
         if not os.path.exists(checkout_dir):  # needs clone
-            local('git clone --recurse-submodules %s -b %s %s' % (repository_url, branch, checkout_dir), quiet=True)
+            if branch.startswith('tags/'):
+                branch = branch[5:]
+
+            local('git clone {repository_url} --recurse-submodules --shallow-submodules --depth 1 --branch {branch} {checkout_dir}'.format(repository_url=repository_url, branch=branch, checkout_dir=checkout_dir), quiet=True)
         else:  # dir already exists
             if os.path.exists('%s/.git' % checkout_dir):  # this is a git repo
                 has_local_changes = True  # default to True for safety
@@ -48,7 +51,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                     has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l' % checkout_dir, quiet=True)).strip()) > 1  # result greater than 1 indicates local modifications are present
 
                 if unsafe_mode or not has_local_changes:
-                    if branch[:5] != 'tags/' and branch[:7] != 'origin/':
+                    if not branch.startswith('tags/') and not branch.startswith('origin/'):
                         branch = 'origin/%s' % branch
 
                     local('cd %s && git fetch -a origin && git checkout -f %s && git submodule update --init' % (checkout_dir, branch), quiet=True)
