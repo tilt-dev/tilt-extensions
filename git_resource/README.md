@@ -28,6 +28,7 @@ git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='de
 * `path_or_repo` ( str ) – either the URL to the remote git repo, or the path to your local checkout.  
 If passing a repo url, a branch may be specified with a hash delimiter (i.e. `git@example.com/path/to/repo.git#myBranchNameHere`).  
 If no branch is specified, defaults to `master`
+To use a tag, prefix the tag name with `tags/` (i.e. `tags/v1.0.01`)
 * `dockerfile` ( str ) – the path to your dockerfile, relative to your git repository's root
 * `namespace` ( str ) – the namespace to deploy the built image to. This can be overridden within the `deployment_callback` function (see: [Custom Deployment YAML][2])
 * `resource_deps` ( List [ str ] ) – a list of resources on which this resource depends
