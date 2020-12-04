@@ -1,0 +1,26 @@
+# -*- mode: Python -*-
+
+krsync_path = os.path.join(os.getcwd(), 'krsync.sh')
+
+
+def syncback(name, deploy, paths, target_dir='.'):
+    # name (str) = resource name
+    # k8s_identifier (str) = thing to exec on (pod, deployment/blah, etc)
+    # paths (List[str]) = paths ON CONTAINER to sync. May be files or dirs. May be absolute, or releative to working dir of container
+    # target_dir (str) = dir on local FS to copy files back to (maybe abs or relative to Tiltfile)
+
+    # TODO: if you're rsync-savvy you might want to do the wildcarding manually--
+    #   give an option to turn off automatic +'***'
+    includes = ' '.join(['--include="{}***"'.format(p) for p in paths])
+
+    local_resource(name, '{krsync} -avO --progress --stats --delete -T=/tmp/rsync {includes} --exclude="*" {deploy}:/app/ {target}'.
+                   format(krsync=krsync_path, includes=includes, deploy=deploy, target=target_dir),
+               trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
+
+    # TODO: better dir for rsync bin on container (AND can override from Tiltfile?)
+    # TODO: validate deploy name -- if it has a slash, rsync will think it's a local path :-/
+    # TODO: more verbosity option
+    # TODO: not necessarily manual/can link up to a resource as a dep
+    # TODO: can pass other k8s specifiers besides deploy, e.g. statefulset/foo, or a pod ID
+    # TODO: namespace support (i think we pass to krsync as my-deploy@my-namespace)
+
