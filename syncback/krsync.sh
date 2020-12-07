@@ -3,6 +3,8 @@
 # Adapted from Karl Bunch's post on Server Fault:
 # https://serverfault.com/questions/741670/rsync-files-to-a-kubernetes-pod/887402#887402
 
+set -e
+
 # make sure local tmp dir exists
 [[ -d /tmp/rsync.tilt ]] || mkdir /tmp/rsync.tilt
 
@@ -29,7 +31,7 @@ fi
 # ensure our rsync bin is present on container in the expected location
 ## TODO: option for windows bin, depending on container OS
 tar_path=${0%/*}/rsync.tilt.tar
-cat $tar_path | kubectl $namespace exec -i deployment/$depl -- /bin/sh -c "ls $rsync_path 2>/dev/null && cat>/dev/null || mkdir /tmp/rsync && tar -xf - -C /bin/" > /dev/null
+kubectl exec deployment/example-rails -- /bin/sh -c "ls $rsync_path > /dev/null" 2> /dev/null || cat $tar_path | kubectl $namespace exec -i deployment/$depl -- /bin/sh -c "tar -xf - -C /bin/"
 
 exec kubectl $namespace exec -i deployment/$depl -- "$@"
 
