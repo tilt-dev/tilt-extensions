@@ -13,7 +13,7 @@ def syncback(name, deploy, paths, target_dir='.'):
     #   give an option to turn off automatic +'***'
     includes = ' '.join(['--include="{}***"'.format(p) for p in paths])
 
-    local_resource(name, '{krsync} -avO --progress --stats --delete -T=/tmp/rsync {includes} --exclude="*" {deploy}:/app/ {target}'.
+    local_resource(name, '{krsync} -avO --progress --stats --delete -T=/tmp/rsync.tilt {includes} --exclude="*" {deploy}:/app/ {target}'.
                    format(krsync=krsync_path, includes=includes, deploy=deploy, target=target_dir),
                trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
 

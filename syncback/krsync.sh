@@ -3,6 +3,9 @@
 # Adapted from Karl Bunch's post on Server Fault:
 # https://serverfault.com/questions/741670/rsync-files-to-a-kubernetes-pod/887402#887402
 
+# make sure local tmp dir exists
+[[ -d /tmp/rsync.tilt ]] || mkdir /tmp/rsync.tilt
+
 rsync_path=/bin/rsync.tilt
 
 if [ -z "$KRSYNC_STARTED" ]; then
