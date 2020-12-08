@@ -3,9 +3,9 @@
 krsync_path = os.path.join(os.getcwd(), 'krsync.sh')
 
 
-def syncback(name, deploy, paths, target_dir='.'):
+def syncback(name, k8s_object, paths, target_dir='.', namespace=''):
     # name (str) = resource name
-    # k8s_identifier (str) = thing to exec on (pod, deployment/blah, etc)
+    # k8s_object (str) = thing to exec on (pod/foo, deployment/bar, etc)
     # paths (List[str]) = paths ON CONTAINER to sync. May be files or dirs. May be absolute, or releative to working dir of container
     # target_dir (str) = dir on local FS to copy files back to (maybe abs or relative to Tiltfile)
 
@@ -13,8 +13,11 @@ def syncback(name, deploy, paths, target_dir='.'):
     #   give an option to turn off automatic +'***'
     includes = ' '.join(['--include="{}***"'.format(p) for p in paths])
 
-    local_resource(name, '{krsync} -avO --progress --stats --delete -T=/tmp/rsync.tilt {includes} --exclude="*" {deploy}:/app/ {target}'.
-                   format(krsync=krsync_path, includes=includes, deploy=deploy, target=target_dir),
+    remote_name = 'dummy'
+    if namespace:
+        remote_name = 'dummy@{}'.format(namespace)
+    local_resource(name, '{krsync} {obj} -avO --progress --stats --delete -T=/tmp/rsync.tilt {includes} --exclude="*" {remote}:/app/ {target}'.
+                   format(krsync=krsync_path, obj=k8s_object, includes=includes, remote=remote_name, target=target_dir),
                trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
 
     # TODO: better dir for rsync bin on container (AND can override from Tiltfile?)

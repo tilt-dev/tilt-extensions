@@ -11,6 +11,8 @@ set -e
 rsync_path=/bin/rsync.tilt
 
 if [ -z "$KRSYNC_STARTED" ]; then
+  export K8S_OBJECT=$1
+  shift
   export KRSYNC_STARTED=true
   exec rsync --rsync-path=$rsync_path --blocking-io --rsh "$0" $@
 fi
@@ -31,7 +33,7 @@ fi
 # ensure our rsync bin is present on container in the expected location
 ## TODO: option for windows bin, depending on container OS
 tar_path=${0%/*}/rsync.tilt.tar
-kubectl exec deployment/example-rails -- /bin/sh -c "ls $rsync_path > /dev/null" 2> /dev/null || cat $tar_path | kubectl $namespace exec -i deployment/$depl -- /bin/sh -c "tar -xf - -C /bin/"
+kubectl exec deployment/example-rails -- /bin/sh -c "ls $rsync_path > /dev/null" 2> /dev/null || cat $tar_path | kubectl $namespace exec -i $K8S_OBJECT -- /bin/sh -c "tar -xf - -C /bin/"
 
-exec kubectl $namespace exec -i deployment/$depl -- "$@"
+exec kubectl $namespace exec -i $K8S_OBJECT -- "$@"
 
