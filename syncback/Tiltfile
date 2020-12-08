@@ -24,10 +24,7 @@ def syncback(name, k8s_object, paths, src_dir, target_dir='.', namespace=''):
                    format(krsync=krsync_path, obj=k8s_object, includes=includes, remote=remote_name, src=src_dir, target=target_dir),
                trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
 
-    # TODO: better dir for rsync bin on container (AND can override from Tiltfile?)
-    # TODO: validate deploy name -- if it has a slash, rsync will think it's a local path :-/
     # TODO: more verbosity option
     # TODO: not necessarily manual/can link up to a resource as a dep
-    # TODO: can pass other k8s specifiers besides deploy, e.g. statefulset/foo, or a pod ID
     # TODO: namespace support (i think we pass to krsync as my-deploy@my-namespace)
 
