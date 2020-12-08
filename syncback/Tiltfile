@@ -1,0 +1,30 @@
+# -*- mode: Python -*-
+
+krsync_path = os.path.join(os.getcwd(), 'krsync.sh')
+
+
+def syncback(name, k8s_object, paths, src_dir, target_dir='.', namespace=''):
+    # name (str) = resource name
+    # k8s_object (str) = thing to exec on (pod/foo, deployment/bar, etc)
+    # paths (List[str]) = paths ON CONTAINER to sync. May be files or dirs. May be absolute, or relative to src_dir
+    # src_dir = dir ON CONTAINER that paths are relative to
+    # target_dir (str) = dir on local FS to copy files back to (maybe abs or relative to Tiltfile)
+
+    if not src_dir.endswith('/'):
+        fail('src_dir must be a directory and have a trailing slash')
+
+    # TODO: if you're rsync-savvy you might want to do the wildcarding manually--
+    #   give an option to turn off automatic +'***'
+    includes = ' '.join(['--include="{}***"'.format(p) for p in paths])
+
+    remote_name = 'dummy'
+    if namespace:
+        remote_name = 'dummy@{}'.format(namespace)
+    local_resource(name, '{krsync} {obj} -avO --progress --stats --delete -T=/tmp/rsync.tilt {includes} --exclude="*" {remote}:{src} {target}'.
+                   format(krsync=krsync_path, obj=k8s_object, includes=includes, remote=remote_name, src=src_dir, target=target_dir),
+               trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
+
+    # TODO: more verbosity option
+    # TODO: not necessarily manual/can link up to a resource as a dep
+    # TODO: namespace support (i think we pass to krsync as my-deploy@my-namespace)
+
