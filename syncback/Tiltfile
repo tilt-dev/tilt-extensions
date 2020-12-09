@@ -3,12 +3,12 @@
 krsync_path = os.path.join(os.getcwd(), 'krsync.sh')
 
 
-def syncback(name, k8s_object, src_dir, target_dir='.', paths=None, namespace='', verbose=False):
+def syncback(name, k8s_object, src_dir, target_dir='.', paths=None, container='', namespace='', verbose=False):
     """
     Create a local resource that will (via rsync) sync the specified files
     from the specified k8s object to the local filesystem.
 
-    :param name (str): name of the created local resource
+    :param name (str): name of the created local resource.
     :param k8s_object (str): a Kubernetes object identifier (e.g. deploy/my-deploy, job/my-job, or a pod ID) that Tilt
            can use to select a pod. As per the behavior of `kubectl exec`, we will act on the first pod of the specified
            object, using the first container by default.
@@ -17,8 +17,9 @@ def syncback(name, k8s_object, src_dir, target_dir='.', paths=None, namespace=''
     :param target_dir (str, optional): directory ON THE LOCAL FS to sync to. Defaults to '.'
     :param paths (List[str], optional): paths IN THE KUBERNETES CONTAINER to sync, relative to src_dir. May be files or dirs.
            Note that these must not begin with `./`. If no paths are provided, sync the entire src_dir.
-    :param namespace (str, optiona): namespace of the desired k8s_object, if not `default`
-    :param verbose (bool, optional): if true, print additional rsync information
+    :param container (str, optiona): name of the container to sync from (by default, the first container)
+    :param namespace (str, optiona): namespace of the desired k8s_object, if not `default`.
+    :param verbose (bool, optional): if true, print additional rsync information.
     :return:
     """
 
@@ -35,6 +36,11 @@ def syncback(name, k8s_object, src_dir, target_dir='.', paths=None, namespace=''
     remote_name = 'dummy'
     if namespace:
         remote_name = 'dummy@{}'.format(namespace)
+
+    # instead of wrestling with passing optional args to krsync.sh that do not then
+    # get passed to rsync, just bundle container flag with k8s object specifier
+    if container:
+        k8s_object = '"{obj} -c {container}"'.format(obj=k8s_object, container=container)
 
     flags = '-aOv'
     if verbose:
