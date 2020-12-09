@@ -6,7 +6,8 @@ This extension helps you sync files/directories from your container back to your
 This extension provides a function `syncback` which creates a manually-triggered local resource to sync files from a Kubernetes container back to your local filesystem. You can configure the source pod/container/directory/files+directories, and the destination location, as well as some other settings.
 
 Whenever you want to sync files back from the pod to your local filesystem, invoke the local resource from the Web UI:
-<IMAGE HERE>
+
+![A syncback resource in the sidebar, with the trigger button highlighted](assets/trigger-syncback.png)
 
 ### Usage
 First, **make sure you have an up-to-date `rsync` on your local machine** (version >= 3.0.0).
