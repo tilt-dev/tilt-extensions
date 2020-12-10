@@ -2,8 +2,12 @@
 
 krsync_path = os.path.join(os.getcwd(), 'krsync.sh')
 
-MIN_LOCAL_RSYNC_VERSION = "3.0.0"
+MIN_LOCAL_RSYNC_VERSION = '3.0.0'
 verify_rsync_path = os.path.join(os.getcwd(), 'verify_rsync.sh')
+
+# if no local rsync/insufficient version, bail
+print('-- syncback extension checking for local rsync --')
+local('{} {}'.format(verify_rsync_path, MIN_LOCAL_RSYNC_VERSION))
 
 def syncback(name, k8s_object, src_dir, target_dir='.', paths=None, container='', namespace='', verbose=False):
     """
@@ -24,8 +28,6 @@ def syncback(name, k8s_object, src_dir, target_dir='.', paths=None, container=''
     :param verbose (bool, optional): if true, print additional rsync information.
     :return:
     """
-    # if no local rsync/insufficient version, bail
-    local('{} {}'.format(verify_rsync_path, MIN_LOCAL_RSYNC_VERSION))
 
     incl_excl = ''
     if paths:
