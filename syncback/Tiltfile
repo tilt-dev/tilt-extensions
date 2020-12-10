@@ -9,7 +9,9 @@ verify_rsync_path = os.path.join(os.getcwd(), 'verify_rsync.sh')
 print('-- syncback extension checking for local rsync --')
 local('{} {}'.format(verify_rsync_path, MIN_LOCAL_RSYNC_VERSION))
 
-def syncback(name, k8s_object, src_dir, paths=None, target_dir='.', container='', namespace='', verbose=False):
+DEFAULT_IGNORES = ['.git', '.gitignore', '.dockerignore', 'Dockerfile', '.tiltignore', 'Tiltfile', 'tilt_modules']
+
+def syncback(name, k8s_object, paths, src_dir, ignore=None, target_dir='.', container='', namespace='', verbose=False):
     """
     Create a local resource that will (via rsync) sync the specified files
     from the specified k8s object to the local filesystem.
@@ -18,10 +20,14 @@ def syncback(name, k8s_object, src_dir, paths=None, target_dir='.', container=''
     :param k8s_object (str): a Kubernetes object identifier (e.g. deploy/my-deploy, job/my-job, or a pod ID) that Tilt
            can use to select a pod. As per the behavior of `kubectl exec`, we will act on the first pod of the specified
            object, using the first container by default.
+    :param paths (List[str]): paths IN THE KUBERNETES CONTAINER to sync, relative to src_dir. May be files or dirs.
+           Note that these must not begin with `./`. Pass an empty list to sync all of src_dir.
+           THIS OPTION RISKS WIPING OUT FILES LOCALLY if the files exist at `target_dir` but not in the container.
+           Tilt will protect some files automatically, but you will probably want to use the `ignores` parameter
+           to explicitly protect other files that exist locally but not on the container.
     :param src_dir (str): directory IN THE KUBERNETES CONTAINER to sync from. Any paths specified, if relative,
            should be relative to this dir.
-    :param paths (List[str], optional): paths IN THE KUBERNETES CONTAINER to sync, relative to src_dir. May be files or dirs.
-           Note that these must not begin with `./`. If no paths are provided, sync the entire src_dir.
+    :param ignore (List[str], optional): files to ignore when syncing (relative to src_dir).
     :param target_dir (str, optional): directory ON THE LOCAL FS to sync to. Defaults to '.'
     :param container (str, optiona): name of the container to sync from (by default, the first container)
     :param namespace (str, optiona): namespace of the desired k8s_object, if not `default`.
@@ -30,11 +36,22 @@ def syncback(name, k8s_object, src_dir, paths=None, target_dir='.', container=''
     """
 
     incl_excl = ''
+    if ignore == None:
+        ignore = []
+
     if paths:
         # TODO: if you're rsync-savvy you might want to do the wildcarding manually--
         #   give an option to turn off automatic +'***'
         includes = ' '.join(['--include="{}***"'.format(p) for p in paths])
         incl_excl = '{} --exclude="*"'.format(includes)
+    else:
+        # Sync the entire src_dir. Danger, Will Robinson! Ignore some stuff
+        # that probably exists locally but not in your container so it
+        # doesn't get wiped out locally on your first sync
+        ignore.extend(DEFAULT_IGNORES)
+
+    excludes = ' '.join(['--exclude="{}***"'.format(ig) for ig in ignore])
+    incl_excl = '{} {}'.format(excludes, incl_excl)
 
     if not src_dir.endswith('/'):
         fail('src_dir must be a directory and have a trailing slash')

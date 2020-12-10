@@ -26,37 +26,42 @@ For every syncback resource you want to create, invoke `syncback` with the follo
 
 * **name (str)**: name of the created local resource
 * **k8s_object (str)**: a Kubernetes object identifier (e.g. `deploy/my-deploy`, `job/my-job`, or a pod ID) that Tilt can use to select a pod. As per the behavior of `kubectl exec`, we will act on the first pod of the specified object, using the first container by default
+* **paths (List[str])**: paths *in the remote container* to sync, relative to `src_dir`. May be files or directories. Note that these must not begin with `./`. Pass an empty list to sync all of src_dir. THIS OPTION RISKS WIPING OUT FILES LOCALLY if the files exist at `target_dir` but not in the container. Tilt will protect some files automatically, but you will probably want to use the `ignores` parameter to explicitly protect other files that exist locally but not on the container.
 * **src_dir (str)**: directory *in the remote container* to sync from. Any `paths`, if specified, should be relative to this dir. This path *must* be a directory and must contain a trailing slash (e.g. `/app/` is acceptable; `/app` is not)
 
 You may also pass the following optional parameters:
-* **paths (List[str], optional)**: paths *in the remote container* to sync, relative to `src_dir`. May be files or directories. Note that these must not begin with `./`. If no paths are provided, we sync the entire `src_dir`
+* **ignore (List[str], optional)**: files to ignore when syncing (relative to src_dir).
 * **target_dir (str, optional)**: directory *on the local filesystem* to sync to. Defaults to `'.'`
-* **container (str, optiona)**: name of the container to sync from (by default, the first container)
+* **container (str, optional)**: name of the container to sync from (by default, the first container)
 * **namespace (str, optiona)**: namespace of the desired `k8s_object`, if not `default`.
 * **verbose (bool, optional)**: if true, print additional rsync information.
 
-### Example invocations:
-1. Create a local resource called "syncback-js" which connects to the first pod of "deploy/frontend" (and the default container) and syncs "/app/package.json" and "/app/yarn.lock" to local directory "./frontend".
+### Example invocations
+1. Create a local resource called "syncback-js" which connects to the first pod of "deploy/frontend" (and the default container) and syncs "/app/package.json" and "/app/yarn.lock" to local directory "./frontend":
     ```python
-    syncback('syncback-js', 'deploy/frontend', '/app/',
+    syncback('syncback-js', 'deploy/frontend',
+             ['package.json', 'yarn.lock'], '/app/',
              target_dir='./frontend',
-             paths=['package.json', 'yarn.lock']
     )
     ```
 
-2. Create a local resource called "syncback-portal" which connects to the first pod of "deploy/portal-app" (to container "app") in namespace $(whoami), and syncs the entire contents of "src/node_modules" to local directory "./portal/node_modules".
+2. Create a local resource called "syncback-portal" which connects to the first pod of "deploy/portal-app" (to container "app") in namespace $(whoami), and syncs the entire contents of "src/node_modules" to local directory "./portal/node_modules":
     ```python
     ns = str(local('whoami')).strip()
-    syncback('syncback-portal', 'deploy/portal-app', '/src/node_modules/',
+    syncback('syncback-portal', 'deploy/portal-app',
+             [], '/src/node_modules/',
              target_dir='./portal/node_modules',
              container='app',
              namespace=ns
     )
     ```
 
-3. Create a local resource called "syncback-data" which connects to the first pod of "job/data-cron" syncs the contents of "/data" to "."
+3. Create a local resource called "syncback-data" which connects to the first pod of "job/data-cron" syncs the contents of "/data" to the local cwd. Protect several files ("k8s.yaml", "config.json") that exist locally but not in the container (otherwise they would be deleted locally on sync):
     ```python
-    syncback('syncback-data', 'job/data-cron', '/data/')
+    syncback('syncback-data', 'job/data-cron',
+             [], '/data/',
+             ignore=['k8s.yaml', 'config.json']
+   )
     ```
 
 You can create as many syncback resources as you like; you'll need at minimum one syncback resource for every remote container you want to copy from, but you might choose to have different syncback resources for different sets of files, e.g. one to copy back `node_modules` and one to copy back your `data/` directory.
