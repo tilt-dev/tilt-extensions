@@ -11,7 +11,7 @@ local('{} {}'.format(verify_rsync_path, MIN_LOCAL_RSYNC_VERSION))
 
 DEFAULT_EXCLUDES = ['.git', '.gitignore', '.dockerignore', 'Dockerfile', '.tiltignore', 'Tiltfile', 'tilt_modules']
 
-def syncback(name, k8s_object, paths, src_dir, delete=False, ignore=None, target_dir='.', container='', namespace='', verbose=False):
+def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False):
     """
     Create a local resource that will (via rsync) sync the specified files
     from the specified k8s object to the local filesystem.
@@ -20,16 +20,15 @@ def syncback(name, k8s_object, paths, src_dir, delete=False, ignore=None, target
     :param k8s_object (str): a Kubernetes object identifier (e.g. deploy/my-deploy, job/my-job, or a pod ID) that Tilt
            can use to select a pod. As per the behavior of `kubectl exec`, we will act on the first pod of the specified
            object, using the first container by default.
-    :param paths (List[str]): paths IN THE KUBERNETES CONTAINER to sync, relative to src_dir. May be files or dirs.
-           Note that these must not begin with `./`. Pass an empty list to sync all of src_dir.
-           THIS OPTION RISKS WIPING OUT FILES LOCALLY if the files exist at `target_dir` but not in the container.
-           Tilt will protect some files automatically, but you will probably want to use the `ignores` parameter
-           to explicitly protect other files that exist locally but not on the container.
     :param src_dir (str): directory IN THE KUBERNETES CONTAINER to sync from. Any paths specified, if relative,
            should be relative to this dir.
-    :param delete (bool, optional): run rsync with the --delete flag, i.e. delete files locally if not present in
-           the container. By default, False.
     :param ignore (List[str], optional): files to ignore when syncing (relative to src_dir).
+    :param delete (bool, optional): run rsync with the --delete flag, i.e. delete files locally if not present in
+           the container. By default, False. THIS OPTION RISKS WIPING OUT FILES that exist locally but not in the
+           container. Tilt will protect some files automatically, but we recommend syncing specific paths (via `paths`
+           and/or using the `ignore` parameter to explicitly protect other files that exist locally but not on the container.
+    :param paths (List[str], optional): paths IN THE KUBERNETES CONTAINER to sync, relative to src_dir. May be files or dirs.
+           Note that these must not begin with `./`. If this arg is not passed, sync all of src_dir.
     :param target_dir (str, optional): directory ON THE LOCAL FS to sync to. Defaults to '.'
     :param container (str, optiona): name of the container to sync from (by default, the first container)
     :param namespace (str, optiona): namespace of the desired k8s_object, if not `default`.

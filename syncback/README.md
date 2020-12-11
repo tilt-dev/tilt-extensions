@@ -26,11 +26,12 @@ For every syncback resource you want to create, invoke `syncback` with the follo
 
 * **name (str)**: name of the created local resource
 * **k8s_object (str)**: a Kubernetes object identifier (e.g. `deploy/my-deploy`, `job/my-job`, or a pod ID) that Tilt can use to select a pod. As per the behavior of `kubectl exec`, we will act on the first pod of the specified object, using the first container by default
-* **paths (List[str])**: paths *in the remote container* to sync, relative to `src_dir`. May be files or directories. Note that these must not begin with `./`. Pass an empty list to sync all of src_dir. THIS OPTION RISKS WIPING OUT FILES LOCALLY if the files exist at `target_dir` but not in the container. Tilt will protect some files automatically, but you will probably want to use the `ignores` parameter to explicitly protect other files that exist locally but not on the container.
 * **src_dir (str)**: directory *in the remote container* to sync from. Any `paths`, if specified, should be relative to this dir. This path *must* be a directory and must contain a trailing slash (e.g. `/app/` is acceptable; `/app` is not)
 
 You may also pass the following optional parameters:
 * **ignore (List[str], optional)**: files to ignore when syncing (relative to src_dir).
+* **delete (bool, optional)**: run `rsync` with the `--delete` flag, i.e. delete files locally if not present in the container. By default, False. *This option risks wiping out files* that exist locally but not in the container. Tilt will protect some files automatically, but we recommend syncing specific paths (via `paths`) and/or using the `ignore` parameter to explicitly protect local files from deletion.
+* **paths (List[str])**: paths *in the remote container* to sync, relative to `src_dir`. May be files or directories. Note that these must not begin with `./` or `/`. If this arg is not passed, sync all of src_dir.
 * **target_dir (str, optional)**: directory *on the local filesystem* to sync to. Defaults to `'.'`
 * **container (str, optional)**: name of the container to sync from (by default, the first container)
 * **namespace (str, optiona)**: namespace of the desired `k8s_object`, if not `default`.
