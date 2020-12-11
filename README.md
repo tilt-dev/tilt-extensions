@@ -18,11 +18,11 @@ All extensions have been vetted and approved by the Tilt team.
 - [`hello_world`](/hello_world): Print "Hello world!". Used in [Extensions](https://docs.tilt.dev/extensions.html).
 - [`helm_remote`](/helm_remote): Install a remote Helm chart (in a way that gets properly uninstalled when running `tilt down`)
 - [`jest_test_runner`](/jest_test_runner): Jest JavaScript test runner. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
-- [`local_output`](/local_output): Run a `local` command and get the output as string
 - [`ko`](/ko): Use [Ko](https://github.com/google/ko) to build Go-based container images
-- ['kubebuilder'](/kubebuilder): Enable live-update for developing [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) projects.
-- [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
+- [`kubebuilder`](/kubebuilder): Enable live-update for developing [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) projects.
+- [`local_output`](/local_output): Run a `local` command and get the output as string
 - [`min_k8s_version`](/min_k8s_version): Require a minimum Kubernetes version to run this Tiltfile.
+- [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
 - [`namespace`](/namespace): Functions for interacting with namespaces.
 - [`pack`](/pack): Build container images using [pack](https://buildpacks.io/docs/install-pack/) and [buildpacks](https://buildpacks.io/).
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
@@ -30,6 +30,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`restart_process`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
+- [`syncback`](/syncback): Sync files/directories from your container back to your local FS.
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
 
 ## Contribute an Extension
