@@ -9,9 +9,9 @@ verify_rsync_path = os.path.join(os.getcwd(), 'verify_rsync.sh')
 print('-- syncback extension checking for local rsync --')
 local('{} {}'.format(verify_rsync_path, MIN_LOCAL_RSYNC_VERSION))
 
-DEFAULT_IGNORES = ['.git', '.gitignore', '.dockerignore', 'Dockerfile', '.tiltignore', 'Tiltfile', 'tilt_modules']
+DEFAULT_EXCLUDES = ['.git', '.gitignore', '.dockerignore', 'Dockerfile', '.tiltignore', 'Tiltfile', 'tilt_modules']
 
-def syncback(name, k8s_object, paths, src_dir, ignore=None, target_dir='.', container='', namespace='', verbose=False):
+def syncback(name, k8s_object, paths, src_dir, delete=False, ignore=None, target_dir='.', container='', namespace='', verbose=False):
     """
     Create a local resource that will (via rsync) sync the specified files
     from the specified k8s object to the local filesystem.
@@ -27,6 +27,8 @@ def syncback(name, k8s_object, paths, src_dir, ignore=None, target_dir='.', cont
            to explicitly protect other files that exist locally but not on the container.
     :param src_dir (str): directory IN THE KUBERNETES CONTAINER to sync from. Any paths specified, if relative,
            should be relative to this dir.
+    :param delete (bool, optional): run rsync with the --delete flag, i.e. delete files locally if not present in
+           the container. By default, False.
     :param ignore (List[str], optional): files to ignore when syncing (relative to src_dir).
     :param target_dir (str, optional): directory ON THE LOCAL FS to sync to. Defaults to '.'
     :param container (str, optiona): name of the container to sync from (by default, the first container)
@@ -35,9 +37,23 @@ def syncback(name, k8s_object, paths, src_dir, ignore=None, target_dir='.', cont
     :return:
     """
 
+    # Verify inputs
+    if not src_dir.endswith('/'):
+        fail('src_dir must be a directory and have a trailing slash (because of rsync syntax rules)')
+
+    if paths:
+        for p in paths:
+            if p.startswith('./'):
+                fail('Found illegal path "{}": paths may not begin with ./ (because of rsync syntax rules)'.format(p))
+            if p.startswith('/'):
+                fail('Found illegal path "{}": paths may not begin with / and must be relative to src_dir (because of rsync syntax rules)'.format(p))
+
+    # Construct include/exclude rules
     incl_excl = ''
-    if ignore == None:
-        ignore = []
+
+    to_exclude = ignore
+    if not ignore:
+        to_exclude = []
 
     if paths:
         # TODO: if you're rsync-savvy you might want to do the wildcarding manually--
@@ -45,17 +61,18 @@ def syncback(name, k8s_object, paths, src_dir, ignore=None, target_dir='.', cont
         includes = ' '.join(['--include="{}***"'.format(p) for p in paths])
         incl_excl = '{} --exclude="*"'.format(includes)
     else:
-        # Sync the entire src_dir. Danger, Will Robinson! Ignore some stuff
-        # that probably exists locally but not in your container so it
+        # Sync the entire src_dir. Danger, Will Robinson! Exclude some stuff
+        # that may exist locally but not in your container so it
         # doesn't get wiped out locally on your first sync
-        ignore.extend(DEFAULT_IGNORES)
+        to_exclude.extend(DEFAULT_EXCLUDES)
 
-    excludes = ' '.join(['--exclude="{}***"'.format(ig) for ig in ignore])
+    excludes = ' '.join(['--exclude="{}***"'.format(ex) for ex in to_exclude])
     incl_excl = '{} {}'.format(excludes, incl_excl)
 
-    if not src_dir.endswith('/'):
-        fail('src_dir must be a directory and have a trailing slash')
-
+    # construct remote name (maybe with namespace)
+    # (when we pass `dummy@namespace` to krsync, it gets parsed and then passed to
+    # `rsync --rsh` as two args, `dummy` and `namespace`. We grab the latter to use,
+    # and ignore the former in favor of k8s_object info we stashed in an env variable
     remote_name = 'dummy'
     if namespace:
         remote_name = 'dummy@{}'.format(namespace)
@@ -69,9 +86,12 @@ def syncback(name, k8s_object, paths, src_dir, ignore=None, target_dir='.', cont
     if verbose:
         flags = '-aOvvi'
 
-    local_resource(name, '{krsync} {obj} {flags} --progress --stats --delete -T=/tmp/rsync.tilt {include_exclude} {remote}:{src} {target}'.
-                   format(krsync=krsync_path, obj=k8s_object, flags=flags, include_exclude=incl_excl,
-                          remote=remote_name, src=src_dir, target=target_dir),
+    delete_flag = ''
+    if delete:
+        delete_flag = '--delete'
+    local_resource(name, '{krsync} {obj} {flags} --progress --stats {delete} -T=/tmp/rsync.tilt {include_exclude} {remote}:{src} {target}'.
+                   format(krsync=krsync_path, obj=k8s_object, flags=flags, delete=delete_flag,
+                          include_exclude=incl_excl, remote=remote_name, src=src_dir, target=target_dir),
                trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
 
     # TODO: not necessarily manual/can link up to a resource as a dep
