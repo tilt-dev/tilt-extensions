@@ -63,7 +63,7 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
         # Sync the entire src_dir. Danger, Will Robinson! Exclude some stuff
         # that may exist locally but not in your container so it
         # doesn't get wiped out locally on your first sync
-        to_exclude.extend(DEFAULT_EXCLUDES)
+        to_exclude = DEFAULT_EXCLUDES + to_exclude
 
     excludes = ' '.join(['--exclude="{}***"'.format(ex) for ex in to_exclude])
     incl_excl = '{} {}'.format(excludes, incl_excl)
