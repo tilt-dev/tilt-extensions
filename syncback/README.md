@@ -74,10 +74,11 @@ This is expected behavior; if you're using [Live Update](https://docs.tilt.dev/l
 ### Syncback isn't finding the files I expect it to
 Kubernetes might have connected you to the wrong pod. We recommend waiting a few seconds/waiting until `kubectl get pods` shows only the pods you expect to, and trying again. For details, see [MORE_INFO.md](MORE_INFO.md).
 
+### Syncback deleted a bunch of stuff locally that I didn't expect it to
+If you're running syncback with `delete=True`, BEWARE: syncback will delete any files locally that don't exist in `src_dir`, so if there are some local files you don't add to your Docker image, they're at risk of being blown away. Consider using the `paths` and/or `ignore` parameters to be very specific about the files `rsync` should care about.
 
 ### Unsupported/Future Work
 (Need this functionality? Need something else not listed here? [Let us know](https://github.com/tilt-dev/tilt-extensions/issues)!)
-* specifying excludes: right now you can specify files to include, but not files to exclude)
 * `rsync`-specific syntax: `rsync` has its own semantics, e.g. specific meanings for directories with and without a trailing slash, or for `*` vs. `**` vs. `***`. This extension converts your arguments into our best guess of their `rsync` translation, but `rsync` experts might want more fine-grained control
 * running on Windows containers: our pre-built Linux `rsync` binary definitely won't run on Windows containers
 * running automatically in response to file/resource changes: it would be neat if Tilt knew when syncbacks were needed (because `fileX` changed locally, because Resource Y updated, or even if `fileZ` changed in the container), but currently this isn't supported
