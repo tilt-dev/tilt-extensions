@@ -79,7 +79,6 @@ If you're running syncback with `delete=True`, BEWARE: syncback will delete any 
 
 ### Unsupported/Future Work
 (Need this functionality? Need something else not listed here? [Let us know](https://github.com/tilt-dev/tilt-extensions/issues)!)
-* specifying excludes: right now you can specify files to include, but not files to exclude)
 * `rsync`-specific syntax: `rsync` has its own semantics, e.g. specific meanings for directories with and without a trailing slash, or for `*` vs. `**` vs. `***`. This extension converts your arguments into our best guess of their `rsync` translation, but `rsync` experts might want more fine-grained control
 * running on Windows containers: our pre-built Linux `rsync` binary definitely won't run on Windows containers
 * running automatically in response to file/resource changes: it would be neat if Tilt knew when syncbacks were needed (because `fileX` changed locally, because Resource Y updated, or even if `fileZ` changed in the container), but currently this isn't supported
