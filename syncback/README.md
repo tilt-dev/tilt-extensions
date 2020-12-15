@@ -74,6 +74,8 @@ This is expected behavior; if you're using [Live Update](https://docs.tilt.dev/l
 ### Syncback isn't finding the files I expect it to
 Kubernetes might have connected you to the wrong pod. We recommend waiting a few seconds/waiting until `kubectl get pods` shows only the pods you expect to, and trying again. For details, see [MORE_INFO.md](MORE_INFO.md).
 
+### Syncback deleted a bunch of stuff locally that I didn't expect it to
+If you're running syncback with `delete=True`, BEWARE: syncback will delete any files locally that don't exist in `src_dir`, so if there are some local files you don't add to your Docker image, they're at risk of being blown away. Consider using the `paths` and/or `ignore` parameters to be very specific about the files `rsync` should care about.
 
 ### Unsupported/Future Work
 (Need this functionality? Need something else not listed here? [Let us know](https://github.com/tilt-dev/tilt-extensions/issues)!)
