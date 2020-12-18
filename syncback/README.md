@@ -71,10 +71,10 @@ You can create as many syncback resources as you like; you'll need at minimum on
 #### Tilt updates my pod after a syncback
 This is expected behavior; if you're using [Live Update](https://docs.tilt.dev/live_update_tutorial.html), we expect the update that runs after syncback to be a no-op, and super fast. For more on how to how to make this extra update as painless as possible, see [MORE_INFO.md](MORE_INFO.md).
 
-### Syncback isn't finding the files I expect it to
+#### Syncback isn't finding the files I expect it to
 Kubernetes might have connected you to the wrong pod. We recommend waiting a few seconds/waiting until `kubectl get pods` shows only the pods you expect to, and trying again. For details, see [MORE_INFO.md](MORE_INFO.md).
 
-### Syncback deleted a bunch of stuff locally that I didn't expect it to
+#### Syncback deleted a bunch of stuff locally that I didn't expect it to
 If you're running syncback with `delete=True`, BEWARE: syncback will delete any files locally that don't exist in `src_dir`, so if there are some local files you don't add to your Docker image, they're at risk of being blown away. Consider using the `paths` and/or `ignore` parameters to be very specific about the files `rsync` should care about.
 
 ### Unsupported/Future Work
