@@ -6,9 +6,6 @@ Install a remotely hosted Helm chart in a way that it will be properly uninstall
 
 ## Usage
 
-Because tilt doesn't have a way to dynamically ignore files, you'll need to add `.helm` to your project's `.tiltignore`
-file in order to prevent recursive re-processing of the main Tiltfile when the helm cache changes/updates.
-
 #### Install a Remote Chart
 
 ```py
