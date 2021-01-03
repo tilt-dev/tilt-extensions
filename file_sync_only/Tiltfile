@@ -2,14 +2,28 @@
 
 # module function
 # non build development with only file sync
-def file_sync_only(image='', manifests=[], deps=["."], live_update=[]):
-    if type(manifests) == "string":
+def file_sync_only(image='', manifests=[], deps=["."], live_update=[], allow_duplicates=False):
+    if type(manifests) != "list":
         manifests = [manifests]
 
+    deployed_image = ""
+    deployed_tag = ""
+
+    # get current tags from image setting from first arg in file_sync_only() or in manifests
     # ex) image is "nginx" or "nginx:1.17" format
-    # "nginx" => return "nginx" and "1.16" (from manifests)
-    # "nginx:1.17" => return "nginx" and "1.17"
-    deployed_image, deployed_tag = _get_current_tag(image, manifests)
+    # "nginx" =>  deployed_image="nginx" and deployed_tag="1.16" (from manifests)
+    # "nginx:1.17" => deployed_image="nginx" and deployed_tag="1.17"
+    p = image.split(':')
+    if len(p) == 2:
+        deployed_image = p[0]
+        deployed_tag = p[1]
+    else:
+        deployed_image = image
+
+    # get kubernetes resources using target image and tags
+    k8s_resources, tag_in_manifests = _get_related_resources(manifests, deployed_image)
+    if deployed_tag == "":
+        deployed_tag = tag_in_manifests
 
     # ":" is null command
     custom_build(deployed_image, ':',
@@ -18,41 +32,53 @@ def file_sync_only(image='', manifests=[], deps=["."], live_update=[]):
         skips_local_docker=True,
         live_update=live_update
     )
-    k8s_yaml(manifests)
-    _first_sync_from_liveupdate(deployed_image, live_update)
-
-# get current tags from image setting from first arg in file_sync_only() or in manifests
-def _get_current_tag(image='', manifests=[]):
-    p = image.split(':')
-    if len(p) == 2:
-        return p[0], p[1]
-
-    tags = []
-
-    for m in manifests:
-        output = str(local(r"grep 'image: %s' %s | cut -d ':' -f 3 | uniq || true" % (image, m))).strip()
-        if (output != ''):
-            tags = tags + output.split("\n")
-
-    if len(tags) == 0:
-        tags = ["latest"]
-    elif len(tags) > 1:
-        fail("found multiple image tags for %s in manifests %s" % (image, manifests))
-
-    return image, tags[0]
+    # k8s_yaml(manifests, allow_duplicates=allow_duplicates)
+    _first_sync_from_liveupdate(deployed_image, live_update, k8s_resources)
 
 # sync files at first time
-def _first_sync_from_liveupdate(image, live_update):
+def _first_sync_from_liveupdate(image, live_update, k8s_resources):
     for l in live_update:
         if type(l) == "live_update_sync_step":
             local_path, remote_path = _get_sync_params(l)
-            local_resource('%s-sync' % local_path,
+            syncname = "firstsync-%s-%s" % (image.replace("/", "_"), local_path.replace("/", "_"))
+            local_resource(syncname,
                 'touch %s' % local_path,
-                resource_deps=[image])
+                resource_deps=k8s_resources)
 
 # return sync(local_path, remote_path)'s args
 def _get_sync_params(sync):
     output = str(sync).split("'")
-    local_path = output[1].replace(os.getcwd() + "/", "")
+    local_path = output[1]
     remote_path = output[3]
     return local_path, remote_path
+
+# get k8s workloads resources using specific image
+def _get_related_resources(manifests, image):
+    k8s_resources = []
+    tags_in_manifests = []
+
+    for m in manifests:
+        if type(m) == 'string':
+            objects = read_yaml_stream(m)
+        elif type(m) == 'blob':
+            objects = decode_yaml_stream(m)
+        else:
+            fail('only takes string or blob, got: %s' % type(m))
+
+        for o in objects:
+            if ("spec" in o) and ("template" in o["spec"]) and ("spec" in o["spec"]["template"]) and ("containers" in o["spec"]["template"]["spec"]):
+                for c in o["spec"]["template"]["spec"]["containers"]:
+                    sp = c["image"].split(":")
+                    if image == sp[0]:
+                        k8s_resources.append(o["metadata"]["name"])
+                        if len(sp) == 2 and sp[1] not in tags_in_manifests:
+                            tags_in_manifests.append(sp[1])
+
+    # if num of tags_in_manifests is >1, tags are ambiguous
+    if len(tags_in_manifests) == 0:
+        tags_in_manifests = ["latest"]
+    elif len(tags_in_manifests) > 1:
+        fail("found multiple image tags for %s in manifests %s" % (image, manifests))
+
+    return k8s_resources, tags_in_manifests[0]
+
