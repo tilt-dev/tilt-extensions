@@ -1,40 +1,57 @@
-def snyk(path, test_type, name='snyk', k8s_dep='', extra_opts=''):
+def snyk(target, test_type, name='snyk', test_deps='', extra_opts='', trigger='manual', mode='gate'):
     """
     Args:
       name: a name for the resource. useful for labeling when running multiple tests.
-      path: path to the file or container image name:tag to test
+      target: path to the file/dir or container image name:tag to test
       test_type: one of 'oss', 'container', or 'iac' corresponding to the various Snyk CLI tests
-      k8s_resource: used for container tests - sets the re-test dependency. ignored by other test types.
+      test_deps: automatically set for test types other than container, allows for setting an external file/dir dependency
       extra_opts: additional CLI options; appended to the snyk command. see `snyk --help` for usage.
-          - container: this is where to insert the 'file=path/to/Dockerfile' option
+          - container: this is where to insert the '--file=path/to/Dockerfile' option
+      trigger: trigger mode - auto or manual
+      mode: control Snyk exit code, info will always exit 0 - gate or info
     """
+
     if test_type == 'oss':
-        snyk_cmd = " ".join([
+        snyk_cmd = [
             "snyk test --all-projects",
-            path
-        ])
-        test_deps = [path]
+            target
+        ]
+        test_deps = [target]
     elif test_type == 'container':
-        snyk_cmd = " ".join([
+        snyk_cmd = [
             "snyk container test",
-            path
-        ])
-        test_deps = [k8s_dep]
+            target
+        ]
     elif test_type == 'iac':
-        snyk_cmd = " ".join([
+        snyk_cmd = [
             "snyk iac test",
-            path
-        ])
-        test_deps = [path]
+            target
+        ]
+        test_deps = [target]
     else:
         fail("Snyk test_type should be one of oss, container, or iac.")
 
     if (len(extra_opts) > 0):
-        snyk_cmd = " ".join([snyk_cmd, extra_opts])
+        snyk_cmd.append(extra_opts)
+
+    if mode == 'info':
+        snyk_cmd.append("|| true")
+
+    snyk_cmd = " ".join(snyk_cmd)
+
+    if trigger == 'manual':
+        trigger_string = TRIGGER_MODE_MANUAL
+        auto_bool = False
+    elif trigger == 'auto':
+        trigger_string = TRIGGER_MODE_AUTO
+        auto_bool = True
+    else:
+        fail("Snyk trigger should be one of manual or auto")
 
     local_resource(
         name,
         deps = test_deps,
         cmd = snyk_cmd,
-        trigger_mode=TRIGGER_MODE_MANUAL
+        auto_init = auto_bool,
+        trigger_mode = trigger_string
     )
