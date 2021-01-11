@@ -106,7 +106,7 @@ def _get_default_checkout_target(repository_url):
 
 def _default_build_callback(resource_name, context, dockerfile='Dockerfile'):  # returns resultant image name
     image_name = resource_name + '-image'
-    docker_build(image_name, context, dockerfile='%s/%s' % (context, dockerfile))
+    docker_build(image_name, context, dockerfile='%s/%s' % (context, dockerfile), ssh='default')
 
     return image_name
 

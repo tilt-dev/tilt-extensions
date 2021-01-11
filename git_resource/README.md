@@ -116,7 +116,8 @@ If no branch is specified, defaults to `master`
 
 ### Custom Docker Builds
 
-By default, `git_resource()`, `deploy_from_dir()`, and `deploy_from_repository()` will build your docker image by calling `docker_build(image_name, context, dockerfile)`
+By default, `git_resource()`, `deploy_from_dir()`, and `deploy_from_repository()` will build your docker image by calling `docker_build(image_name, context, dockerfile, ssh='default')`
+(note the default support for Docker ssh-forwarding)
 If your situation requires more nuance/complexity than that, you can pass a `build_callback` function pointer when making your call to `git_resource()`
 This callback should have the following signature:
 
