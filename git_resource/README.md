@@ -116,7 +116,8 @@ If no branch is specified, defaults to `master`
 
 ### Custom Docker Builds
 
-By default, `git_resource()`, `deploy_from_dir()`, and `deploy_from_repository()` will build your docker image by calling `docker_build(image_name, context, dockerfile)`
+By default, `git_resource()`, `deploy_from_dir()`, and `deploy_from_repository()` will build your docker image by calling `docker_build(image_name, context, dockerfile, ssh='default')`
+(note the default support for Docker ssh-forwarding)
 If your situation requires more nuance/complexity than that, you can pass a `build_callback` function pointer when making your call to `git_resource()`
 This callback should have the following signature:
 
@@ -143,8 +144,6 @@ def my_microservice_builder(resource_name, directory, dockerfile) -> str: # retu
 
 git_resource('myMicroservice', 'git@example.com/myRepo.git', dockerfile='Dockerfile.dev', build_callback=my_microservice_builder) 
 ```
-
-###### Note: if a custom builder is not passed, the default builder is used and calls `docker_build(..., ssh='default')` in order to support Docker ssh-forwarding. If you need to pass a different value (or none), just pass a custom build function to do what you need.
 
 
 ### Custom Deployment YAML
