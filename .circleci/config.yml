@@ -5,6 +5,7 @@ jobs:
       - image: tiltdev/tilt-extensions-ci:latest
 
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 19.03.12
       - checkout
       - run: with-kind-cluster.sh ./test.sh
