@@ -1,6 +1,6 @@
 # Tilt Extensions
 
-[![Build Status](https://circleci.com/gh/tilt-dev/tilt/tree/master.svg?style=shield)](https://circleci.com/gh/tilt-dev/tilt)
+[![Build Status](https://circleci.com/gh/tilt-dev/tilt-extensions/tree/master.svg?style=shield)](https://circleci.com/gh/tilt-dev/tilt-extensions)
 
 This is the official Tilt Extensions Repository. Read more in [docs](https://docs.tilt.dev/extensions.html).
 
