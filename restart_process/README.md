@@ -79,6 +79,7 @@ def docker_build_with_restart(ref: str, context: str,
     live_update: List[LiveUpdateStep],
     base_suffix: str = '-base',
     restart_file: str = '/.restart-proc',
+    trigger: Union[str, List[str]] = [],
     **kwargs
 ):
     """Args:
@@ -88,6 +89,8 @@ def docker_build_with_restart(ref: str, context: str,
       live_update: set of steps for updating a running container; as the parameter of the same name in docker_build
       base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
       restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
+      trigger: (optional) list of local paths. If specified, the process will ONLY be restarted when there are changes
+               to the given file(s); as the parameter of the same name in the LiveUpdate `run` step.
       **kwargs: will be passed to the underlying `docker_build` call
     """
     
@@ -98,6 +101,7 @@ def custom_build_with_restart(ref: str, command: str, deps: List[str], entrypoin
     live_update: List[LiveUpdateStep],
     base_suffix: str = '-base',
     restart_file: str = '/.restart-proc',
+    trigger: Union[str, List[str]] = [],
     , **kwargs
 ):
     """
@@ -109,6 +113,8 @@ def custom_build_with_restart(ref: str, command: str, deps: List[str], entrypoin
       live_update: set of steps for updating a running container; as the parameter of the same name in custom_build
       base_suffix: suffix for naming the base image, applied as {ref}{base_suffix}
       restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
+      trigger: (optional) list of local paths. If specified, the process will ONLY be restarted when there are changes
+               to the given file(s); as the parameter of the same name in the LiveUpdate `run` step.
       **kwargs: will be passed to the underlying `custom_build` call
     """
 ```
