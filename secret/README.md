@@ -35,7 +35,7 @@ k8s_yaml(secret_yaml_generic('name', from_file=[...]))
 ### For a Postgres password:
 
 ```
-load('ext://secret', 'secret_generic_create')
+load('ext://secret', 'secret_create_generic')
 secret_create_generic('pgpass', from_file='.pgpass=./.pgpass')
 ```
 
