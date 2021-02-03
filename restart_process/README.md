@@ -24,6 +24,7 @@ This extension does NOT support process restarts for:
 - Images without a shell (e.g. `scratch`, `distroless`)
 - Container commands specified as `command` in Kubernetes YAML will be overridden by this extension.
   - However, the `args` field is still available; [reach out](https://tilt.dev/contact) if you need help navigating the interplay between Tilt and these YAML values
+- CRDs
 
 If this extension doesn't work for your use case, [see our docs for alternatives](https://docs.tilt.dev/live_update_reference.html#restarting-your-process).
 
