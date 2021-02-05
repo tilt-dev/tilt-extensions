@@ -3,8 +3,8 @@ def min_tilt_version(min_version):
   # v0.13.0, built 2020-04-01
   # Also supports dev versions
   # v0.13.0-dev, built 2020-04-03
-
-  ver_string = str(local('tilt version', quiet=True))
+  tilt_bin = os.environ.get('TILT_BIN', 'tilt')
+  ver_string = str(local('%s version' % tilt_bin, quiet=True))
   # Clean out the version file so its in the format 0.13.0
   versions = ver_string.split(', ')
   # pull first string and remove the `v` and `-dev`
