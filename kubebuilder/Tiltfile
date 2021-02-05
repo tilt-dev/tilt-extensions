@@ -1,6 +1,6 @@
 load('ext://restart_process', 'docker_build_with_restart')
 
-def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest'):
+def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'):
 
     DOCKERFILE = '''FROM golang:alpine
     WORKDIR /
@@ -12,7 +12,7 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest'):
         return local('cd config/manager; kustomize edit set image controller=' + IMG + '; cd ../..; kustomize build config/default')
     
     def manifests():
-        return 'controller-gen crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
+        return 'controller-gen ' + CONTROLLERGEN
     
     def generate():
         return 'controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
