@@ -16,10 +16,10 @@ helm_remote('myChartName')
 ##### Additional Parameters
 
 ```
-helm_remote(chart_name, repo_url='', repo_name='', release_name='', namespace='', version='', username='', password='', values=[], set=[])
+helm_remote(chart, repo_url='', repo_name='', release_name='', namespace='', version='', username='', password='', values=[], set=[])
 ```
 
-* `chart_name` ( str ) – the name of the chart to install  
+* `chart` ( str ) – the name of the chart to install  
 * `repo_name` ( str ) – the name of the repo within which to find the chart (assuming the repo is already added locally)
 <br> if omitted, defaults to the same value as `chart_name`
 * `repo_url` ( str ) – the URL of the repo within which to find the chart (equivalent to `helm repo add <repo_name> <repo_url>`)
