@@ -52,9 +52,19 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
 
         if not os.path.exists(checkout_dir):  # needs clone
             if is_branch or is_tag:
-                local('git clone {repository_url} --recurse-submodules --shallow-submodules --depth 1 --branch {branch} {checkout_dir}'.format(repository_url=repository_url, branch=tree, checkout_dir=checkout_dir), quiet=True)
+                branch_flag = ''
+                if tree:
+                    branch_flag = '--branch %s' % tree
+
+                local('git clone {repository_url} --recurse-submodules --shallow-submodules --depth 1 {branch_flag} {checkout_dir}'.
+                      format(repository_url=repository_url, branch_flag=branch_flag, checkout_dir=checkout_dir), quiet=True)
             else:
-                local('git clone {repository_url} --recurse-submodules --shallow-submodules {checkout_dir} && cd {checkout_dir} && git checkout {branch}'.format(repository_url=repository_url, branch=tree, checkout_dir=checkout_dir), quiet=True)
+                checkout_cmd = ''
+                if tree:
+                    checkout_cmd = ' && git checkout %s' % tree
+
+                local('git clone {repository_url} --recurse-submodules --shallow-submodules {checkout_dir} && cd {checkout_dir} {checkout_cmd}'.
+                      format(repository_url=repository_url, checkout_dir=checkout_dir, checkout_cmd=checkout_cmd), quiet=True)
         else:  # dir already exists
             if os.path.exists('%s/.git' % checkout_dir):  # this is a git repo
                 has_local_changes = True  # default to True for safety
@@ -62,10 +72,16 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                     has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l' % checkout_dir, quiet=True)).strip()) > 1  # result greater than 1 indicates local modifications are present
 
                 if unsafe_mode or not has_local_changes:
-                    if not is_tag and not is_revision:
-                        tree = 'origin/%s' % tree
+                    checkout_cmd = ''
+                    if tree:
+                        checkout_branch = tree
+                        if not is_tag and not is_revision:
+                            checkout_branch = 'origin/%s' % tree
 
-                    local('cd %s && git fetch -a origin && git checkout -f %s && git submodule update --init' % (checkout_dir, tree), quiet=True)
+                        checkout_cmd = '&& git checkout -f %s' % checkout_branch
+
+                    local('cd {checkout_dir} && git fetch -a origin {checkout_cmd} && git submodule update --init'.
+                          format(checkout_dir=checkout_dir, checkout_cmd=checkout_cmd), quiet=True)
                 else:
                     fail('git_checkout() failed: local modifications present and safe_mode is enabled')
 
@@ -106,11 +122,16 @@ def _parse_repository_url(url):
         splitter = '@'
 
     if splitter == None:
-        tree = '#master'
+        tree = ''
     else:
         parts = url.split(splitter)
         tree = splitter + parts[-1]  # last item
-        url = splitter.join(parts[:-1])  # everything else
+
+        # Make sure we didn't peel of a scheme://user@host/ url
+        if splitter == '@' and '/' in tree:
+            tree = ''
+        else:
+            url = splitter.join(parts[:-1])  # everything else
 
     if is_ssh:
         url = 'git@' + url

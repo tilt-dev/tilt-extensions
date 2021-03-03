@@ -1,6 +1,53 @@
 os.putenv('TILT_GIT_RESOURCE_CHECKOUT_DIR', os.path.abspath('./.git-sources'))
 load('../Tiltfile', 'git_checkout', 'deploy_from_dir')
 
+symbols = load_dynamic('../Tiltfile')
+
+def _case(input, url, repo, tree):
+  return (input, (url, repo, tree))
+
+url_test_cases = [
+  _case(input='https://github.com/tilt-dev/tilt-example-html',
+        url='https://github.com/tilt-dev/tilt-example-html',
+        repo='tilt-example-html',
+        tree=''),
+  _case(input='git@example.com/path/to/repo',
+        url="git@example.com/path/to/repo",
+        repo="repo",
+        tree=""),
+  _case(input='git@example.com/path/to/repo.git',
+        url="git@example.com/path/to/repo.git",
+        repo="repo",
+        tree=""),
+  _case(input='git@example.com/path/to/repo.git@myRevisionSha',
+        url="git@example.com/path/to/repo.git",
+        repo="repo",
+        tree="@myRevisionSha"),
+  _case(input='git@example.com/path/to/repo.git#myBranchNameHere',
+        url="git@example.com/path/to/repo.git",
+        repo="repo",
+        tree="#myBranchNameHere"),
+  _case(input='https://user@example.com/path/repo.git',
+        url='https://user@example.com/path/repo.git',
+        repo='repo',
+        tree=''),
+  _case(input='ssh://user@example.com:54321/path/repo.git',
+        url='ssh://user@example.com:54321/path/repo.git',
+        repo='repo',
+        tree=''),
+  _case(input='https://user@example.com/path/repo.git@myRevisionSha',
+        url='https://user@example.com/path/repo.git',
+        repo='repo',
+        tree='@myRevisionSha'),
+]
+
+for case in url_test_cases:
+  (url, expected) = case
+  parse_repository_url = symbols['_parse_repository_url']
+  actual = parse_repository_url(url)
+  if expected != actual:
+    fail('_parse_repository_url("%s"). Expected: %s. Actual: %s' % (url, expected, actual))
+
 repo_dir = git_checkout('https://github.com/tilt-dev/tilt-example-html')
 example_dir = os.path.join(repo_dir, '0-base')
 deploy_from_dir('example-html', example_dir)
