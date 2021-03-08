@@ -17,7 +17,6 @@ jobs:
       - setup_remote_docker:
           version: 19.03.12
       - checkout
-      - run: GOBIN=$HOME/.bin go get github.com/tilt-dev/tilt-extensions-ci && go install github.com/tilt-dev/tilt-extensions-ci
       - run: with-kind-cluster.sh ./test.sh
         
 workflows:
