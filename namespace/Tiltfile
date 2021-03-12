@@ -16,13 +16,13 @@ metadata:
   name: %s
 """ % name)
 
-def namespace_create(name):
+def namespace_create(name, allow_duplicates=False):
   """Creates a namespace in the current Kubernetes cluster.
 
   Args:
     name: The namespace name. Currently not validated.
   """
-  k8s_yaml(namespace_yaml(name))
+  k8s_yaml(namespace_yaml(name), allow_duplicates=allow_duplicates)
 
 def namespace_inject(x, ns):
   """Takes K8s yaml, sets its namespace to `ns`, and returns it as a blob.
