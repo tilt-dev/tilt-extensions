@@ -11,13 +11,13 @@ namespaces on Kubernetes objects.
 
 Returns YAML for a Kubernetes namespace.
 
-### `namespace_create(name: str)`
+### `namespace_create(name: str, allow_duplicates: boolean = False)`
 
 Deploys a namespace to the cluster. Equivalent to
 
 ```
 load('ext://namespace', 'namespace_yaml')
-k8s_yaml(namespace_yaml('name'))
+k8s_yaml(namespace_yaml('name'), allow_duplicates=False)
 ```
 
 ### `namespace_inject(objects: Union[str, Blob], namespace: str): Blob`
