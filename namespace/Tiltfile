@@ -21,6 +21,9 @@ def namespace_create(name, allow_duplicates=False):
 
   Args:
     name: The namespace name. Currently not validated.
+    allow_duplicates: Whether or not k8s should be allowed to have two
+      instances of the same resource. Useful if you have more than one
+      Tiltfile trying to create the same namespace.
   """
   k8s_yaml(namespace_yaml(name), allow_duplicates=allow_duplicates)
 
