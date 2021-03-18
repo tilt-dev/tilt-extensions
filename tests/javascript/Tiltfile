@@ -1,0 +1,28 @@
+# Some common test configurations to easily get up and running with Tilt for Tests
+# (see docs: https://docs.tilt.dev/tests_in_tilt.html)
+
+
+def _test_js(name, pkmanager, dir, deps=None, with_install=False):
+    resource_deps = []
+    if with_install:
+        install_resource = pkmanager + '-install'
+        local_resource(install_resource, 'cd {dir} && {pkmanager} install'.format(
+            dir=dir, pkmanager=pkmanager), allow_parallel=True)
+        resource_deps = [install_resource]
+
+    cmd = 'cd {dir} && {pkmanager} test -o --watchAll=false'.format(
+        dir=dir, pkmanager=pkmanager)
+
+    file_deps = deps
+    if not file_deps:
+        file_deps = dir
+
+    test(name, cmd, deps=file_deps, resource_deps=resource_deps)
+
+
+def test_jest_npm(name, dir, deps=None, with_install=False):
+    _test_js(name, 'npm', dir, deps, with_install)
+
+
+def test_jest_yarn(name, dir, deps=None, with_install=False):
+    _test_js(name, 'yarn', dir, deps, with_install)

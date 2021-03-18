@@ -1,0 +1,23 @@
+# Some common test configurations to easily get up and running with Tilt for Tests
+# (see docs: https://docs.tilt.dev/tests_in_tilt.html)
+
+
+def test_go(name, path, deps, timeout='', tags=None, mod=''):
+    if not path.endswith('...'):
+        path = path.rstrip('/')
+        path = path + '/...'
+
+    timeout_str = ''
+    if timeout:  # expects a go-parsable dur
+        timeout_str = '-timeout {}'.format(timeout)
+    tags_str = ''
+    if tags:
+        tags_str = '-tags {}'.format(','.join(tags))
+
+    mod_str = ''
+    if mod:
+        mod_str = '-mod {}'.format(mod)
+
+    cmd = 'go test {mod_str} {tags_str} {timeout_str} {path}'.format(
+        mod_str=mod_str, tags_str=tags_str, timeout_str=timeout_str, path=path)
+    test(name, cmd, deps=deps)
