@@ -2,13 +2,21 @@
 # (see docs: https://docs.tilt.dev/tests_in_tilt.html)
 
 
-def _test_js(name, pkmanager, dir, deps=None, with_install=False, extra_args=None):
+def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='.', extra_args=None):
+    install_deps = deps_for_package_manager(pkmanager, project_root)
     resource_deps = []
     if with_install:
         install_resource = pkmanager + '-install'
-        local_resource(install_resource, 'cd {dir} && {pkmanager} install'.format(
-            dir=dir, pkmanager=pkmanager), allow_parallel=True)
+        install_cmd = 'cd {dir} && {pkmanager} install'.format(
+            dir=dir, pkmanager=pkmanager)
+        local_resource(install_resource, install_cmd, install_deps, allow_parallel=True)
         resource_deps = [install_resource]
+
+        # double check that we could find package.json etc. correctly
+        for f in install_deps:
+            if not os.path.exists(f):
+                warn('''expected JS config file "{}" not found -- did you pass project_root correctly when setting up JS tests?
+    If not, we can't watch this file for changes and reinstall JS deps when necessary.'''.format(f))
 
     extra_args_str = ''
     if extra_args:
@@ -21,12 +29,24 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, extra_args=Non
     if not file_deps:
         file_deps = dir
 
-    test(name, cmd, deps=file_deps, resource_deps=resource_deps)
+    test(name, cmd, deps=file_deps, ignore=install_deps, resource_deps=resource_deps)
 
 
-def test_jest_npm(name, dir, deps=None, with_install=False):
-    _test_js(name, 'npm', dir, deps, with_install)
+def test_jest_npm(name, dir, deps=None, with_install=False, project_root='.', extra_args=None):
+    _test_js(name, 'npm', dir, deps, with_install, project_root, extra_args)
 
 
-def test_jest_yarn(name, dir, deps=None, with_install=False):
-    _test_js(name, 'yarn', dir, deps, with_install)
+def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='.', extra_args=None):
+    _test_js(name, 'yarn', dir, deps, with_install, project_root, extra_args)
+
+
+def deps_for_package_manager(pkmanager, project_root):
+    install_deps = [os.path.join(project_root, 'package.json')]
+    if pkmanager == 'npm':
+        install_deps.append(os.path.join(project_root, 'package-lock.json'))
+    elif pkmanager == 'yarn':
+        install_deps.append(os.path.join(project_root, 'yarn.lock'))
+    else:
+        fail('unrecognized js package manager: {}'.format(pkmanager))
+
+    return install_deps
