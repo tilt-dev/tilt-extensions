@@ -17,7 +17,7 @@ jobs:
       - setup_remote_docker:
           version: 19.03.12
       - checkout
-      - run: with-kind-cluster.sh ./test.sh
+      - run: ctlptl create cluster kind --registry=ctlptl-registry && ./test.sh
         
 workflows:
   version: 2
