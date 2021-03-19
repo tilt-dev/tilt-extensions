@@ -15,7 +15,7 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
         # double check that we could find package.json etc. correctly
         for f in install_deps:
             if not os.path.exists(f):
-                warn('''expected JS config file "{}" not found -- did you pass project_root correctly when setting up JS tests?
+                warn('''expected file "{}" not found -- did you pass project_root correctly when setting up JS tests?
     If not, we can't watch this file for changes and reinstall JS deps when necessary.'''.format(f))
 
     extra_args_str = ''
