@@ -2,7 +2,7 @@
 # (see docs: https://docs.tilt.dev/tests_in_tilt.html)
 
 
-def test_go(name, package, deps, timeout='', tags=None, mod='', recursive=False):
+def test_go(name, package, deps, timeout='', tags=None, mod='', recursive=False, extra_args=None):
     if recursive and not package.endswith('...'):
         package = package.rstrip('/')
         package = package + '/...'
@@ -18,6 +18,12 @@ def test_go(name, package, deps, timeout='', tags=None, mod='', recursive=False)
     if mod:
         mod_str = '-mod {}'.format(mod)
 
-    cmd = 'go test {mod_str} {tags_str} {timeout_str} {path}'.format(
-        mod_str=mod_str, tags_str=tags_str, timeout_str=timeout_str, path=package)
+    extra_args_str = ''
+    if extra_args:
+        extra_args_str = ' '.join(extra_args)
+
+
+    cmd = 'go test {mod_str} {tags_str} {timeout_str} {extra_args_str} {path}'.format(
+          mod_str=mod_str, tags_str=tags_str, timeout_str=timeout_str,
+          extra_args_str=extra_args_str, path=package)
     test(name, cmd, deps=deps)

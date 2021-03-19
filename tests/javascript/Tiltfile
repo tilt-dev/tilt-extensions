@@ -2,7 +2,7 @@
 # (see docs: https://docs.tilt.dev/tests_in_tilt.html)
 
 
-def _test_js(name, pkmanager, dir, deps=None, with_install=False):
+def _test_js(name, pkmanager, dir, deps=None, with_install=False, extra_args=None):
     resource_deps = []
     if with_install:
         install_resource = pkmanager + '-install'
@@ -10,8 +10,12 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False):
             dir=dir, pkmanager=pkmanager), allow_parallel=True)
         resource_deps = [install_resource]
 
-    cmd = 'cd {dir} && {pkmanager} test -o --watchAll=false'.format(
-        dir=dir, pkmanager=pkmanager)
+    extra_args_str = ''
+    if extra_args:
+        extra_args_str = ' '.join(extra_args)
+
+    cmd = 'cd {dir} && {pkmanager} test -o --watchAll=false {extra_args_str}'.format(
+        dir=dir, pkmanager=pkmanager, extra_args_str=extra_args_str)
 
     file_deps = deps
     if not file_deps:
