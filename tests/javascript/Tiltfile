@@ -2,7 +2,10 @@
 # (see docs: https://docs.tilt.dev/tests_in_tilt.html)
 
 
-def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='.', extra_args=None):
+def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='', extra_args=None):
+    if not project_root:
+        project_root = dir
+
     install_deps = deps_for_package_manager(pkmanager, project_root)
     resource_deps = []
     if with_install:
@@ -29,14 +32,15 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
     if not file_deps:
         file_deps = dir
 
-    test(name, cmd, deps=file_deps, ignore=install_deps, resource_deps=resource_deps)
+    ignore = install_deps + [os.path.join(project_root, '.eslintcache')]
+    test(name, cmd, deps=file_deps, ignore=ignore, resource_deps=resource_deps)
 
 
-def test_jest_npm(name, dir, deps=None, with_install=False, project_root='.', extra_args=None):
+def test_jest_npm(name, dir, deps=None, with_install=False, project_root='', extra_args=None):
     _test_js(name, 'npm', dir, deps, with_install, project_root, extra_args)
 
 
-def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='.', extra_args=None):
+def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='', extra_args=None):
     _test_js(name, 'yarn', dir, deps, with_install, project_root, extra_args)
 
 
