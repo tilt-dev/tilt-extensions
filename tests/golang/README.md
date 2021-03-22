@@ -18,6 +18,7 @@ You may also pass the following optional parameters:
 * **tags (List[str], optional)**: tags to pass to the `go test` call.
 * **mod (str, optional)**: value to pass to the `-mod` flag. [As per the docs](https://golang.org/ref/mod#build-commands), should be one of: `mod`, `readonly`, or `vendor`.
 * **recursive (bool, optional)**: by default, False. If true, run tests recursively, i.e. on the specified package _and all of its children_. This is equivalent to adding `/...` to the end of your package name.
+* **ignore (List[str], optional)**: set of file patterns that will be ignored. Ignored files will not trigger builds and will not be included in images. Follows the [dockerignore syntax](https://docs.docker.com/engine/reference/builder/#dockerignore-file). Paths will be evaluated _relative to the Tiltfile_.
 * **extra_args (List[str], optional)**: any other args to pass to `go test`. 
 
 ### Examples
