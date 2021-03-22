@@ -22,8 +22,9 @@ def test_go(name, package, deps, timeout='', tags=None, mod='', recursive=False,
     if extra_args:
         extra_args_str = ' '.join(extra_args)
 
+    # TODO: ability to pass multiple packages (as in `go test`)
 
-    cmd = 'go test {mod_str} {tags_str} {timeout_str} {extra_args_str} {path}'.format(
+    cmd = 'go test {mod_str} {tags_str} {timeout_str} {extra_args_str} {package}'.format(
           mod_str=mod_str, tags_str=tags_str, timeout_str=timeout_str,
-          extra_args_str=extra_args_str, path=package)
+          extra_args_str=extra_args_str, package=package)
     test(name, cmd, deps=deps)
