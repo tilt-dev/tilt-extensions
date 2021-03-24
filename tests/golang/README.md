@@ -14,7 +14,7 @@ load('ext://tests/golang', 'test_go')
 * **deps (Union[str, List[str]])**: a list of files or directories to be added as dependencies to this test. Tilt will watch those files and will run the test when they change. Only accepts real paths, not file globs.
 
 You may also pass the following optional parameters:
-* **timeout (str, optional)**: if a single test binary runs longer than the timeout duration, panic. Must be a Go-parseable duration string (e.g. "45s", "2m").
+* **timeout (str, optional)**: if a single test binary runs longer than the timeout duration, panic. Must be a [Go-parseable duration string](https://golang.org/pkg/time/#ParseDuration) (e.g. "45s", "2m").
 * **tags (List[str], optional)**: tags to pass to the `go test` call.
 * **mod (str, optional)**: value to pass to the `-mod` flag. [As per the docs](https://golang.org/ref/mod#build-commands), should be one of: `mod`, `readonly`, or `vendor`.
 * **recursive (bool, optional)**: by default, False. If true, run tests recursively, i.e. on the specified package _and all of its children_. This is equivalent to adding `/...` to the end of your package name.
