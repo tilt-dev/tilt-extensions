@@ -11,3 +11,5 @@ helm_remote/test/test.sh
 ko/test/test.sh
 secret/test/test.sh
 restart_process/test/test.sh
+tests/golang/test/test.sh
+tests/javascript/test/test.sh

@@ -1,0 +1,15 @@
+load('../Tiltfile', 'test_go')
+
+test_go('single-package', './fake_project/foo', './fake_project/foo')
+
+# should fail b/c of failing test in foo/bar/failing_test.go
+test_go('recursive', './fake_project', './fake_project', recursive=True)
+
+# should succeed b/c build tags mean we skip foo/bar/failing_test.go
+test_go('tags', './fake_project/...', './fake_project', tags=['skipfailing'])
+
+# should fail b/c of 3ms test in slow/slow_test
+test_go('timeout', './fake_project/slow', './fake_project/slow', timeout='1ms')
+
+# should fail b/c go test runner chokes on timeout value
+test_go('bad-timeout-value', './fake_project/slow', './fake_project/slow', timeout='one_millisecond')
