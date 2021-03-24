@@ -12,14 +12,14 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
         install_resource = pkmanager + '-install'
         install_cmd = 'cd {dir} && {pkmanager} install'.format(
             dir=dir, pkmanager=pkmanager)
-        local_resource(install_resource, install_cmd, install_deps, allow_parallel=True)
+        local_resource(install_resource, install_cmd, install_deps)
         resource_deps = [install_resource]
 
         # double check that we could find package.json etc. correctly
         for f in install_deps:
             if not os.path.exists(f):
-                warn('''expected file "{}" not found -- did you pass project_root correctly when setting up JS tests?
-    If not, we can't watch this file for changes and reinstall JS deps when necessary.'''.format(f))
+                warn('''expected file "{}" not found (consider passing the project_root arg when setting up JS tests).
+    Tilt can still install your JS deps, it just can't watch this file and reinstall JS deps on change.'''.format(f))
 
     extra_args_str = ''
     if extra_args:
