@@ -15,12 +15,6 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
         local_resource(install_resource, install_cmd, install_deps)
         resource_deps = [install_resource]
 
-        # double check that we could find package.json etc. correctly
-        for f in install_deps:
-            if not os.path.exists(f):
-                warn('''expected file "{}" not found (consider passing the project_root arg when setting up JS tests).
-    Tilt can still install your JS deps, it just can't watch this file and reinstall JS deps on change.'''.format(f))
-
     extra_args_str = ''
     if extra_args:
         extra_args_str = ' '.join(extra_args)
@@ -47,6 +41,14 @@ def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='', ig
     _test_js(name, 'yarn', dir, deps, with_install, project_root, ignore, extra_args)
 
 
+def verify_dep(f):
+    if not os.path.exists(f):
+        warn('''expected file "{}" not found (consider passing the project_root arg when setting up JS tests).
+    Tilt can still install your JS deps, it just can't watch this file and reinstall JS deps on change.'''.format(f))
+        return False
+    return True
+
+
 def deps_for_package_manager(pkmanager, project_root):
     install_deps = [os.path.join(project_root, 'package.json')]
     if pkmanager == 'npm':
@@ -56,4 +58,4 @@ def deps_for_package_manager(pkmanager, project_root):
     else:
         fail('unrecognized js package manager: {}'.format(pkmanager))
 
-    return install_deps
+    return [dep for dep in install_deps if verify_dep(dep)]
