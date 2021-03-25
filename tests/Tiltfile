@@ -1,0 +1,1 @@
+fail('Module "tests" cannot be included directly; see extensions listed under https://github.com/tilt-dev/tilt-extensions/tree/master/tests')

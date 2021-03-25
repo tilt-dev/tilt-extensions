@@ -31,6 +31,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
 - [`syncback`](/syncback): Sync files/directories from your container back to your local FS.
+- [`tests`](/tests): Some common configurations for running your tests in Tilt.
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
 
 ## Contribute an Extension

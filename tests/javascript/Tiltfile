@@ -1,0 +1,59 @@
+# Some common test configurations to easily get up and running with Tilt for Tests
+# (see docs: https://docs.tilt.dev/tests_in_tilt.html)
+
+
+def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None):
+    if not project_root:
+        project_root = dir
+
+    install_deps = deps_for_package_manager(pkmanager, project_root)
+    resource_deps = []
+    if with_install:
+        install_resource = pkmanager + '-install'
+        install_cmd = 'cd {dir} && {pkmanager} install'.format(
+            dir=dir, pkmanager=pkmanager)
+        local_resource(install_resource, install_cmd, install_deps)
+        resource_deps = [install_resource]
+
+        # double check that we could find package.json etc. correctly
+        for f in install_deps:
+            if not os.path.exists(f):
+                warn('''expected file "{}" not found (consider passing the project_root arg when setting up JS tests).
+    Tilt can still install your JS deps, it just can't watch this file and reinstall JS deps on change.'''.format(f))
+
+    extra_args_str = ''
+    if extra_args:
+        extra_args_str = ' '.join(extra_args)
+
+    cmd = 'cd {dir} && {pkmanager} test -o --watchAll=false {extra_args_str}'.format(
+        dir=dir, pkmanager=pkmanager, extra_args_str=extra_args_str)
+
+    file_deps = deps
+    if not file_deps:
+        file_deps = dir
+
+    all_ignores = []
+    if ignore:
+        all_ignores = [ig for ig in ignore]
+    all_ignores.extend(install_deps + [os.path.join(project_root, '.eslintcache')])
+    test(name, cmd, deps=file_deps, ignore=all_ignores, resource_deps=resource_deps)
+
+
+def test_jest_npm(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None):
+    _test_js(name, 'npm', dir, deps, with_install, project_root, ignore, extra_args)
+
+
+def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None):
+    _test_js(name, 'yarn', dir, deps, with_install, project_root, ignore, extra_args)
+
+
+def deps_for_package_manager(pkmanager, project_root):
+    install_deps = [os.path.join(project_root, 'package.json')]
+    if pkmanager == 'npm':
+        install_deps.append(os.path.join(project_root, 'package-lock.json'))
+    elif pkmanager == 'yarn':
+        install_deps.append(os.path.join(project_root, 'yarn.lock'))
+    else:
+        fail('unrecognized js package manager: {}'.format(pkmanager))
+
+    return install_deps
