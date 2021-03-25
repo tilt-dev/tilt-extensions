@@ -18,8 +18,8 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
         # double check that we could find package.json etc. correctly
         for f in install_deps:
             if not os.path.exists(f):
-                fail('''Expected file "{}" not found, refusing to attempt to install JS deps.
-    (Consider passing the project_root arg when setting up JS tests).'''.format(f))
+                warn('''expected file "{}" not found (consider passing the project_root arg when setting up JS tests).
+    Tilt can still install your JS deps, it just can't watch this file and reinstall JS deps on change.'''.format(f))
 
     extra_args_str = ''
     if extra_args:
