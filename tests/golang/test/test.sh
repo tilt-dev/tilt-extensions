@@ -17,6 +17,10 @@ echo "=== Test Recursive"
 tilt ci recursive && msg_and_exit "Expected 'tilt ci' to fail, but succeeded."
 
 echo
+echo "=== Test Kwargs"
+tilt ci kwargs || msg_and_exit "Expected 'tilt ci' to succeed, but exited with code $?"
+
+echo
 echo "=== Test Tags"
 tilt ci tags || msg_and_exit "Expecteed 'tilt ci' to succed, but exited with code $?"
 

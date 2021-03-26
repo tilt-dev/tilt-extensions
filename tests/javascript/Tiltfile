@@ -2,7 +2,7 @@
 # (see docs: https://docs.tilt.dev/tests_in_tilt.html)
 
 
-def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None):
+def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
     if not project_root:
         project_root = dir
 
@@ -29,16 +29,16 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
     all_ignores = []
     if ignore:
         all_ignores = [ig for ig in ignore]
-    all_ignores.extend(install_deps + [os.path.join(project_root, '.eslintcache')])
-    test(name, cmd, deps=file_deps, ignore=all_ignores, resource_deps=resource_deps)
+    all_ignores.extend(install_deps + extra_ignores(pkmanager, project_root))
+    test(name, cmd, deps=file_deps, ignore=all_ignores, resource_deps=resource_deps, **kwargs)
 
 
-def test_jest_npm(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None):
-    _test_js(name, 'npm', dir, deps, with_install, project_root, ignore, extra_args)
+def test_jest_npm(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+    _test_js(name, 'npm', dir, deps, with_install, project_root, ignore, extra_args, **kwargs)
 
 
-def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None):
-    _test_js(name, 'yarn', dir, deps, with_install, project_root, ignore, extra_args)
+def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+    _test_js(name, 'yarn', dir, deps, with_install, project_root, ignore, extra_args, **kwargs)
 
 
 def verify_dep(f):
@@ -59,3 +59,10 @@ def deps_for_package_manager(pkmanager, project_root):
         fail('unrecognized js package manager: {}'.format(pkmanager))
 
     return [dep for dep in install_deps if verify_dep(dep)]
+
+
+def extra_ignores(pkmanager, project_root):
+    files = ['.eslintcache']
+    if pkmanager == 'yarn':
+        files.append('yarn-error.log')
+    return [os.path.join(project_root, f) for f in files]

@@ -26,7 +26,7 @@ def assert_manifest_names(json, expected):
       fail('expected {} manifests but got {}'.format(len(expected), len(manifests)))
     actual = [m['Name'] for m in manifests]
     if expected != actual:
-        fail('did not find expected manifests (expected {}, got {}'.format(expected, actual))
+        fail('did not find expected manifests (expected {}, got {})'.format(expected, actual))
 
     return manifests
 
@@ -40,7 +40,7 @@ def assert_deps(m, expected):
 
     expected_abs = [os.path.abspath(d) for d in expected]
     if actual != expected_abs:
-        fail('did not find expected deps for {} (expected {}, got {}'.
+        fail('did not find expected deps for {} (expected {}, got {})'.
              format(m['Name'], expected_abs, actual))
 
 
@@ -52,7 +52,7 @@ def assert_resource_deps(m, expected):
         return
 
     if actual != expected:
-        fail('did not find expected resource deps for {} (expected {}, got {}'.
+        fail('did not find expected resource deps for {} (expected {}, got {})'.
              format(m['Name'], expected, actual))
 
 
@@ -71,6 +71,14 @@ def assert_cmd_contains(m, expected):
         if not str_contains(cmd, exp):
             fail('expected UpdateCmd for {} to contain "{}", but didn\'t (full cmd: "{}")'.
                  format(m['Name'], exp, cmd))
+
+
+def assert_trigger_mode(m, expected):
+    actual = m.get('TriggerMode')
+
+    if actual != expected:
+        fail('expected TriggerMode for {} to be {}, but found {}'.
+             format(m['Name'], expected, actual))
 
 
 def test_no_install():
@@ -128,6 +136,15 @@ def test_install_without_project_root():
     assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/src', 'yarn test -o --watchAll=false'])
 
 
+def test_set_trigger_mode_via_kwargs():
+    res = get_tiltfile_res_for_test_case('set-trigger-mode-via-kwargs')
+    test_manifest = assert_manifest_names(res, ['tests'])[0]
+
+    assert_resource_deps(test_manifest, [])
+    assert_deps(test_manifest, ['fake_project_yarn/src'])
+    assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/src', 'yarn test -o --watchAll=false'])
+    assert_trigger_mode(test_manifest, 1)  # trigger mode manual = 1
+
 test_no_install()
 print()
 
@@ -141,6 +158,9 @@ test_install_with_project_root()
 print()
 
 test_install_without_project_root()
+print()
+
+test_set_trigger_mode_via_kwargs()
 print()
 
 # Without at least one real resource, `tilt ci` exits with code 1 😅
