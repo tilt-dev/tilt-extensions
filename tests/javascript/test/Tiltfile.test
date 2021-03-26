@@ -1,0 +1,147 @@
+# -*- mode: Python -*-
+
+# Setting up a yarn/npm project on the test container would be a PITA, so instead
+# just use `tilt alpha tiltfile-result` to ensure that we're getting reasonable Tiltfile
+# results from this extension.
+#
+# Munging json in Bash would SUCK, but there's no need to put Python on our test container
+# when we already have Tilt 🙃
+
+# uncomment this if you're iterating on tests :D
+# watch_file('Tiltfile')
+
+
+def str_contains(s, substr):
+    return s.find(substr) > -1
+
+
+def get_tiltfile_res_for_test_case(case):
+    print('=== TESTING CASE: {}'.format(case))
+    return decode_json(str(local('tilt alpha tiltfile-result {} || (echo unexpected failure && exit 1)'.format(case), quiet=True)))
+
+
+def assert_manifest_names(json, expected):
+    manifests = json.get('Manifests', [])
+    if len(manifests) != len(expected):
+      fail('expected {} manifests but got {}'.format(len(expected), len(manifests)))
+    actual = [m['Name'] for m in manifests]
+    if expected != actual:
+        fail('did not find expected manifests (expected {}, got {}'.format(expected, actual))
+
+    return manifests
+
+
+def assert_deps(m, expected):
+    actual = m.get('DeployTarget', {}).get('Deps')
+
+    if not actual and not expected:
+        # don't worry about knowing the specific falsey type
+        return
+
+    expected_abs = [os.path.abspath(d) for d in expected]
+    if actual != expected_abs:
+        fail('did not find expected deps for {} (expected {}, got {}'.
+             format(m['Name'], expected_abs, actual))
+
+
+def assert_resource_deps(m, expected):
+    actual = m.get('ResourceDependencies')
+
+    if not actual and not expected:
+        # don't worry about knowing the specific falsey type
+        return
+
+    if actual != expected:
+        fail('did not find expected resource deps for {} (expected {}, got {}'.
+             format(m['Name'], expected, actual))
+
+
+def assert_cmd_contains(m, expected):
+    argv = m.get('DeployTarget', {}).get('UpdateCmd', {}).get('Argv', [])
+    if not len(argv) == 3:
+        fail('expected UpdateCmd for {} to have 3 args, instead found: {}'.format(m['Name'], argv))
+
+    # these are all 'sh -c ...' cmds, so we only care about the last arg
+    cmd = argv[2]
+
+    if type(expected) != type([]):
+        fail('arg "expected" should be List[str]')
+
+    for exp in expected:
+        if not str_contains(cmd, exp):
+            fail('expected UpdateCmd for {} to contain "{}", but didn\'t (full cmd: "{}")'.
+                 format(m['Name'], exp, cmd))
+
+
+def test_no_install():
+    res = get_tiltfile_res_for_test_case('no-install')
+    test_manifest = assert_manifest_names(res, ['tests'])[0]
+
+    assert_resource_deps(test_manifest, [])
+    assert_deps(test_manifest, ['fake_project_yarn/src'])
+    assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/src', 'yarn test -o --watchAll=false'])
+
+
+def test_explicit_deps():
+    res = get_tiltfile_res_for_test_case('explicit-deps')
+    test_manifest = assert_manifest_names(res, ['tests'])[0]
+
+    assert_resource_deps(test_manifest, [])
+    assert_deps(test_manifest, ['fake_project_yarn/src/foo.js', 'fake_project_yarn/src/bar.js'])
+    assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/', 'yarn test -o --watchAll=false'])
+
+
+def test_extra_args():
+    res = get_tiltfile_res_for_test_case('extra-args')
+    test_manifest = assert_manifest_names(res, ['tests'])[0]
+
+    assert_resource_deps(test_manifest, [])
+    assert_deps(test_manifest, ['fake_project_yarn/src'])
+    assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/', 'yarn test -o --watchAll=false', 'foo.js bar.js'])
+
+
+def test_install_with_project_root():
+    res = get_tiltfile_res_for_test_case('install-with-project-root')
+    install_manifest, test_manifest = assert_manifest_names(res, ['yarn-install', 'tests'])
+
+    assert_deps(install_manifest, ['fake_project_yarn/package.json', 'fake_project_yarn/yarn.lock'])
+    assert_resource_deps(install_manifest, [])
+    assert_cmd_contains(install_manifest, ['cd ./fake_project_yarn/src', 'yarn install'])
+
+    assert_resource_deps(test_manifest, ['yarn-install'])
+    assert_deps(test_manifest, ['fake_project_yarn/src'])
+    assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/src', 'yarn test -o --watchAll=false'])
+
+
+def test_install_without_project_root():
+    res = get_tiltfile_res_for_test_case('install-without-project-root')
+    install_manifest, test_manifest = assert_manifest_names(res, ['yarn-install', 'tests'])
+
+    # since we didn't provide a product root, shouldn't have found package.json etc.
+    # (but shouldn't error out)
+    assert_deps(install_manifest, [])
+    assert_resource_deps(install_manifest, [])
+    assert_cmd_contains(install_manifest, ['cd ./fake_project_yarn/src', 'yarn install'])
+
+    assert_resource_deps(test_manifest, ['yarn-install'])
+    assert_deps(test_manifest, ['fake_project_yarn/src'])
+    assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/src', 'yarn test -o --watchAll=false'])
+
+
+test_no_install()
+print()
+
+test_explicit_deps()
+print()
+
+test_extra_args()
+print()
+
+test_install_with_project_root()
+print()
+
+test_install_without_project_root()
+print()
+
+# Without at least one real resource, `tilt ci` exits with code 1 😅
+local_resource('test_success', 'echo ✨ tests succeeded')
