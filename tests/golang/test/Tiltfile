@@ -5,6 +5,11 @@ test_go('single-package', './fake_project/foo', './fake_project/foo')
 # should fail b/c of failing test in foo/bar/failing_test.go
 test_go('recursive', './fake_project', './fake_project', recursive=True)
 
+# should succeed b/c, despite there being a failing test in here, we don't run
+# auto_init=False resources in CI; if we successfully set auto_init via kwargs,
+# the offending test won't run
+test_go('kwargs', './fake_project', './fake_project', recursive=True, auto_init=False)
+
 # should succeed b/c build tags mean we skip foo/bar/failing_test.go
 test_go('tags', './fake_project/...', './fake_project', tags=['skipfailing'])
 

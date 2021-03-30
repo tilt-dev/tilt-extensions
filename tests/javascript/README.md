@@ -19,6 +19,7 @@ You may also pass the following optional parameters:
 * **project_root (str, optional)**: if `dir` is not the root of the JS project, specify the project root here so that Tilt can locate `package.json` and your lockfile. By default, will be set to `dir`. (Mostly relevant if you have specified `with_install=True`, so that Tilt can watch your `package.json` and lockfile and rerun in the install command either changes.)
 * **ignore (List[str], optional)**: set of file patterns that will be ignored. Ignored files will not trigger builds and will not be included in images. Follows the [dockerignore syntax](https://docs.docker.com/engine/reference/builder/#dockerignore-file). Paths will be evaluated _relative to the Tiltfile_.
 * **extra_args (List[str], optional)**: any other args to pass to `npm|yarn test`.
+* **\*\*kwargs**: will be passed to the underlying `test` call
 
 ### Examples
 1. Run tests in a directory
@@ -38,3 +39,10 @@ You may also pass the following optional parameters:
    test_jest_yarn('test-js', './web',
                   extra_args=['--notify'])
     ```
+
+4. Run your slow/expensive tests manually
+    ```python
+    test_jest_yarn('integration-tests', './integration',
+                trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
+    ```
+   The `trigger_mode` and `auto_init` parameters will be passed to the underlying `test` call (see docs on [Manual Update Control](https://docs.tilt.dev/manual_update_control.html)).

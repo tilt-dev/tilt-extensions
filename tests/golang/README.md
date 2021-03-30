@@ -19,7 +19,8 @@ You may also pass the following optional parameters:
 * **mod (str, optional)**: value to pass to the `-mod` flag. [As per the docs](https://golang.org/ref/mod#build-commands), should be one of: `mod`, `readonly`, or `vendor`.
 * **recursive (bool, optional)**: by default, False. If true, run tests recursively, i.e. on the specified package _and all of its children_. This is equivalent to adding `/...` to the end of your package name.
 * **ignore (List[str], optional)**: set of file patterns that will be ignored. Ignored files will not trigger builds and will not be included in images. Follows the [dockerignore syntax](https://docs.docker.com/engine/reference/builder/#dockerignore-file). Paths will be evaluated _relative to the Tiltfile_.
-* **extra_args (List[str], optional)**: any other args to pass to `go test`. 
+* **extra_args (List[str], optional)**: any other args to pass to `go test`.
+* **\*\*kwargs**: will be passed to the underlying `test` call
 
 ### Examples
 1. Test the current directory, recursively
@@ -47,7 +48,15 @@ You may also pass the following optional parameters:
             tags=['skiplongtests'], recursive=True)
     ```
 
-4. Test individual Go packages
+4. Run your slow/expensive tests manually
+    ```python
+    test_go('integration-tests', './integration', './integration',
+                recursive=True, trigger_mode=TRIGGER_MODE_MANUAL,
+                auto_init=False)
+    ```
+   The `trigger_mode` and `auto_init` parameters will be passed to the underlying `test` call (see docs on [Manual Update Control](https://docs.tilt.dev/manual_update_control.html)).
+
+5. Test individual Go packages
     * In most cases, a single `test_go` call will suffice for an entire project, because Go's caching should make sure that only the relevant tests are run for every given file change. However, if your project has any caching issues (e.g. is affected by [this bug](https://github.com/golang/go/issues/26562)), _or_ if you just want more granular visibility into tests, you can call `test_go` once for each package in your project, like so:
     ```python
     EXCLUDE = ['cmd/', 'integration/']  # don't test packges in these dirs
