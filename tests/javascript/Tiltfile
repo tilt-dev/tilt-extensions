@@ -2,7 +2,7 @@
 # (see docs: https://docs.tilt.dev/tests_in_tilt.html)
 
 
-def _test_js(name, pkmanager, dir, deps=None, run_all=False, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+def _test_js(name, pkmanager, dir, deps=None, only_changed=True, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
     if not project_root:
         project_root = dir
 
@@ -19,12 +19,13 @@ def _test_js(name, pkmanager, dir, deps=None, run_all=False, with_install=False,
     if extra_args:
         extra_args_str = ' '.join(extra_args)
 
-    run_some_flag = '-o'
-    if run_all:
-        run_some_flag = ''
+    # https://jestjs.io/docs/cli#--onlychanged
+    only_changed_flag = '-o'  # by default, run tests for files changed since last commit
+    if not only_changed:
+        only_changed_flag = ''
 
-    cmd = 'cd {dir} && {pkmanager} test {run_some_flag} --watchAll=false {extra_args_str}'.format(
-        dir=dir, pkmanager=pkmanager, run_some_flag=run_some_flag, extra_args_str=extra_args_str)
+    cmd = 'cd {dir} && {pkmanager} test {only_changed_flag} --watchAll=false {extra_args_str}'.format(
+        dir=dir, pkmanager=pkmanager, only_changed_flag=only_changed_flag, extra_args_str=extra_args_str)
 
     file_deps = deps
     if not file_deps:
@@ -37,10 +38,10 @@ def _test_js(name, pkmanager, dir, deps=None, run_all=False, with_install=False,
     test(name, cmd, deps=file_deps, ignore=all_ignores, resource_deps=resource_deps, **kwargs)
 
 
-def test_jest_npm(name, dir, deps=None, run_all=False, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+def test_jest_npm(name, dir, deps=None, only_changed=True, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
     _test_js(name, 'npm', dir,
              deps=deps,
-             run_all=run_all,
+             only_changed=only_changed,
              with_install=with_install,
              project_root=project_root,
              ignore=ignore,
@@ -48,10 +49,10 @@ def test_jest_npm(name, dir, deps=None, run_all=False, with_install=False, proje
              **kwargs)
 
 
-def test_jest_yarn(name, dir, deps=None, run_all=False, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+def test_jest_yarn(name, dir, deps=None, only_changed=True, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
     _test_js(name, 'yarn', dir,
              deps=deps,
-             run_all=run_all,
+             only_changed=only_changed,
              with_install=with_install,
              project_root=project_root,
              ignore=ignore,

@@ -15,7 +15,7 @@ Both `test_jest_npm` and `test_jest_yarn` accept the same parameters. These are:
 
 You may also pass the following optional parameters:
 * **deps (Union[str, List[str]])**: a list of files or directories to be added as dependencies to this test. Tilt will watch those files and will run the test when they change. By default, will be set to `dir`. Only accepts real paths, not file globs.
-* **run_all (bool, optional)**: by default, False. If true, Jest will run all tests at the specified dir/path(s); otherwise, just tests affected by files changed since last commit.
+* **only_changed (bool, optional)**: by default, True. If true, Jest will run tests affected by files changed since last commit; otherwise, will run all tests at the specified dir/path(s). (`only_changed = True` is equivalent to passing the [`--onlyChanged` flag](https://jestjs.io/docs/cli#--onlychanged) to Jest.)
 * **with_install (bool, optional)**: by default, False. If true, run `npm|yarn install` before running any tests, to ensure that your local dependencies are up to date.
 * **project_root (str, optional)**: if `dir` is not the root of the JS project, specify the project root here so that Tilt can locate `package.json` and your lockfile. By default, will be set to `dir`. (Mostly relevant if you have specified `with_install=True`, so that Tilt can watch your `package.json` and lockfile and rerun in the install command either changes.)
 * **ignore (List[str], optional)**: set of file patterns that will be ignored. Ignored files will not trigger builds and will not be included in images. Follows the [dockerignore syntax](https://docs.docker.com/engine/reference/builder/#dockerignore-file). Paths will be evaluated _relative to the Tiltfile_.

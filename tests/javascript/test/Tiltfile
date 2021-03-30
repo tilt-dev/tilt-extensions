@@ -26,7 +26,7 @@ elif arg == 'set-trigger-mode-via-kwargs':
                    trigger_mode=TRIGGER_MODE_MANUAL)
 elif arg == 'run-all-tests':
     test_jest_yarn('tests', './fake_project_yarn/src/',
-                   run_all=True)
+                   only_changed=False)
 
 else:
     fail('unrecognized arg: {}'.format(arg))
