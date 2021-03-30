@@ -2,7 +2,7 @@
 # (see docs: https://docs.tilt.dev/tests_in_tilt.html)
 
 
-def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+def _test_js(name, pkmanager, dir, deps=None, run_all=False, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
     if not project_root:
         project_root = dir
 
@@ -19,8 +19,12 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
     if extra_args:
         extra_args_str = ' '.join(extra_args)
 
-    cmd = 'cd {dir} && {pkmanager} test -o --watchAll=false {extra_args_str}'.format(
-        dir=dir, pkmanager=pkmanager, extra_args_str=extra_args_str)
+    run_some_flag = '-o'
+    if run_all:
+        run_some_flag = ''
+
+    cmd = 'cd {dir} && {pkmanager} test {run_some_flag} --watchAll=false {extra_args_str}'.format(
+        dir=dir, pkmanager=pkmanager, run_some_flag=run_some_flag, extra_args_str=extra_args_str)
 
     file_deps = deps
     if not file_deps:
@@ -33,12 +37,26 @@ def _test_js(name, pkmanager, dir, deps=None, with_install=False, project_root='
     test(name, cmd, deps=file_deps, ignore=all_ignores, resource_deps=resource_deps, **kwargs)
 
 
-def test_jest_npm(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
-    _test_js(name, 'npm', dir, deps, with_install, project_root, ignore, extra_args, **kwargs)
+def test_jest_npm(name, dir, deps=None, run_all=False, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+    _test_js(name, 'npm', dir,
+             deps=deps,
+             run_all=run_all,
+             with_install=with_install,
+             project_root=project_root,
+             ignore=ignore,
+             extra_args=extra_args,
+             **kwargs)
 
 
-def test_jest_yarn(name, dir, deps=None, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
-    _test_js(name, 'yarn', dir, deps, with_install, project_root, ignore, extra_args, **kwargs)
+def test_jest_yarn(name, dir, deps=None, run_all=False, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+    _test_js(name, 'yarn', dir,
+             deps=deps,
+             run_all=run_all,
+             with_install=with_install,
+             project_root=project_root,
+             ignore=ignore,
+             extra_args=extra_args,
+             **kwargs)
 
 
 def verify_dep(f):

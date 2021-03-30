@@ -24,5 +24,9 @@ elif arg == 'install-without-project-root':
 elif arg == 'set-trigger-mode-via-kwargs':
     test_jest_yarn('tests', './fake_project_yarn/src/',
                    trigger_mode=TRIGGER_MODE_MANUAL)
+elif arg == 'run-all-tests':
+    test_jest_yarn('tests', './fake_project_yarn/src/',
+                   run_all=True)
+
 else:
     fail('unrecognized arg: {}'.format(arg))
