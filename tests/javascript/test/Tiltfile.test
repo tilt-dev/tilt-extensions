@@ -56,7 +56,10 @@ def assert_resource_deps(m, expected):
              format(m['Name'], expected, actual))
 
 
-def assert_cmd_contains(m, expected):
+def assert_cmd_contains(m, expected, not_expected=None):
+    if not not_expected:
+        not_expected = []
+
     argv = m.get('DeployTarget', {}).get('UpdateCmd', {}).get('Argv', [])
     if not len(argv) == 3:
         fail('expected UpdateCmd for {} to have 3 args, instead found: {}'.format(m['Name'], argv))
@@ -71,6 +74,11 @@ def assert_cmd_contains(m, expected):
         if not str_contains(cmd, exp):
             fail('expected UpdateCmd for {} to contain "{}", but didn\'t (full cmd: "{}")'.
                  format(m['Name'], exp, cmd))
+
+    for not_exp in not_expected:
+        if str_contains(cmd, not_exp):
+            fail('expected UpdateCmd for {} NOT to contain "{}", but it did (full cmd: "{}")'.
+                 format(m['Name'], not_exp, cmd))
 
 
 def assert_trigger_mode(m, expected):
@@ -145,6 +153,16 @@ def test_set_trigger_mode_via_kwargs():
     assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/src', 'yarn test -o --watchAll=false'])
     assert_trigger_mode(test_manifest, 1)  # trigger mode manual = 1
 
+
+def test_run_all_tests():
+    res = get_tiltfile_res_for_test_case('run-all-tests')
+    test_manifest = assert_manifest_names(res, ['tests'])[0]
+
+    assert_resource_deps(test_manifest, [])
+    assert_deps(test_manifest, ['fake_project_yarn/src'])
+    assert_cmd_contains(test_manifest, ['cd ./fake_project_yarn/src', 'yarn test', '--watchAll=false'],
+                        not_expected=['-o'])
+
 test_no_install()
 print()
 
@@ -161,6 +179,9 @@ test_install_without_project_root()
 print()
 
 test_set_trigger_mode_via_kwargs()
+print()
+
+test_run_all_tests()
 print()
 
 # Without at least one real resource, `tilt ci` exits with code 1 😅
