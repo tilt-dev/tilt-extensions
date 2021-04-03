@@ -48,7 +48,7 @@ def _first_sync_from_liveupdate(image, live_update, k8s_resources):
 # return sync(local_path, remote_path)'s args
 def _get_sync_params(sync):
     output = str(sync).split("'")
-    local_path = output[1]
+    local_path = output[1].replace(os.getcwd() + "/", "")
     remote_path = output[3]
     return local_path, remote_path
 
