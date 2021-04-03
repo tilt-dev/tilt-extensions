@@ -32,7 +32,7 @@ def file_sync_only(image='', manifests=[], deps=["."], live_update=[], allow_dup
         skips_local_docker=True,
         live_update=live_update
     )
-    # k8s_yaml(manifests, allow_duplicates=allow_duplicates)
+    k8s_yaml(manifests, allow_duplicates=allow_duplicates)
     _first_sync_from_liveupdate(deployed_image, live_update, k8s_resources)
 
 # sync files at first time
