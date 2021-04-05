@@ -19,7 +19,7 @@ set -e
 sleep 5 # wait for live_update to finish
 
 POD=$(kubectl get pod -l app=nginx -o jsonpath="{.items[*].metadata.name}")
-kubectl cp $POD:testfile ./testfile-out
+kubectl cp ${POD}:testfile ./testfile-out
 EXPECTED=$(cat testfile)
 ACTUAL=$(cat testfile-out)
 rm ./testfile-out
@@ -30,4 +30,4 @@ fi
 echo "SUCCESS!"
 """,
   allow_parallel=True,
-  resource_deps=['testfile-sync'])
+  resource_deps=['firstsync-nginx-testfile'])
