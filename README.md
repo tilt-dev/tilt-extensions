@@ -25,6 +25,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
 - [`namespace`](/namespace): Functions for interacting with namespaces.
 - [`pack`](/pack): Build container images using [pack](https://buildpacks.io/docs/install-pack/) and [buildpacks](https://buildpacks.io/).
+- [`podman`](/podman): Build container images using [podman](https://podman.io)
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
 - [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
 - [`restart_process`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)

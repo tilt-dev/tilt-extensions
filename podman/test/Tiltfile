@@ -1,0 +1,6 @@
+# -*- mode: Python -*-
+
+load('../Tiltfile', 'podman_build')
+
+podman_build('example-podman-image', '.')
+k8s_yaml('deployment.yaml')

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-podman
+  labels:
+    app: example-podman
+spec:
+  selector:
+    matchLabels:
+      app: example-podman
+  template:
+    metadata:
+      labels:
+        app: example-podman
+    spec:
+      containers:
+      - name: example-podman
+        image: example-podman-image
+        ports:
+        - containerPort: 8000
