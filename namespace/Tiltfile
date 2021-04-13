@@ -58,7 +58,11 @@ def _mutate_yaml(x, f):
   return encode_yaml_stream([f(o) for o in objects])
 
 def _set_k8s_yaml_namespace(o, ns):
-  o['metadata']['namespace'] = ns
+  if type(o) == 'dict' and type(o.get('metadata', None)) == 'dict':
+    o['metadata']['namespace'] = ns
+  else:
+    fail('Cannot inject namespace. Object does not have an object field named metadata:\n%s' % encode_yaml(o))
+
   _set_template_namespace(o, ns)
   return o
 
