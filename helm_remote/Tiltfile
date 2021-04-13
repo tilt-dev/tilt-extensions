@@ -1,6 +1,5 @@
 load('ext://global_vars', 'get_global', 'set_global')
 
-
 def _get_skip():
     return get_global(_get_skip_name())
 
@@ -36,8 +35,8 @@ def _find_cache_dir():
 
 # this is the root directory into which remote helm charts will be pulled/cloned/untar'd
 # use `os.putenv('TILT_HELM_REMOTE_CACHE_DIR', new_dir)` to change
-# if customizing this location, you will also need to add the new location to your .tiltignore file to prevent infinite loops processing the main tiltfile (See github [issue #3404](https://github.com/tilt-dev/tilt/issues/3404))
 helm_remote_cache_dir = _find_cache_dir()
+watch_settings(ignore=helm_remote_cache_dir)
 
 # TODO: =====================================
 #   if it ever becomes possible for loaded files to also load their own extensions
