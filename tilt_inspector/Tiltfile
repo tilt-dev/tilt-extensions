@@ -1,0 +1,21 @@
+# -*- mode: Python -*-
+
+_img = 'tiltdev/tilt-inspector:v20210426'
+
+def tilt_inspector(port=11351):
+  home_dir = os.getenv('HOME')
+  local_resource(
+    name="tilt:inspector",
+    deps=[],
+    cmd="docker pull %s" % _img,
+    serve_cmd=[
+      'docker', 'run', '--rm=true',
+      '--network=host',
+      '--entrypoint', './node_modules/.bin/next',
+      '-v', '%s:/root/.tilt-dev' % os.path.join(home_dir, '.tilt-dev'),
+      '-v', '%s:/root/.windmill' % os.path.join(home_dir, '.windmill'),
+      _img,
+      'start',
+      '--port', '%d' % port
+    ],
+    links=['http://localhost:%d/' % port])

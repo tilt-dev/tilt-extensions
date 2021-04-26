@@ -1,0 +1,3 @@
+load('../Tiltfile', 'tilt_inspector')
+
+tilt_inspector()
