@@ -3,7 +3,7 @@
 //
 // This is Tilt's recommended way of restarting a process as part of a live_update:
 // if your container invokes your app via the restart wrapper (e.g. `tilt-restart-wrapper /bin/my-app`),
-// you can trigger re-excecution of you app with a live_update `run` step that makes
+// you can trigger re-execution of your app with a live_update `run` step that makes
 // a trivial change to the file watched by `entr` (e.g. `run('date > /.restart-proc')`)
 //
 // This script exists (i.e. we're wrapping `entr` in a binary instead of invoking
