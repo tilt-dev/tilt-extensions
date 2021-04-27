@@ -1,0 +1,18 @@
+# -*- mode: Python -*-
+
+_dir = os.getcwd()
+
+def tilt_inspector(port=11351):
+  # The tilt:inspector resource is currently a local server installed + run
+  # with Yarn.
+  #
+  # Ideally, it would be a docker container, but that would require some
+  # networking tricks to get the process in the container talking to Tilt.
+  local_resource(
+    name="tilt:inspector",
+    deps=[],
+    cmd='cd %s && yarn install' % _dir,
+    serve_env={'TILT_INSPECTOR_PORT': '%d' % port},
+    serve_cmd='cd %s && yarn run tilt-inspector' % _dir,
+    readiness_probe=probe(http_get=http_get_action(port=port)),
+    links=['http://localhost:%d/' % port])
