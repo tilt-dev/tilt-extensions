@@ -18,9 +18,8 @@ E.g. if your app is a static binary, you'll probably need to re-execute the bina
 
 ### Unsupported Cases
 This extension does NOT support process restarts for:
-- Images built with `custom_build`
+- Images built with `custom_build` using any of the `skips_local_docker`, `disable_push`, or `tag` parameters.
 - Images run in Docker Compose resources (use the [`restart_container()`](https://docs.tilt.dev/api.html#api.restart_container) builtin instead)
-- `custom_build`
 - Images without a shell (e.g. `scratch`, `distroless`)
 - Container commands specified as `command` in Kubernetes YAML will be overridden by this extension.
   - However, the `args` field is still available; [reach out](https://tilt.dev/contact) if you need help navigating the interplay between Tilt and these YAML values
@@ -72,6 +71,14 @@ custom_build_with_restart(
     live_update=[sync(...)]
 )
 ```
+
+### Troubleshooting
+#### `failed running [touch /tmp/.restart-proc']`
+If you see an error of the form:
+```
+ERROR: Build Failed: ImageBuild: executor failed running [touch /tmp/.restart-proc']: exit code: 1
+```
+this often means that your Dockerfile user ([see docs](https://docs.docker.com/engine/reference/builder/#user)) doesn't have permission to write to the file we use to signal a process restart. Use the `restart_file` parameter to specify a file that your Dockerfile user definitely has write access to.
 
 ### API
 ```python

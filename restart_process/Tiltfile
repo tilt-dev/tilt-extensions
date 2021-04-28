@@ -1,4 +1,4 @@
-RESTART_FILE = '/.restart-proc'
+RESTART_FILE = '/tmp/.restart-proc'
 TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
 KWARGS_BLACKLIST = [
@@ -9,10 +9,9 @@ KWARGS_BLACKLIST = [
     # 'target' isn't relevant to our child build--if we pass this arg,
     # Docker will just fail to find the specified stage and error out
     'target',
-
 ]
 
-# Arguments in custom_build but don't apply to the docker_build.
+# Arguments to custom_build that don't apply to the docker_build.
 _CUSTOM_BUILD_KWARGS_BLACKLIST = [
     'tag',
     'command_bat',
@@ -33,7 +32,6 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
     FROM tiltdev/restart-helper:2020-10-16 as restart-helper
 
     FROM {}
-    USER root
     RUN ["touch", "{}"]
     COPY --from=restart-helper /tilt-restart-wrapper /
     COPY --from=restart-helper /entr /
@@ -57,7 +55,7 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
 
     # We don't need a real context. See:
     # https://github.com/tilt-dev/tilt/issues/3897
-    context=_ext_dir
+    context = _ext_dir
 
     docker_build(ref, context, entrypoint=entrypoint_with_entr, dockerfile_contents=df,
                  live_update=live_update, **kwargs)
@@ -67,7 +65,6 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
                               trigger=None, **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
-
 
      Args:
       ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in docker_build
@@ -86,7 +83,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
         fail("`docker_build_with_restart` requires at least one live_update step")
     for step in live_update:
         if type(step) == TYPE_RESTART_CONTAINER_STEP:
-            fail("`docker_build_with_restart` is not compatible with live_update step: "+
+            fail("`docker_build_with_restart` is not compatible with live_update step: " +
                  "`restart_container()` (this extension is meant to REPLACE restart_container() )")
 
     # rename the original image to make it a base image and declare a docker_build for it
@@ -107,7 +104,6 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
                               trigger=None, **kwargs):
     """Wrap a custom_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
-
 
      Args:
       ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in custom_build
@@ -137,7 +133,6 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
             fail("`custom_build_with_restart` is not compatible with `disable_push`")
         if k == 'tag':
             fail("`custom_build_with_restart` renames your base image, so is not compatible with `tag`")
-
 
     # rename the original image to make it a base image and declare a custom_build for it
     base_ref = '{}{}'.format(ref, base_suffix)
