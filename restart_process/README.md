@@ -78,7 +78,7 @@ If you see an error of the form:
 ```
 ERROR: Build Failed: ImageBuild: executor failed running [touch /tmp/.restart-proc']: exit code: 1
 ```
-this often means that your Dockerfile user doesn't have permission to write to the file we use to signal a process restart. Use the `restart_file` parameter to specify a file that your Dockerfile user definitely has write access to.
+this often means that your Dockerfile user ([see docs](https://docs.docker.com/engine/reference/builder/#user)) doesn't have permission to write to the file we use to signal a process restart. Use the `restart_file` parameter to specify a file that your Dockerfile user definitely has write access to.
 
 ### API
 ```python
