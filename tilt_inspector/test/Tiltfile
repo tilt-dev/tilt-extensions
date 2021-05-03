@@ -1,3 +1,8 @@
 load('../Tiltfile', 'tilt_inspector')
 
 tilt_inspector()
+
+local_resource(
+  name='verify',
+  resource_deps=['tilt:inspector'],
+  cmd='curl -fsSL http://localhost:11351/view/cmd')
