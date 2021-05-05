@@ -36,9 +36,8 @@ The full list of parameters accepted by `hasura` includes:
 
 - `release_name`, defaults to `''`
 - `path` defaults to `'.'`. It will synchronise `{path}/metadata` and `{path}/migrations` with the server through the Hasura CLI console.
-- `version` of Hasura config to use. Defaults to `2`
 - `resource_name` defaults to `'hasura'`
-- `port` of Hasura, defaults to `8080`
+- `port` is the host port Hasura is redirected to, defaults to `8080`
 - `postgres_port` defaults to `5432`
 - `tag` of the Hasura image, defaults to `'latest'`
 - `hasura_secret` defaults to `'hasura-dev-secret'`
