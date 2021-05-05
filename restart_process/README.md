@@ -80,6 +80,13 @@ ERROR: Build Failed: ImageBuild: executor failed running [touch /tmp/.restart-pr
 ```
 this often means that your Dockerfile user ([see docs](https://docs.docker.com/engine/reference/builder/#user)) doesn't have permission to write to the file we use to signal a process restart. Use the `restart_file` parameter to specify a file that your Dockerfile user definitely has write access to.
 
+#### My args aren't being applied!
+Whatever you pass as the `entrypoint` parameter will override everything in your Dockerfile `COMMAND`, Dockerfile `ARGS`, and Kubernetes YAML `command`.
+
+If you still want to apply different arguments to different containers, you can specify `args` in your Kubernetes YAML. But _be warned_: these args only work if you pass your entrypoint as args (i.e. as a list of strings). So instead of `entrypoint="/my/great/bin"`*, pass `entrypoint=["/my/great/bin"]`.
+
+/* Tilt's internals will wrap this as a shell command, ultimately invoking `/bin/sh -c '/my/great/bin`--which means that any args in your Kubernetes YAML will be applied to the `/bin/sh` call rather than the `/my/great/bin` call, which means they won't do much of anything.
+ 
 ### API
 ```python
 def docker_build_with_restart(ref: str, context: str,
