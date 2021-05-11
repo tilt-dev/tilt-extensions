@@ -43,4 +43,4 @@ The full list of parameters accepted by `hasura` includes:
 - `hasura_secret` defaults to `'hasura-dev-secret'`
 - `postgresql_password` defaults to `'development-postgres-password'`. Be careful: this password is persisted in the Postgres PV, so a password change while the PV already exists won't have any effect. Let's wait for [this](https://github.com/helm/charts/issues/5167) or [that](https://github.com/bitnami/charts/issues/2061).
 - `yaml` to define a Kubernetes resources to deploy Hasura instead of the default Helm Chart, defaults to `''`
-- `registry` from which images should be pulled, defaults to `quay.io/jetstack`
+
