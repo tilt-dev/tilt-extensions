@@ -18,6 +18,8 @@ def _find_cache_dir():
         return from_env
 
     cachedir = os.path.join(_find_root_tiltfile_dir(), '.tilt-cache')
+    if not os.path.exists(cachedir):
+        local('mkdir -p %s' % cachedir, quiet=True)
     os.putenv('TILT_CACHE_DIR', cachedir)
 
     return cachedir
@@ -47,8 +49,6 @@ def replace_target(src, target):
 
 def download_files():
     cachedir = _find_cache_dir()
-    if not os.path.exists(cachedir):
-        local('mkdir %s' % cachedir, quiet=True)
 
     kube_prometheus_version = 'v0.5.0'
     kube_prometheus_tarball = os.path.join(cachedir, 'coreos-kube-prometheus-%s.tar.gz' % kube_prometheus_version)
@@ -62,8 +62,11 @@ def download_files():
 	# have completed successfully.
 	local("mv %s.tmp %s" % (kube_prometheus_tarball, kube_prometheus_tarball))
 
-    local("mkdir %s" % extract_path)
-    local("tar -C %s -xzf %s --strip-components=1 --wildcards 'prometheus-operator-kube-prometheus-*/manifests'" % (extract_path, kube_prometheus_tarball))
+    local("rm -rf %s.tmp && mkdir %s.tmp" % (extract_path, extract_path))
+    local("tar -C %s.tmp -xzf %s --strip-components=1 --wildcards 'prometheus-operator-kube-prometheus-*/manifests'" % (extract_path, kube_prometheus_tarball))
+
+    # only move path to final location if extraction completed successfully
+    local("rm -rf %s && mv %s.tmp %s" % (extract_path, extract_path, extract_path))
 
     # return path containing manifests directory
     return extract_path
@@ -75,7 +78,7 @@ def patch_prometheus(path):
     # patches to modify certain behaviour
     #  modify clusterrole for greater access
     #  ensure all namespaces are scanned for alerts
-    localFiles = listdir(prometheusPatchesPath)
+    localFiles = listdir(prometheusPatchesPath, recursive=True)
 
     for f in localFiles:
         target = os.path.join(manifestsPath, os.path.basename(f))
