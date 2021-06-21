@@ -41,10 +41,13 @@ def cmd_button(name, resource, argv, text=''):
       },
     }
   }
-  local("echo %s | %s apply -f -" % (shlex.quote(str(encode_yaml_stream([button, cmd]))), sys.executable))
+
+  local('echo "${TILT_APPLY_YAML}" | %s apply -f -' % (sys.executable,),
+        env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
+        echo_off=True)
 
 
 def _now():
   # this is portable across coreutils/busybox/BSD
   # note: it's missing fractional seconds because that's not available from strftime
-  return str(local('date -u +"%Y-%m-%dT%H:%M:%S.000000Z"')).rstrip('\r\n')
+  return str(local('date -u +"%Y-%m-%dT%H:%M:%S.000000Z"', echo_off=True, quiet=True)).rstrip('\r\n')
