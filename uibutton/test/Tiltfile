@@ -1,0 +1,5 @@
+load('../Tiltfile', 'cmd_button')
+
+local_resource('vigoda', cmd='echo "Hello from resource"')
+
+cmd_button("mybutton", "vigoda", ["bash", "-c", "echo Hello from bash ${BASH_VERSION}"], text='My Button')

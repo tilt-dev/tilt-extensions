@@ -1,0 +1,53 @@
+def cmd_button(name, resource, argv, text=''):
+  if config.tilt_subcommand == 'down':
+    return
+
+  if not text:
+    text = name
+
+  button = {
+    "apiVersion": "tilt.dev/v1alpha1",
+    "kind": "UIButton",
+    "metadata": {
+      "name": name,
+      "annotations": {
+        "tilt.dev/resource": resource,
+      }
+    },
+    "spec": {
+      "text": text,
+      "location": {
+        "componentType": "Resource",
+        "componentID": resource,
+      }
+    }
+  }
+  cmd = {
+    "apiVersion": "tilt.dev/v1alpha1",
+    "kind": "Cmd",
+    "metadata": {
+      "name": "btn-" + name,
+      "annotations": {
+        "tilt.dev/resource": resource,
+        "tilt.dev/log-span-id": 'cmd:' + name,
+      }
+    },
+    "spec": {
+      "args": argv,
+      "dir": config.main_dir,
+      "startOn": {
+        "startAfter": _now(),
+        "uiButtons": [name],
+      },
+    }
+  }
+
+  local('echo "${TILT_APPLY_YAML}" | %s apply -f -' % (sys.executable,),
+        env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
+        echo_off=True)
+
+
+def _now():
+  # this is portable across coreutils/busybox/BSD
+  # note: it's missing fractional seconds because that's not available from strftime
+  return str(local('date -u +"%Y-%m-%dT%H:%M:%S.000000Z"', echo_off=True, quiet=True)).rstrip('\r\n')
