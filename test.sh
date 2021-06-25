@@ -22,3 +22,4 @@ restart_process/test/test.sh
 tilt_inspector/test/test.sh
 tests/golang/test/test.sh
 tests/javascript/test/test.sh
+uibutton/test/test.sh

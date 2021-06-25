@@ -35,6 +35,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`syncback`](/syncback): Sync files/directories from your container back to your local FS.
 - [`tests`](/tests): Some common configurations for running your tests in Tilt.
 - [`tilt_inspector`](/tilt_inspector): Debugging server for exploring internal Tilt state.
+- [`uibutton`](/uibutton): Customize your Tilt dashboard with [buttons to run a command](https://blog.tilt.dev/2021/06/21/uibutton.html).
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
 
 ## Contribute an Extension
