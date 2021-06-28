@@ -9,7 +9,7 @@ Helper functions for creating Kubernetes configmaps.
 ### configmap_yaml
 
 ```
-configmap_yaml(name: str, namespace: str = "", from_file: Union[str, List[str]] = None, from_env_file: str = None, watch: bool = True): Blob
+configmap_yaml(name: str, namespace: str = "", from_file: Union[str, List[str]] = None, watch: bool = True, from_env_file: str = None): Blob
 ```
 
 Returns YAML for a config map generated from a file.
@@ -21,7 +21,7 @@ Returns YAML for a config map generated from a file.
 ### configmap_create
 
 ```
-configmap_create(name: str, namespace: str = "", from_file: Union[str, List[str]] = None, from_env_file: str = None, watch: bool = True)
+configmap_create(name: str, namespace: str = "", from_file: Union[str, List[str]] = None, watch: bool = True, from_env_file: str = None)
 ```
 
 Deploys a config map. Equivalent to
