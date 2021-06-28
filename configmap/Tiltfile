@@ -61,6 +61,10 @@ def configmap_yaml(name, namespace="", from_file=None, from_env_file=None, watch
 def configmap_create(name, namespace="", from_file=None, from_env_file=None, watch=True):
   """Creates a configmap in the current Kubernetes cluster.
 
+  Generators:
+    - from_file: Wraps kubectl from-file behavior.
+    - from_env_file: Wraps kubectl from-env-file behavior.
+
   Args:
     name: The configmap name.
     namespace: The namespace.
