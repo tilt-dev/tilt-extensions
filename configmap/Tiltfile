@@ -10,6 +10,8 @@ def configmap_yaml(name, namespace="", from_file=None, watch=True, from_env_file
        Example: ["grafana.ini=path/to/grafana.ini"]
     watch: Reruns the Tiltfile and re-deploys automatically if the from-files change.
        Defaults to true.
+    from_env_file: Use from-env-file configmap generator. Must be string.
+       Example: "./local.env"
 
   Returns:
     The configmap YAML as a blob
@@ -70,9 +72,9 @@ def configmap_create(name, namespace="", from_file=None, watch=True, from_env_fi
     namespace: The namespace.
     from_file: Use the from-file configmap generator. May be a string or a list of strings.
        Example: ["grafana.ini=path/to/grafana.ini"]
-    from_env_file: Use from-env-file configmap generator. Must be string.
-       Example: "./local.env"
     watch: Reruns the Tiltfile and re-deploys automatically if the from-files change.
        Defaults to true.
+    from_env_file: Use from-env-file configmap generator. Must be string.
+       Example: "./local.env"
   """
-  k8s_yaml(configmap_yaml(name, namespace, from_file, from_env_file, watch))
+  k8s_yaml(configmap_yaml(name, namespace, from_file, watch, from_env_file))
