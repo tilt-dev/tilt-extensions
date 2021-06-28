@@ -1,6 +1,6 @@
 # -*- mode: Python -*-
 
-def configmap_yaml(name, namespace="", from_file=None, from_env_file=None, watch=True):
+def configmap_yaml(name, namespace="", from_file=None, watch=True, from_env_file=None):
   """Returns YAML for a generic configmap
 
   Args:
@@ -58,7 +58,7 @@ def configmap_yaml(name, namespace="", from_file=None, from_env_file=None, watch
   args.extend(["-o=yaml", "--dry-run=client"])
   return local(args, quiet=True)
 
-def configmap_create(name, namespace="", from_file=None, from_env_file=None, watch=True):
+def configmap_create(name, namespace="", from_file=None, watch=True, from_env_file=None):
   """Creates a configmap in the current Kubernetes cluster.
 
   Generators:
