@@ -5,6 +5,7 @@ cd $(dirname $0)
 set -ex
 cert_manager/test/test.sh
 configmap/test/test.sh
+coreos_prometheus/test/test.sh
 file_sync_only/test/test.sh
 git_resource/test/test.sh
 namespace/test/test.sh
