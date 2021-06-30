@@ -2,16 +2,16 @@ version: 2.1
 jobs:
   check:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:f0d807f7e88880c36816e1782b2412d96bdd5c1e170f6b873c86afeed277eefd
+      - image: tiltdev/tilt-extensions-ci@sha256:e1990914dbfdd357ef880110faeb1eaa68bd85b7668a54f9b7aed8e098f83c0c
 
     steps:
       - checkout
-      - run: GOBIN=$HOME/.bin go get github.com/tilt-dev/tilt-extensions-ci && go install github.com/tilt-dev/tilt-extensions-ci
+      - run: GOBIN=$HOME/.bin go get github.com/tilt-dev/tilt-extensions-ci && go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
       - run: $HOME/.bin/tilt-extensions-ci .
 
   test:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:f0d807f7e88880c36816e1782b2412d96bdd5c1e170f6b873c86afeed277eefd
+      - image: tiltdev/tilt-extensions-ci@sha256:e1990914dbfdd357ef880110faeb1eaa68bd85b7668a54f9b7aed8e098f83c0c
 
     steps:
       - setup_remote_docker:
