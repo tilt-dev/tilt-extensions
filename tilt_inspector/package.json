@@ -1,6 +1,6 @@
 {
   "license": "Apache-2.0",
   "dependencies": {
-    "@tilt.dev/tilt-inspector": "0.1.6"
+    "@tilt.dev/tilt-inspector": "0.1.8"
   }
 }
