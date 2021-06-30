@@ -12,10 +12,6 @@ RUN curl -sSL https://github.com/google/ko/releases/download/v0.8.1/ko_0.8.1_Lin
   mv ko /root/go/bin/ko && \
   which ko
 
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
-    apt-get install -y nodejs
-
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
   echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
   apt update && apt install -y yarn
-
