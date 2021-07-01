@@ -4,7 +4,7 @@ def _find_root_tiltfile_dir():
     # Find top-level Tilt path
     current = os.path.abspath('./')
     while current != '/':
-        if os.path.exists(os.path.join(current, '')):
+        if os.path.exists(os.path.join(current, 'Tiltfile')):
             return current
 
         current = os.path.dirname(current)
@@ -12,16 +12,15 @@ def _find_root_tiltfile_dir():
     fail('Could not find root Tiltfile')
 
 def _find_cache_dir():
-    from_env = os.getenv('TILT_CACHE_DIR', '')
+    cachedir = os.getenv('TILT_CACHE_DIR', '')
 
-    if from_env != '':
-        return from_env
+    if cachedir == '':
+        cachedir = os.path.join(_find_root_tiltfile_dir(), '.tilt-cache')
 
-    cachedir = os.path.join(_find_root_tiltfile_dir(), '.tilt-cache')
     if not os.path.exists(cachedir):
-        local('mkdir -p %s' % cachedir, quiet=True)
-    os.putenv('TILT_CACHE_DIR', cachedir)
+        local('mkdir -p %s' % cachedir, echo_off=True)
 
+    os.putenv('TILT_CACHE_DIR', cachedir)
     return cachedir
 
 def _create_temp_dir():
@@ -30,7 +29,7 @@ def _create_temp_dir():
     if from_env != '':
         return from_env
 
-    tmpdir = str(local("mktemp -d")).strip()
+    tmpdir = str(local("mktemp -d", echo_off=True, quiet=True)).strip()
     os.putenv('TILT_COREOS_PROMETHEUS_TEMP_DIR', tmpdir)
 
     return tmpdir
@@ -50,23 +49,23 @@ def replace_target(src, target):
 def download_files():
     cachedir = _find_cache_dir()
 
-    kube_prometheus_version = 'v0.5.0'
+    kube_prometheus_version = '0.5.0'
     kube_prometheus_tarball = os.path.join(cachedir, 'coreos-kube-prometheus-%s.tar.gz' % kube_prometheus_version)
 
     tmpdir = _create_temp_dir()
     extract_path = os.path.join(tmpdir, 'prometheus-operator-kube-prometheus-%s' % kube_prometheus_version)
 
     if not os.path.exists(kube_prometheus_tarball):
-	local("curl -L https://api.github.com/repos/coreos/kube-prometheus/tarball/%s -o %s.tmp" % (kube_prometheus_version, kube_prometheus_tarball))
-	# only copy file to final location to prevent redoing the above if the above
-	# have completed successfully.
-	local("mv %s.tmp %s" % (kube_prometheus_tarball, kube_prometheus_tarball))
+        local("curl -sSL https://github.com/prometheus-operator/kube-prometheus/archive/refs/tags/v%s.tar.gz -o %s.tmp" % (kube_prometheus_version, kube_prometheus_tarball), echo_off=True)
+        # only copy file to final location to prevent redoing the above if the above
+        # have completed successfully.
+        local("mv %s.tmp %s" % (kube_prometheus_tarball, kube_prometheus_tarball), echo_off=True)
 
-    local("rm -rf %s.tmp && mkdir %s.tmp" % (extract_path, extract_path))
-    local("tar -C %s.tmp -xzf %s --strip-components=1 --wildcards 'prometheus-operator-kube-prometheus-*/manifests'" % (extract_path, kube_prometheus_tarball))
+    local("rm -rf %s.tmp && mkdir %s.tmp" % (extract_path, extract_path), echo_off=True)
+    local("tar -C %s.tmp -xzf %s --strip-components=1 'kube-prometheus-%s/manifests'" % (extract_path, kube_prometheus_tarball, kube_prometheus_version), echo_off=True)
 
     # only move path to final location if extraction completed successfully
-    local("rm -rf %s && mv %s.tmp %s" % (extract_path, extract_path, extract_path))
+    local("rm -rf %s && mv %s.tmp %s" % (extract_path, extract_path, extract_path), echo_off=True)
 
     # return path containing manifests directory
     return extract_path

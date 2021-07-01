@@ -5,6 +5,11 @@ cd $(dirname $0)
 set -ex
 cert_manager/test/test.sh
 configmap/test/test.sh
+
+# TODO(milas): the prometheus resources need more CPU than
+#   our CI KIND cluster can provide
+# coreos_prometheus/test/test.sh
+
 file_sync_only/test/test.sh
 git_resource/test/test.sh
 namespace/test/test.sh
