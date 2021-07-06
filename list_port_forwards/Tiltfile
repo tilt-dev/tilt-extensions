@@ -1,0 +1,4 @@
+local_resource(
+	"which_ports?",
+	"./display_port_forwards.sh"
+)
