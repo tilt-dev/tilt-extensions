@@ -2,4 +2,9 @@ load('../Tiltfile', 'cmd_button')
 
 local_resource('vigoda', cmd='echo "Hello from resource"')
 
-cmd_button("mybutton", "vigoda", ["bash", "-c", "echo Hello from bash ${BASH_VERSION}"], text='My Button')
+cmd_button("resource-button", resource="vigoda", argv=["bash", "-c", "echo Hello from bash ${BASH_VERSION}"], text='Resource Button', icon_name='star')
+
+goose_icon = read_file('./goose.svg')
+
+cmd_button('nav-button-svg', argv=["echo", "✨ Hello from SVG ✨"], icon_svg=goose_icon, nav=True, text='SVG Nav Button')
+cmd_button('nav-button-std', argv=["echo", "Hello from nav"], icon_name='calendar_today', nav=True)
