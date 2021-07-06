@@ -1,4 +1,7 @@
-local_resource(
-	"which_ports?",
-	"./display_port_forwards.sh"
-)
+def display_port_forwards():
+	local_resource(
+		"which_ports?",
+		"./display_port_forwards.sh"
+	)
+
+display_port_forwards()
