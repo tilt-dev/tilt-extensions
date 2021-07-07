@@ -22,6 +22,22 @@ Creates a button for a resource that runs the given command when clicked.
 | `icon_svg`  |  `str` or `Blob` | `<svg>` to use as icon; should have 24x24px viewport |
 | `nav`       | `bool`           | If `True`, button will appear in global nav; otherwise, will be in resource view for specified resource |
 
+## Example Usage
+
+```python
+load('ext://uibutton', 'cmd_button')
+
+# define resource 'my-resource'
+# k8s_resource('my-resource')
+
+# create a button on resource 'my-resource'
+cmd_button(name='my-resource-hello-world',
+           resource='my-resource',
+           argv=['echo', 'Hello World'],
+           text='Hello World',
+           icon_name='travel_explore')
+```
+
 ## Button Placement
 Currently, you can create buttons for a specific resource, which will be shown with other resource contextual actions such as "Copy Pod ID" or as part of the global nav next to the help and account buttons.
 
@@ -39,20 +55,33 @@ Any command output will appear in the "All Resources" log view under `(global)`.
 
 Global nav buttons SHOULD specify an icon via either the `icon_name` or `icon_svg` arguments. The `text` value will appear on hover.
 
-## Example Usage
+## Icons
+Button icons can either come from the set of built-in icons that ship with Tilt or a custom SVG.
 
-```
-load('ext://uibutton', 'cmd_button')
+Navbar buttons SHOULD include an icon as the button text is only visible on hover.
+For resource buttons, icons are optional and will appear within the button if specified.
 
-# define resource 'my-resource'
-# k8s_resource('my-resource')
+If both `icon_name` and `icon_svg`
 
-# create a button on resource 'my-resource'
-cmd_button(name='my-resource-hello-world',
-           resource='my-resource',
-           argv=['echo', 'Hello World'],
-           text='Hello World',
-           icon_name='travel_explore')
+### Built-in Icons (Material Icons)
+Tilt includes the [Material Icons][material-icons-font] by default.
+Use the `icon_name` argument and pass the "font ligature" value for your desired icon.
+The font ligatures are visible in the sidebar after clicking on an icon on the Material Fonts site.
+Tip: They are `lower_snake_case` values, e.g. the "Check Circle" icon has a font ligature value of `check_circle`.
+
+### Custom Icons (SVG)
+Use the `icon_svg` argument and pass a full `<svg>` element.
+The SVG viewport should be 24x24 for best results.
+
+To avoid string quoting issues, it's often easiest to load the SVG from disk rather than storing it directly in your Tiltfile:
+```python
+icon = read_file('./icon.svg')
+
+cmd_button('svg-btn',
+           argv=["echo", "✨ Hello from SVG ✨"],
+           icon_svg=icon,
+           nav=True,
+           text='SVG Nav Button') # text will appear on hover
 ```
 
 ## Other notes
