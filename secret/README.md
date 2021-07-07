@@ -26,7 +26,7 @@ secret_create_generic(name: str, namespace: str = "", from_file: Union[str, List
 Deploys a secret to the cluster. Equivalent to
 
 ```
-load('ext://namespace', 'secret_yaml_generic')
+load('ext://secret', 'secret_yaml_generic')
 k8s_yaml(secret_yaml_generic('name', from_file=[...]))
 ```
 
