@@ -1,3 +1,12 @@
+LOCATION_RESOURCE = 'resource'
+LOCATION_NAV = 'nav'
+
+location = struct(
+  RESOURCE = LOCATION_RESOURCE,
+  NAV = LOCATION_NAV,
+)
+
+
 def _button(name, location, text='', icon=None, annotations={}):
   text = text or name
   btn = {
@@ -25,24 +34,36 @@ def _button(name, location, text='', icon=None, annotations={}):
 
   return btn
 
-def cmd_button(name, resource='', argv=[], text='', icon_name='', icon_svg='', nav=False):
+
+def cmd_button(name, resource='', argv=[], text=None, location=LOCATION_RESOURCE, icon_name=None, icon_svg=None):
   if config.tilt_subcommand == 'down':
     return
 
-  if not nav and not resource:
-    fail('Must provide a resource name or nav=True')
+  if not location:
+    fail('location is required')
+
+  if location == LOCATION_RESOURCE:
+    if not resource:
+      fail('Must provide a resource name')
+  elif resource:
+    fail('Cannot specify resource for location type {}'.format(location))
 
   if not argv:
     fail('argv cannot be empty')
 
   btn_annotations = {}
-  if resource:
-    btn_annotations['tilt.dev/resource'] = resource
 
-  if nav:
+  if location == LOCATION_NAV:
     location=struct(type='Global', id='nav')
-  else:
+  elif location == LOCATION_RESOURCE:
     location=struct(type='Resource', id=resource)
+    btn_annotations['tilt.dev/resource'] = resource
+  else:
+    # fallback to simplify experimenting with new locations in the future
+    loc_type, sep, loc_id = location.partition('/')
+    if not sep:
+      fail('Unsupported location {}'.format(location))
+    location=struct(type=loc_type, id=loc_id)
 
   button = _button(
     name=name,
@@ -74,6 +95,7 @@ def cmd_button(name, resource='', argv=[], text='', icon_name='', icon_svg='', n
   local('echo "${TILT_APPLY_YAML}" | %s apply -f -' % (sys.executable,),
         env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
         echo_off=True)
+
 
 def _now():
   # this is portable across coreutils/busybox/BSD
