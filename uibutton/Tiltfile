@@ -1,27 +1,77 @@
-def cmd_button(name, resource, argv, text=''):
-  if config.tilt_subcommand == 'down':
-    return
+LOCATION_RESOURCE = 'resource'
+LOCATION_NAV = 'nav'
 
-  if not text:
-    text = name
+location = struct(
+  RESOURCE = LOCATION_RESOURCE,
+  NAV = LOCATION_NAV,
+)
 
-  button = {
+
+def _button(name, location, text='', icon=None, annotations={}):
+  text = text or name
+  btn = {
     "apiVersion": "tilt.dev/v1alpha1",
     "kind": "UIButton",
     "metadata": {
       "name": name,
-      "annotations": {
-        "tilt.dev/resource": resource,
-      }
+      "annotations": annotations
     },
     "spec": {
       "text": text,
       "location": {
-        "componentType": "Resource",
-        "componentID": resource,
+        "componentType": location.type,
+        "componentID": location.id,
       }
     }
   }
+
+  if icon:
+    if icon.svg:
+      # convert to str to handle str + Blob
+      btn['spec']['iconSVG'] = str(icon.svg)
+    elif icon.name:
+      btn['spec']['iconName'] = icon.name
+
+  return btn
+
+
+def cmd_button(name, resource='', argv=[], text=None, location=LOCATION_RESOURCE, icon_name=None, icon_svg=None):
+  if config.tilt_subcommand == 'down':
+    return
+
+  if not location:
+    fail('location is required')
+
+  if location == LOCATION_RESOURCE:
+    if not resource:
+      fail('Must provide a resource name')
+  elif resource:
+    fail('Cannot specify resource for location type {}'.format(location))
+
+  if not argv:
+    fail('argv cannot be empty')
+
+  btn_annotations = {}
+
+  if location == LOCATION_NAV:
+    location=struct(type='Global', id='nav')
+  elif location == LOCATION_RESOURCE:
+    location=struct(type='Resource', id=resource)
+    btn_annotations['tilt.dev/resource'] = resource
+  else:
+    # fallback to simplify experimenting with new locations in the future
+    loc_type, sep, loc_id = location.partition('/')
+    if not sep:
+      fail('Unsupported location {}'.format(location))
+    location=struct(type=loc_type, id=loc_id)
+
+  button = _button(
+    name=name,
+    location=location,
+    text=text,
+    icon=struct(name=icon_name, svg=icon_svg),
+    annotations=btn_annotations
+  )
   cmd = {
     "apiVersion": "tilt.dev/v1alpha1",
     "kind": "Cmd",
