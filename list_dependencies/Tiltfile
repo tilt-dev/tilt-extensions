@@ -1,23 +1,5 @@
 load('ext://uibutton', 'cmd_button')
 
-'''
-Set up dependency tree
-a <—— b
- ^——— c <—— d
-'''
-
-k8s_yaml('a.yaml')
-k8s_resource('a')
-
-k8s_yaml('b.yaml')
-k8s_resource('b', resource_deps=['a'])
-
-k8s_yaml('c.yaml')
-k8s_resource('c', resource_deps=['a', 'b'])
-
-k8s_yaml('d.yaml')
-k8s_resource('d', resource_deps=['c'])
-
 display_deps_path = os.path.join(os.getcwd(), 'deps.py')
 
 def display_dependencies():
@@ -28,5 +10,3 @@ def display_dependencies():
 		text = 'list pending dependencies',
 		icon_name = 'account_tree'
 	)
-
-display_dependencies()
