@@ -69,16 +69,20 @@ def format_list(mylist):
     else:
         return str(mylist[:-1])[1:-1] + " and '" + str(mylist[-1]) + "'"
 
-print(" (\___/)     (\___/)     (\___/)     (\___/)")
-print(" (• ┷ •)     (• ┷ •)     (• ┷ •)     (• ┷ •)")
 print("---- Resources waiting for dependencies ----")
 
+blocked_count = 0
 for node in g_f.keys():
     blocking = find_blocking(node)
     if len(blocking) > 0:
         print("Resource '" + node + "' is blocking on " + format_list(blocking) + ".")
+        blocked_count += 1
     # else:
     #     print("Resource '" + node + "' is not blocked by any dependencies.")
 
+if blocked_count == 0:
+    print("No resources blocked at the moment.")
 print("--------------------------------------------")
+print()
+
 
