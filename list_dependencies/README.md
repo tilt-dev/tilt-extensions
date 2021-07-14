@@ -2,9 +2,27 @@
 
 A simple extension that displays a list of which resources are being blocked by dependencies,
 as well as the specific dependencies they are waiting for, 
-via a UI button on the (Tiltfile) resource.
+via a UI button on the `(Tiltfile)` resource.
 
-It is also possible to do this on the command line using the `jq` utility to parse Tilt's engine state. 
+A sample output could look like this:
+```
+---- Resources waiting for dependencies ----
+Resource 'b' is blocking on 'a'.
+Resource 'c' is blocking on 'a' and 'b'.
+Resource 'd' is blocking on 'c'.
+--------------------------------------------
+```
+
+Or, if no resources are currently blocked, like this:
+```
+---- Resources waiting for dependencies ----
+No resources blocked at the moment.
+--------------------------------------------
+```
+
+It's possible to replicate this extension's functionality on the command line
+using the `jq` utility to parse Tilt's engine state. 
+
 1. find each resource's dependencies
 ```
 $ tilt dump engine | jq '.ManifestTargets[].Manifest | { name:.Name , deps:.ResourceDependencies } '
