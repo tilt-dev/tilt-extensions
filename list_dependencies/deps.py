@@ -40,9 +40,6 @@ for resInfo in data.values():
         resStatus = False
     node_ready[resName] = resStatus
 
-print(g_f)
-print(node_ready)
-
 # construct the reverse graph
 
 g_r = {}
@@ -56,8 +53,6 @@ for (start, neighbors) in g_f.items():
         for end in neighbors:
             g_r[end].append(start)
 
-print(g_r)
-
 # find blocking
 
 def find_blocking(node):
@@ -69,12 +64,21 @@ def find_blocking(node):
     return pending
 
 def format_list(mylist):
-    return str(mylist)[1:-1]
+    if len(mylist) < 2:
+        return str(mylist)[1:-1]
+    else:
+        return str(mylist[:-1])[1:-1] + " and '" + str(mylist[-1]) + "'"
 
-for node in g_r.keys():
+print(" (\___/)     (\___/)     (\___/)     (\___/)")
+print(" (• ┷ •)     (• ┷ •)     (• ┷ •)     (• ┷ •)")
+print("---- Resources waiting for dependencies ----")
+
+for node in g_f.keys():
     blocking = find_blocking(node)
     if len(blocking) > 0:
-        print("Resource \"" + node + "\" is blocking on " + format_list(blocking))
-    else:
-        print("Resource \"" + node + "\" is not blocked by any dependencies.")
+        print("Resource '" + node + "' is blocking on " + format_list(blocking) + ".")
+    # else:
+    #     print("Resource '" + node + "' is not blocked by any dependencies.")
+
+print("--------------------------------------------")
 
