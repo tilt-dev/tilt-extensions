@@ -8,14 +8,16 @@ def format_list(mylist):
     else:
         return str(mylist[:-1])[1:-1] + " and '" + str(mylist[-1]) + "'"
 
-def get_node_info():
-    stdout_str = subprocess.run(['tilt', 'dump', 'engine'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    data = json.loads(stdout_str)["ManifestTargets"]
+def get_node_dependencies():
+    node_str = subprocess.run(
+            ['tilt', 'dump', 'engine'], 
+            stdout=subprocess.PIPE,
+        ).stdout.decode('utf-8')
+    node_data = json.loads(node_str)["ManifestTargets"]
 
     dependencies = {}
-    node_ready = {}
 
-    for resInfo in data.values():
+    for resInfo in node_data.values():
         manifest = resInfo["Manifest"]
         resName = manifest["Name"]
         resDeps = manifest["ResourceDependencies"]
@@ -23,14 +25,32 @@ def get_node_info():
             resDeps = []
         dependencies[resName] = resDeps
 
-        pods = resInfo["State"]["RuntimeState"]["Pods"]
-        if resName in pods:
-            resStatus = pods[resName]["containers"][0]["ready"]
-        else:
-            resStatus = False
-        node_ready[resName] = resStatus
+    return dependencies
+    
+def get_node_status():
+    ready_str = subprocess.run(
+            ['tilt', 'get', 'kubernetesdiscovery', '-o', 'json'],
+            stdout=subprocess.PIPE,
+        ).stdout.decode('utf-8')
+    ready_data = json.loads(ready_str)["items"]
 
-    return (dependencies, node_ready)
+    ready = {}
+
+    for resInfo in ready_data:
+        resName = resInfo["metadata"]["name"]
+        pods = resInfo["status"]["pods"]
+        resStatus = False
+        if pods != None:
+            for pod in pods:
+                containers = pod["containers"]
+                for container in containers:
+                    resStatus = container["ready"]
+        ready[resName] = resStatus
+
+    return ready
+
+def keys_same(mapA, mapB):
+    return mapA.keys() == mapB.keys()
 
 def find_blocking(node, dependencies, ready):
     node_deps = dependencies[node]
@@ -56,5 +76,9 @@ def print_blocking(dependencies, ready):
     print("--------------------------------------------")
     print()
 
-(deps, ready) = get_node_info()
-print_blocking(deps, ready)
+deps = get_node_dependencies()
+ready = get_node_status()
+if not keys_same(deps, ready):
+    print("Mismatched dependency and status information -- please retry")
+else:
+    print_blocking(deps, ready)
