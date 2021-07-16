@@ -9,6 +9,7 @@ TILT_PID=$!
 sleep 1
 timeout 30 tail -f tilt.log  | grep -q "verify │ SUCCESS!"
 RESULT=$?
+cat tilt.log
 
 kill $TILT_PID
 tilt down
