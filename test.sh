@@ -28,3 +28,4 @@ tilt_inspector/test/test.sh
 tests/golang/test/test.sh
 tests/javascript/test/test.sh
 uibutton/test/test.sh
+list_dependencies/test/test.sh
