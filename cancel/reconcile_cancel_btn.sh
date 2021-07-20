@@ -32,13 +32,11 @@ if [[ "$resource" == "null" ]]; then
     exit 0
 fi
 
-# Ignore cmds that don't to the Tiltfile or a local_resource.
+# Ignore cmds that don't belong to the Tiltfile or a local_resource.
 owner_kind=$(echo "$cmd" | jq -r '.metadata.labels["tilt.dev/owner-kind"]')
-echo "kind 1 $owner_kind"
 if [[ "$owner_kind" == "null" ]]; then
     # gahhhhh
     owner_kind=$(echo "$cmd" | jq -r '.metadata.annotations["tilt.dev/owner-kind"]')
-    echo "kind 2 $owner_kind"
 fi
 if [[ "$owner_kind" != "Tiltfile" && "$owner_kind" != "CmdServer" ]]; then
     exit 0

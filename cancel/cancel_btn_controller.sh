@@ -11,7 +11,7 @@ set -eou pipefail
 
 echo "operator:cancel runs in the background and listens to Tilt
 
-When there are commands to cancel, operator/cancel adds a Cancel button to the Tilt UI
+When there are commands to cancel, operator:cancel adds a Cancel button to the Tilt UI
 "
 
 # Currently, we only watch Cmds.
