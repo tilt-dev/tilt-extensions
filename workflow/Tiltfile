@@ -1,4 +1,4 @@
-import subprocess
+load('ext://uibutton', 'cmd_button')
 
 cmds = [
         ['echo', 'hi'],
@@ -10,52 +10,20 @@ cmds = [
 
 clear_cmd = ['echo', 'resetting...']
 
-def set_work_cmds():
-    # TODO write the work commands into a file
-    pass
-
-def set_clear_cmd():
-    # TODO: write the clear command into a file
-    pass
-
 index = 0
 
-def advance_index():
-    index = (index + 1) % len(cmds)
-    write_index()
+def set_work_cmds():
+    local(['write_workflow.sh', cmds...])
 
-def prev_index():
-    index = (index - 1) % len(cmds)
-    write_index()
+def set_clear_cmd():
+    local(['write_reset.sh', clear_cmd...])
 
-def reset_index():
-    index = 0
-    write_index()
+def play():
+    local(['play.sh'])
 
-def is_last_step(i):
-    return i == len(cmds)-1
+def replay():
+    local(['replay.sh'])
 
-def run_current():
-    # TODO: run current command
-    pass
-
-def write_index():
-    # TODO: write index value into file
-    pass
-
-def run_next():
-    if is_last_step(index):
-        start_over()
-        print('workflow finished, starting over')
-    else:
-        advance_index()
-        run_current()
-
-def rerun():
-    run_current()
-
-def start_over():
-    subprocess.run(clear_cmd)
-    reset_index()
-    pass
+def rewind():
+    local(['rewind.sh'])
 
