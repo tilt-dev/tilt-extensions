@@ -1,15 +1,43 @@
 load('ext://uibutton', 'cmd_button')
 
-def set_work_cmds(work_cmds):
-    cmds = ['./write_workflow.sh']
+def set_work_cmds(flow_name, res_name, work_cmds):
+    cmds = ['./write_workflow.sh', flow_name, res_name]
     for i in work_cmds:
         cmds.append(" ".join(i))
     local(cmds)
 
-def set_clear_cmd(clear_cmd):
-    cmd = ['./write_reset.sh']
+def set_clear_cmd(flow_name, res_name, clear_cmd):
+    cmd = ['./write_reset.sh', flow_name, res_name]
     cmd.append(" ".join(clear_cmd))
     local(cmd)
+
+def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
+
+	set_work_cmds(workflow_name, resource_name, work_cmds)
+	set_clear_cmd(workflow_name, resource_name, clear_cmd)
+
+	local(['./write_index.sh', workflow_name, resource_name, '0'])
+
+	cmd_button(
+		name = '%s-%s-play' % (workflow_name, resource_name),
+		resource = resource_name,
+		argv = ['./play.sh', workflow_name, resource_name],
+		icon_name = 'play_arrow',
+	)
+
+	cmd_button(
+		name = '%s-%s-replay' % (workflow_name, resource_name),
+		resource = resource_name,
+		argv = ['./replay.sh', workflow_name, resource_name],
+		icon_name = 'replay',
+	)
+
+	cmd_button(
+		name = '%s-%s-rewind' % (workflow_name, resource_name), 
+		resource = resource_name,
+		argv = ['./rewind.sh', workflow_name, resource_name],
+		icon_name = 'fast_rewind',
+	)
 
 test_cmds = [
         ['echo', 'hi'],
@@ -19,34 +47,28 @@ test_cmds = [
         ['echo', 'bye'],
     ]
 
+test_clear = ['echo', 'resetting...']
+
+
 local_resource(
-	name='data-workflow',
+	name='database',
 	cmd=['echo', 'Workflow Time(TM)'],
 )
 
-test_clear = ['echo', 'resetting...']
-
-set_work_cmds(test_cmds)
-set_clear_cmd(test_clear)
-
-cmd_button(
-	name='play',
-	resource='data-workflow',
-	argv=['./play.sh'],
-	icon_name='play_arrow',
+workflow('test', 
+	resource_name='database',
+	work_cmds=test_cmds,
+	clear_cmd=test_clear,
 )
 
-cmd_button(
-	name='replay',
-	resource='data-workflow',
-	argv=['./replay.sh'],
-	icon_name='replay',
+workflow('test2',
+	resource_name='database',
+	work_cmds=test_cmds,
+	clear_cmd=test_clear,
 )
 
-cmd_button(
-	name='rewind', 
-	resource='data-workflow',
-	argv=['./rewind.sh'],
-	icon_name='fast_rewind',
+workflow('test',
+	resource_name='(Tiltfile)',
+	work_cmds=test_cmds,
+	clear_cmd=test_clear,
 )
-

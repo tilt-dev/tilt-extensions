@@ -1,12 +1,21 @@
 #!/usr/bin/env bash 
 
-if [ "$#" -ne 1 ]; then
-	echo "usage: $0 <index>"
+set -eou pipefail
+
+if [ $# -ne 3 ]
+then
+	echo "usage: $0 <workflow_name> <resource_name> <index>"
 	exit 1
-fi
+fi 
 
-echo "$1" > workflow_index.tmp
+resource_name=$1
+workflow_name=$2
+index=$3
 
-echo "file workflow_index.tmp now contains:"
-cat workflow_index.tmp
+indexfile="workflow_index-$resource_name-$workflow_name.tmp"
+
+echo "$index" > $indexfile
+
+echo "file $indexfile now contains:"
+cat $indexfile
 
