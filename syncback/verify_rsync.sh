@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 function rsync_complain() {
-  echo $1
+  echo "$1"
   echo "Install/update with your favorite package manager or download from:"
-  echo -e "\thttps://github.com/WayneD/rsync/releases"
+  echo -e "  https://github.com/WayneD/rsync/releases"
   exit 1
 }
 
@@ -25,4 +25,4 @@ function verify_rsync_version_at_least() {
   fi
 }
 
-verify_rsync_version_at_least $1
+verify_rsync_version_at_least "$1"

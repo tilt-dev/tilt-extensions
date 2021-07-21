@@ -49,7 +49,7 @@ if [[ "$pid" == "" || "$pid" == "null" ]]; then
 fi
 
 # TODO(nick): Add Icons to the buttons
-dir=$(realpath $(dirname "$0"))
+dir=$(realpath "$(dirname "$0")")
 cat <<EOF | tilt apply -f -
 apiVersion: tilt.dev/v1alpha1
 kind: UIButton

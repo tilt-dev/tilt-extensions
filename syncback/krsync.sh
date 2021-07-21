@@ -15,7 +15,7 @@ if [ -z "$KRSYNC_STARTED" ]; then
   export K8S_OBJECT=$1
   shift
   export KRSYNC_STARTED=true
-  exec rsync --rsync-path=$rsync_path --blocking-io --rsh "$0" $@
+  exec rsync --rsync-path=$rsync_path --blocking-io --rsh "$0" "$@"
 fi
 
 # Running as --rsh
@@ -33,12 +33,13 @@ fi
 
 # ensure our rsync bin is present on container in the expected location
 set +e # disable exit on error
-kubectl exec $K8S_OBJECT -- ls $rsync_path > /dev/null 2>&1
+kubectl exec "$K8S_OBJECT" -- ls "$rsync_path" > /dev/null 2>&1
 exit_code="$?"
 set -e
 if [[ "$exit_code" != "0" ]]; then
-  cat $tar_path_local | kubectl $namespace exec -i $K8S_OBJECT -- tar -xf - -C /bin/
+  # shellcheck disable=SC2002
+  cat "$tar_path_local" | kubectl "$namespace" exec -i "$K8S_OBJECT" -- tar -xf - -C /bin/
 fi
 
-exec kubectl $namespace exec -i $K8S_OBJECT -- "$@"
+exec kubectl "$namespace" exec -i "$K8S_OBJECT" -- "$@"
 
