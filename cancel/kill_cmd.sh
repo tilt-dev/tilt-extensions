@@ -15,12 +15,12 @@ set -euo pipefail
 CMD_NAME="$1"
 shift
 
-PID=$(tilt get cmd "$CMD_NAME" -o jsonpath={.status.running.pid})
+PID=$(tilt get cmd "$CMD_NAME" -o "jsonpath={.status.running.pid}")
 if [[ "$PID" == "" ]]; then
     echo "Cmd $CMD_NAME not running"
     exit 1
 fi
 
-kill "$PID" $@
+kill "$PID" "$@"
 
 

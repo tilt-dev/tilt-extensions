@@ -15,7 +15,7 @@ When there are commands to cancel, operator:cancel adds a Cancel button to the T
 "
 
 # Currently, we only watch Cmds.
-tilt get cmd --watch -o name | while read cmd_full_name; do
+tilt get cmd --watch -o name | while read -r cmd_full_name; do
     cmd_short_name=${cmd_full_name#cmd.tilt.dev/}
     ./reconcile_cancel_btn.sh "$cmd_short_name"
 done
