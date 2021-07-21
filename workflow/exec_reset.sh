@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-for l in reset_cmds.tmp
+cat reset_cmds.tmp | while read CMD_LINE
 do
-	echo "executing command: '$l'"
-	$l
+	echo "executing command: '$CMD_LINE'"
+	$CMD_LINE
 done
 

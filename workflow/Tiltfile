@@ -1,29 +1,52 @@
 load('ext://uibutton', 'cmd_button')
 
-cmds = [
+def set_work_cmds(work_cmds):
+    cmds = ['./write_workflow.sh']
+    for i in work_cmds:
+        cmds.append(" ".join(i))
+    local(cmds)
+
+def set_clear_cmd(clear_cmd):
+    cmd = ['./write_reset.sh']
+    cmd.append(" ".join(clear_cmd))
+    local(cmd)
+
+test_cmds = [
         ['echo', 'hi'],
-        ['echo', 'second step']
-        ['echo', 'third step']
-        ['echo', 'fourth step']
-        ['echo', 'bye']
+        ['echo', 'second step'],
+        ['echo', 'third step'],
+        ['echo', 'fourth step'],
+        ['echo', 'bye'],
     ]
 
-clear_cmd = ['echo', 'resetting...']
+local_resource(
+	name='data-workflow',
+	cmd=['echo', 'Workflow Time(TM)'],
+)
 
-index = 0
+test_clear = ['echo', 'resetting...']
 
-def set_work_cmds():
-    local(['write_workflow.sh', cmds...])
+set_work_cmds(test_cmds)
+set_clear_cmd(test_clear)
 
-def set_clear_cmd():
-    local(['write_reset.sh', clear_cmd...])
+cmd_button(
+	name='play',
+	resource='data-workflow',
+	argv=['./play.sh'],
+	icon_name='play_arrow',
+)
 
-def play():
-    local(['play.sh'])
+cmd_button(
+	name='replay',
+	resource='data-workflow',
+	argv=['./replay.sh'],
+	icon_name='replay',
+)
 
-def replay():
-    local(['replay.sh'])
-
-def rewind():
-    local(['rewind.sh'])
+cmd_button(
+	name='rewind', 
+	resource='data-workflow',
+	argv=['./rewind.sh'],
+	icon_name='fast_rewind',
+)
 
