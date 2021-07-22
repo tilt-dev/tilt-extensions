@@ -21,6 +21,7 @@ def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
 	cmd_button(
 		name = '%s-%s-play' % (workflow_name, resource_name),
 		resource = resource_name,
+		text = '%s-play' % (workflow_name),
 		argv = ['./play.sh', workflow_name, resource_name],
 		icon_name = 'play_arrow',
 	)
@@ -28,6 +29,7 @@ def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
 	cmd_button(
 		name = '%s-%s-replay' % (workflow_name, resource_name),
 		resource = resource_name,
+		text = '%s-replay' % (workflow_name),
 		argv = ['./replay.sh', workflow_name, resource_name],
 		icon_name = 'replay',
 	)
@@ -35,6 +37,7 @@ def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
 	cmd_button(
 		name = '%s-%s-rewind' % (workflow_name, resource_name), 
 		resource = resource_name,
+		text = '%s-rewind' % (workflow_name),
 		argv = ['./rewind.sh', workflow_name, resource_name],
 		icon_name = 'fast_rewind',
 	)
@@ -61,6 +64,7 @@ workflow('test',
 	clear_cmd=test_clear,
 )
 
+'''
 workflow('test2',
 	resource_name='database',
 	work_cmds=test_cmds,
@@ -72,3 +76,4 @@ workflow('test',
 	work_cmds=test_cmds,
 	clear_cmd=test_clear,
 )
+'''
