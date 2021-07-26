@@ -41,5 +41,5 @@ if [[ "$exit_code" != "0" ]]; then
   cat "$tar_path_local" | kubectl "${namespace_args[@]}" exec -i "$K8S_OBJECT" -- tar -xf - -C /bin/
 fi
 
-exec kubectl "${namespace[@]}" exec -i "$K8S_OBJECT" -- "$@"
+exec kubectl "${namespace_args[@]}" exec -i "$K8S_OBJECT" -- "$@"
 
