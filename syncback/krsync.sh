@@ -19,7 +19,7 @@ if [ -z "$KRSYNC_STARTED" ]; then
 fi
 
 # Running as --rsh
-namespace=''
+namespace_args=()
 depl=$1
 shift
 
@@ -27,7 +27,7 @@ shift
 if [ "X$depl" = "X-l" ]; then
     depl=$1
     shift
-    namespace="-n $1"
+    namespace_args=(-n "$1")
     shift
 fi
 
@@ -38,8 +38,8 @@ exit_code="$?"
 set -e
 if [[ "$exit_code" != "0" ]]; then
   # shellcheck disable=SC2002
-  cat "$tar_path_local" | kubectl "$namespace" exec -i "$K8S_OBJECT" -- tar -xf - -C /bin/
+  cat "$tar_path_local" | kubectl "${namespace_args[@]}" exec -i "$K8S_OBJECT" -- tar -xf - -C /bin/
 fi
 
-exec kubectl "$namespace" exec -i "$K8S_OBJECT" -- "$@"
+exec kubectl "${namespace_args[@]}" exec -i "$K8S_OBJECT" -- "$@"
 
