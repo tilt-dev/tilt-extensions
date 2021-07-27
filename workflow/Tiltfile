@@ -1,13 +1,15 @@
 load('ext://uibutton', 'cmd_button')
 
+cwd = os.getcwd()
+
 def set_work_cmds(flow_name, res_name, work_cmds):
-    cmds = ['./write_workflow.sh', flow_name, res_name]
+    cmds = [ os.path.join(cwd, 'write_workflow.sh'), flow_name, res_name ]
     for i in work_cmds:
         cmds.append(" ".join(i))
     local(cmds)
 
 def set_clear_cmd(flow_name, res_name, clear_cmd):
-    cmd = ['./write_reset.sh', flow_name, res_name]
+    cmd = [ os.path.join(cwd, 'write_reset.sh'), flow_name, res_name ]
     cmd.append(" ".join(clear_cmd))
     local(cmd)
 
@@ -16,13 +18,13 @@ def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
 	set_work_cmds(workflow_name, resource_name, work_cmds)
 	set_clear_cmd(workflow_name, resource_name, clear_cmd)
 
-	local(['./write_index.sh', workflow_name, resource_name, '0'])
+	local([ os.path.join(cwd, 'write_index.sh'), workflow_name, resource_name, '0' ])
 
 	cmd_button(
 		name = '%s-%s-play' % (workflow_name, resource_name),
 		resource = resource_name,
 		text = '%s-play' % (workflow_name),
-		argv = ['./play.sh', workflow_name, resource_name],
+		argv = [ os.path.join(cwd, 'play.sh'), workflow_name, resource_name ],
 		icon_name = 'play_arrow',
 	)
 
@@ -30,7 +32,7 @@ def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
 		name = '%s-%s-replay' % (workflow_name, resource_name),
 		resource = resource_name,
 		text = '%s-replay' % (workflow_name),
-		argv = ['./replay.sh', workflow_name, resource_name],
+		argv = [ os.path.join(cwd, 'replay.sh'), workflow_name, resource_name ],
 		icon_name = 'replay',
 	)
 
@@ -38,42 +40,7 @@ def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
 		name = '%s-%s-rewind' % (workflow_name, resource_name), 
 		resource = resource_name,
 		text = '%s-rewind' % (workflow_name),
-		argv = ['./rewind.sh', workflow_name, resource_name],
+		argv = [ os.path.join(cwd, 'rewind.sh'), workflow_name, resource_name ],
 		icon_name = 'fast_rewind',
 	)
 
-test_cmds = [
-        ['echo', 'hi'],
-        ['echo', 'second step'],
-        ['echo', 'third step'],
-        ['echo', 'fourth step'],
-        ['echo', 'bye'],
-    ]
-
-test_clear = ['echo', 'resetting...']
-
-
-local_resource(
-	name='database',
-	cmd=['echo', 'Workflow Time(TM)'],
-)
-
-workflow('test', 
-	resource_name='database',
-	work_cmds=test_cmds,
-	clear_cmd=test_clear,
-)
-
-'''
-workflow('test2',
-	resource_name='database',
-	work_cmds=test_cmds,
-	clear_cmd=test_clear,
-)
-
-workflow('test',
-	resource_name='(Tiltfile)',
-	work_cmds=test_cmds,
-	clear_cmd=test_clear,
-)
-'''
