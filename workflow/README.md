@@ -5,6 +5,15 @@ Attach a workflow, or series of commands, to a resource.
 ```
 workflow(workflow_name : string, resource_name : string, work_cmds=[[]] : [[string]], clear_cmd=[]: [string])
 ```
+Where `work_cmds` is an array of argv, and `clear_cmd` is a single argv. For example:
+```
+workflow(
+	'my-workflow',
+	'my-resource',
+	[ ['echo', '1st'], ['echo', '2nd'], ['echo', '3rd'] ],
+	['echo', 'resetting...'],
+)
+```
 
 Each invocation of `workflow` creates a set of three buttons in the tilt UI:
 * `play`: run the next command.
