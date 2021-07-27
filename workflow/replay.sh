@@ -8,4 +8,4 @@ then
 	exit 1
 fi
 
-./exec_workflow.sh $@
+./exec_workflow.sh "$@"

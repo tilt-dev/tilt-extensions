@@ -13,10 +13,10 @@ workflow_name=$2
 
 cmdfile="workflow_cmds-$resource_name-$workflow_name.tmp"
 
-rm -f $cmdfile
+rm -f "$cmdfile"
 shift 2
 for i in "$@"
 do
-	echo "$i" >> $cmdfile
+	echo "$i" >> "$cmdfile"
 done
 

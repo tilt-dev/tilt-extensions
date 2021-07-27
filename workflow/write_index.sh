@@ -14,5 +14,5 @@ index=$3
 
 indexfile="workflow_index-$resource_name-$workflow_name.tmp"
 
-echo "$index" > $indexfile
+echo "$index" > "$indexfile"
 

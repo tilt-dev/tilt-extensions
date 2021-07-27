@@ -8,5 +8,5 @@ then
 	exit 1
 fi
 
-./write_index.sh $@ 0
-./exec_reset.sh $@
+./write_index.sh "$@" 0
+./exec_reset.sh "$@"

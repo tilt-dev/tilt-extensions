@@ -13,10 +13,10 @@ workflow_name=$2
 
 resetfile="reset_cmds-$resource_name-$workflow_name.tmp"
 
-rm -f $resetfile
+rm -f "$resetfile"
 shift 2
 for i in "$@"
 do
-	echo "$i" >> $resetfile
+	echo "$i" >> "$resetfile"
 done
 

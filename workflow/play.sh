@@ -8,5 +8,5 @@ then
 	exit 1
 fi
 
-./increment_index.sh $@
-./exec_workflow.sh $@
+./increment_index.sh "$@"
+./exec_workflow.sh "$@"
