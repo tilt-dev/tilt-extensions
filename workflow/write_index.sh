@@ -16,6 +16,3 @@ indexfile="workflow_index-$resource_name-$workflow_name.tmp"
 
 echo "$index" > $indexfile
 
-echo "file $indexfile now contains:"
-cat $indexfile
-

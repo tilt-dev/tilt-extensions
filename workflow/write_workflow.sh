@@ -20,6 +20,3 @@ do
 	echo "$i" >> $cmdfile
 done
 
-echo "file workflow_cmds.tmp now contains:"
-cat $cmdfile
-

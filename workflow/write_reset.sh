@@ -20,6 +20,3 @@ do
 	echo "$i" >> $resetfile
 done
 
-echo "file $resetfile now contains:"
-cat $resetfile
-
