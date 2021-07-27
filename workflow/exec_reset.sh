@@ -11,9 +11,8 @@ fi
 resource_name=$1
 workflow_name=$2
 
-cat "reset_cmds-$resource_name-$workflow_name.tmp" | while read -r CMD_LINE
+while read -r CMD_LINE
 do
-	# echo "executing command: '$CMD_LINE'"
 	$CMD_LINE
-done
+done < "reset_cmds-$resource_name-$workflow_name.tmp"
 

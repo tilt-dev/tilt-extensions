@@ -8,5 +8,5 @@ then
 	exit 1
 fi
 
-"$(dirname $0)/increment_index.sh" "$@"
-"$(dirname $0)/exec_workflow.sh" "$@"
+"$(dirname "$0")/increment_index.sh" "$@"
+"$(dirname "$0")/exec_workflow.sh" "$@"
