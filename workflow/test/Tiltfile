@@ -13,7 +13,7 @@ test_clear = ['echo', 'resetting...']
 
 local_resource(
 	name='database',
-	cmd=['echo', 'Workflow Time(TM)'],
+	cmd=['echo', 'Workflow Test'],
 )
 
 workflow('test', 

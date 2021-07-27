@@ -5,12 +5,14 @@ cwd = os.getcwd()
 def set_work_cmds(flow_name, res_name, work_cmds):
     cmds = [ os.path.join(cwd, 'write_workflow.sh'), flow_name, res_name ]
     for i in work_cmds:
-        cmds.append(" ".join(i))
+        safe_quoted = [shlex.quote(arg) for arg in i]
+        cmds.append(" ".join(safe_quoted))
     local(cmds, echo_off=True)
 
 def set_clear_cmd(flow_name, res_name, clear_cmd):
     cmd = [ os.path.join(cwd, 'write_reset.sh'), flow_name, res_name ]
-    cmd.append(" ".join(clear_cmd))
+    safe_quoted = [shlex.quote(arg) for arg in clear_cmd]
+    cmd.append(" ".join(safe_quoted))
     local(cmd, echo_off=True)
 
 def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
