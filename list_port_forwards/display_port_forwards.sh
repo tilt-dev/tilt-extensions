@@ -5,7 +5,7 @@ set -euo pipefail
 command -v jq >/dev/null || (echo "jq not installed :(" && exit 1)  # ensure jq is installed
 
 echo "__(.)= __(.)=    =(.)__ =(.)__"
-echo "\___)  \___)      (___/  (___/"
+echo "\\___)  \\___)      (___/  (___/"
 
 echo "---- Port forwards in use ----"
 
