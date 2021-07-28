@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd $(dirname $0)
+cd "$(dirname "$0")"
 
 set -ex
 cert_manager/test/test.sh

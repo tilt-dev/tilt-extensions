@@ -30,6 +30,16 @@ Deploys a config map. Equivalent to
 k8s_yaml(configmap_yaml('name', from_file=[...]))
 ```
 
+### configmap_from_dict
+
+```
+configmap_from_dict(name: str, namespace: str = "", inputs: Dict[str, str]] = None): Blob
+```
+
+Returns YAML for a config map generated from a given dictionary. Nested dictionaries are not supported
+
+* `inputs` ( dict ) – equivalent to `kubectl create configmap --from-literal` for each key and value
+
 ## Example Usage
 
 ### For a Grafana config
