@@ -21,5 +21,5 @@ if [[ "$WORKFLOW_INDEX" -eq "0" ]] ; then
 	exit 0
 fi
 
-$(head -n "$WORKFLOW_INDEX" "$cmdsfile" | tail -n 1)
-
+cmd=$(head -n "${WORKFLOW_INDEX}" "${cmdsfile}" | tail -n 1)
+eval "${cmd}"
