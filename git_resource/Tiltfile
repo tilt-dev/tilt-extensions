@@ -136,7 +136,7 @@ def _parse_repository_url(url):
     if is_ssh:
         url = 'git@' + url
 
-    repository_name = str(local('basename %s .git' % url, quiet=True)).strip()
+    repository_name = os.path.basename(url).rstrip('.git')
 
     return url, repository_name, tree
 
