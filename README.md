@@ -21,6 +21,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`helm_remote`](/helm_remote): Install a remote Helm chart (in a way that gets properly uninstalled when running `tilt down`)
 - [`jest_test_runner`](/jest_test_runner): Jest JavaScript test runner. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
 - [`ko`](/ko): Use [Ko](https://github.com/google/ko) to build Go-based container images
+- [`kubectl_build`](/kubectl_build): Get faster build cycles and smaller disk usage by building docker images directly in the k8s cluster with [BuildKit CLI for kubectl](https://github.com/vmware-tanzu/buildkit-cli-for-kubectl).
 - [`kubebuilder`](/kubebuilder): Enable live-update for developing [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) projects.
 - [`local_output`](/local_output): Run a `local` command and get the output as string
 - [`min_k8s_version`](/min_k8s_version): Require a minimum Kubernetes version to run this Tiltfile.
