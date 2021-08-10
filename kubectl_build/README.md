@@ -1,4 +1,4 @@
-# Kubebuilder
+# kubectl_build
 
 Author: [Gaëtan Lehmann](https://github.com/glehmann)
 
@@ -14,12 +14,14 @@ Having the images built directly in the cluster has several benefits:
 
 `kubectl build` must be installed on your computer. See [BuildKit CLI for kubectl's Getting started](https://github.com/vmware-tanzu/buildkit-cli-for-kubectl#getting-started) for instructions.
 
-Load the extension in your `Tiltfile`, and replace the `docker_build()` call by `kubectl_build()`.
+Load the extension in your `Tiltfile`, and replace the [`docker_build`][docker_build] calls by `kubectl_build`.
 
 ``` python
 load('ext://kubebuilder', 'kubectl_build')
 kubectl_build('gcr.io/foo/bar', '.')
 ```
+
+`kubectl_build` supports the same arguments than [`docker_build`][docker_build] (with a few exceptions, see the Limitations section).
 
 ## Pulling image from private repository
 
@@ -35,15 +37,17 @@ You may also set the `KUBECTL_BUILD_REGISTRY_SECRET` environment variable with t
 
 ## Limitations
 
-`kubectl_build` supports almost all the `docker_build` arguments, excepted:
+`kubectl_build` supports almost all the [`docker_build`][docker_build] arguments, except:
 
-* `dockerfile_contents`
-* `only`
 * `container_args`
+* `dockerfile_contents`
 * `network`
+* `only`
 
 some of these arguments may be added in the future (a pull request is welcome!).
 
 BuildKit CLI for kubectl doesn't support `env` secrets at this time, so you have to convert them to file to use this extension.
 
-BuildKit CLI for kubectl doesn't support all the local k8s clusters — k3d, for example, is know to not be supported.
+BuildKit CLI for kubectl doesn't support all the local k8s clusters equally — k3d, for example, is known to [not be supported](https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/blob/main/docs/installing.md#k3d); with kind, the image tag [must include the repository name](https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/issues/79).
+
+[docker_build]: https://docs.tilt.dev/api.html#api.docker_build
