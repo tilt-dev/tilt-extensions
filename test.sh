@@ -41,4 +41,5 @@ do
   else
     echo "skipping $TEST"
   fi
-done < <(find ./* -name test.sh -print0)
+# `git ls-files` instead of `find` to ensure we skip stuff like .git and ./git_resource/test/.git-sources
+done < <(git ls-files -z "**/test.sh")
