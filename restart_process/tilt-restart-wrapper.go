@@ -41,11 +41,12 @@ import (
 
 var watchFile = flag.String("watch_file", "/.restart-proc", "File that entr will watch for changes; changes to this file trigger `entr` to rerun the command(s) passed")
 var entrPath = flag.String("entr_path", "/entr", "Path to `entr` executable")
+var entrFlags = flag.String("entr_flags", "-rz", "Command line flags to pass to `entr` executable")
 
 func main() {
 	flag.Parse()
 
-	cmd := exec.Command(*entrPath, "-rz")
+	cmd := exec.Command(*entrPath, *entrFlags)
 	cmd.Stdin = strings.NewReader(fmt.Sprintf("%s\n", *watchFile))
 	cmd.Args = append(cmd.Args, flag.Args()...)
 	cmd.Stdout = os.Stdout

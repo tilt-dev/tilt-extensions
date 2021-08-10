@@ -22,6 +22,8 @@ fi
 grep -q "Are you there, pod?" tilt.log
 GREP_EXIT=$?
 
+cat tilt.log
+
 rm tilt.log
 
 exit $GREP_EXIT
