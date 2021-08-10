@@ -1,2 +1,2 @@
-def local_output(command, quiet=False, command_bat='', echo_off=False, env={}, dir=''):
-  return str(local(command, quiet=quiet, command_bat=command_bat, echo_off=echo_off, env=env, dir=dir)).rstrip('\n')
+def local_output(*args, **kwargs):
+  return str(local(*args, **kwargs)).rstrip('\n')
