@@ -11,7 +11,10 @@ fi
 resource_name=$1
 workflow_name=$2
 
-cmdfile="workflow_cmds-$resource_name-$workflow_name.tmp"
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+state_dir="${TILT_WORKFLOW_STATE_PATH:-$script_dir}"
+
+cmdfile="${state_dir}/workflow_cmds-$resource_name-$workflow_name.tmp"
 
 rm -f "$cmdfile"
 shift 2
@@ -19,4 +22,3 @@ for i in "$@"
 do
 	echo "$i" >> "$cmdfile"
 done
-
