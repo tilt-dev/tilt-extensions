@@ -19,7 +19,12 @@ def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
     set_work_cmds(workflow_name, resource_name, work_cmds)
     set_clear_cmd(workflow_name, resource_name, clear_cmd)
 
-    local([ os.path.join(cwd, 'write_index.sh'), workflow_name, resource_name, '0' ], echo_off=True)
+    # only reset the workflow on initial load
+    # TODO(milas): using a Tilt ConfigMap would be a better solution
+    workflow_init_key = 'TILT_WORKFLOW_INIT_{}'.format(workflow_name.lower())
+    if not os.getenv(workflow_init_key):
+        local([ os.path.join(cwd, 'write_index.sh'), workflow_name, resource_name, '0' ], echo_off=True)
+        os.putenv(workflow_init_key, '1')
 
     cmd_button(
         name = '%s-%s-play' % (workflow_name, resource_name),
