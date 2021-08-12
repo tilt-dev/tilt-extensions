@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  shellcheck: circleci/shellcheck@2.2.4
 jobs:
   validate:
     docker:
@@ -10,6 +8,14 @@ jobs:
       - checkout
       - run: GOBIN=$HOME/.bin go get github.com/tilt-dev/tilt-extensions-ci && go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
       - run: $HOME/.bin/tilt-extensions-ci .
+
+  shellcheck:
+    docker:
+      - image: tiltdev/tilt-extensions-ci@sha256:1fef97113de8538066e67d220367d953056993aca333382aca1e91b35c907bf4
+
+    steps:
+      - checkout
+      - run: make shellcheck
 
   test:
     docker:
@@ -25,6 +31,6 @@ workflows:
   version: 2
   build:
     jobs:
-      - shellcheck/check
       - validate
+      - shellcheck
       - test
