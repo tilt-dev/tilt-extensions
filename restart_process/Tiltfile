@@ -29,7 +29,8 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
     df = '''
-    FROM tiltdev/restart-helper:2021-08-05v2 as restart-helper
+    FROM tiltdev/restart-helper:2021-08-09 as restart-helper
+
     FROM {}
     RUN ["touch", "{}"]
     COPY --from=restart-helper /tilt-restart-wrapper /
@@ -67,6 +68,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
                               trigger=None, entr_flags=None, **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
+
      Args:
       ref: name for this image (e.g. 'myproj/backend' or 'myregistry/myproj/backend'); as the parameter of the same name in docker_build
       context: path to use as the Docker build context; as the parameter of the same name in docker_build

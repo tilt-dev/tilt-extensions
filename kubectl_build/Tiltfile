@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+def kubectl_build(ref, context, build_args={}, dockerfile='Dockerfile', live_update=[],
+                  match_in_env_vars=False, ignore=[], entrypoint=[], target='', ssh='',
+                  secret='', extra_tag='', cache_from=[], pull=False,
+                  registry_secret=None):
+    # incompatible parameters with docker_build:
+    # dockerfile_contents
+    # only
+    # container_args
+    # network
+    registry_secret = registry_secret or os.environ.get('KUBECTL_BUILD_REGISTRY_SECRET', 'docker-registry')
+    command = ['kubectl', 'build', '--context', k8s_context()]
+    command += ['-f', context + '/' + dockerfile]
+    if registry_secret:
+        command += ['--registry-secret', registry_secret]
+    for arg, value in build_args.items():
+        command += ['--build-arg', arg + '=', value]
+    if target:
+        command += ['--target', target]
+    if extra_tag:
+        if type(extra_tag) == 'string':
+            command += ['-t', extra_tag]
+        else:
+            for t in extra_tag:
+                command += ['-t', t]
+    if pull:
+        command += ['--pull']
+    for c in cache_from:
+        command += ['--cache-from', c]
+    if ssh:
+        if type(ssh) == 'string':
+            command += ['--ssh', ssh]
+        else:
+            for s in ssh:
+                command += ['--ssh', s]
+    if secret:
+        if type(secret) == 'string':
+            command += ['--secret', secret]
+        else:
+            for s in secret:
+                command += ['--secret', s]
+    command = [shlex.quote(c) for c in command]
+    command += ['-t', '$EXPECTED_REF']
+    command += [shlex.quote(context)]
+    command = ' '.join(command)
+
+    custom_build(ref, command, [context], disable_push=True, skips_local_docker=True, live_update=live_update,
+                 match_in_env_vars=match_in_env_vars, ignore=ignore, entrypoint=entrypoint)
