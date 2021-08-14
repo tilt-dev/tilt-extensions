@@ -22,7 +22,9 @@ function delete_children {
     exit 0
 }
 
-if [[ "$cmd" == "" ]]; then
+# Check if the object has been deleted.
+name_in_json=$(echo "$cmd" | jq -r '.metadata.name')
+if [[ "$name_in_json" == "null" ]]; then
     delete_children
 fi
 
@@ -35,17 +37,20 @@ fi
 # Ignore cmds that don't belong to the Tiltfile or a local_resource.
 owner_kind=$(echo "$cmd" | jq -r '.metadata.labels["tilt.dev/owner-kind"]')
 if [[ "$owner_kind" == "null" ]]; then
-    # gahhhhh
     owner_kind=$(echo "$cmd" | jq -r '.metadata.annotations["tilt.dev/owner-kind"]')
+fi
+if [[ "$owner_kind" == "null" ]]; then
+    owner_kind=$(echo "$cmd" | jq -r '.metadata.ownerReferences[0]["kind"]')
 fi
 if [[ "$owner_kind" != "Tiltfile" && "$owner_kind" != "CmdServer" ]]; then
     exit 0
 fi
 
-# If the command isn't running or doesn't exist, delete any existing button.
+# If the command isn't running or doesn't exist, disable the button
 pid=$(echo "$cmd" | jq -r '.status.running.pid')
+disabled="false"
 if [[ "$pid" == "" || "$pid" == "null" ]]; then
-    delete_children
+    disabled="true"
 fi
 
 # TODO(nick): Add Icons to the buttons
@@ -56,6 +61,7 @@ kind: UIButton
 metadata:
   name: $cancel_button_name
 spec:
+  disabled: $disabled
   text: Cancel
   location:
     componentType: resource
