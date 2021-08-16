@@ -36,8 +36,6 @@ against the Tilt APIServer. This controller is written in bash.
 - Support for cancelling other built-in types, like Kubernetes deploys and
 Docker builds.
 
-- Integration tests.
-
 - Icons
 
 - Escalating signals (if you hit cancel twice, it should send a KILL instead of
