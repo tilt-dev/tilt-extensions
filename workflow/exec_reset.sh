@@ -11,8 +11,10 @@ fi
 resource_name=$1
 workflow_name=$2
 
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+state_dir="${TILT_WORKFLOW_STATE_PATH:-$script_dir}"
+
 while read -r CMD_LINE
 do
 	$CMD_LINE
-done < "reset_cmds-$resource_name-$workflow_name.tmp"
-
+done < "${state_dir}/workflow_reset_cmds-$resource_name-$workflow_name.tmp"
