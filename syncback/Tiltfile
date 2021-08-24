@@ -11,7 +11,7 @@ local('{} {}'.format(verify_rsync_path, MIN_LOCAL_RSYNC_VERSION))
 
 DEFAULT_EXCLUDES = ['.git', '.gitignore', '.dockerignore', 'Dockerfile', '.tiltignore', 'Tiltfile', 'tilt_modules']
 
-def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False):
+def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False, labels=[]):
     """
     Create a local resource that will (via rsync) sync the specified files
     from the specified k8s object to the local filesystem.
@@ -33,6 +33,8 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
     :param container (str, optiona): name of the container to sync from (by default, the first container)
     :param namespace (str, optiona): namespace of the desired k8s_object, if not `default`.
     :param verbose (bool, optional): if true, print additional rsync information.
+    :param labels (Union[str, List[str]], optional): Used to group resources in the Web UI.
+    if true, print additional rsync information.
     :return:
     """
 
@@ -91,7 +93,7 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
     local_resource(name, '{krsync} {obj} {flags} --progress --stats {delete} -T=/tmp/rsync.tilt {include_exclude} {remote}:{src} {target}'.
                    format(krsync=krsync_path, obj=k8s_object, flags=flags, delete=delete_flag,
                           include_exclude=incl_excl, remote=remote_name, src=src_dir, target=target_dir),
-               trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False)
+               trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False, labels=labels)
 
     # TODO: not necessarily manual/can link up to a resource as a dep
 
