@@ -1,0 +1,4 @@
+local_resource(
+  name='kubefwd:run',
+  serve_cmd='./sudo-kubefwd.sh',
+  deps=['sudo-kubefwd.sh', 'run-kubefwd.sh'])
