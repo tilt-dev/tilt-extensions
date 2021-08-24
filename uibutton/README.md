@@ -30,10 +30,21 @@ To specify button location, you can bind the `location` helper type or pass a st
 | Resource   | `resource`  | `location.RESOURCE` |
 | Global nav | `nav`       | `location.NAV`      |
 
+### `text_input`
+Specifies that the button's UI will include a text field the user can enter.
+The field's current value will be set in the command's env when it is run.
+
+| Argument      | Type  | Description |
+| ------------- | ----- | ----------- |
+| `name`        | `str` | The text input's name. Also the name of the environment variable to be set when running the command. |
+| `label`       | `str` | Text to display next to the text input in the UI. |
+| `default`     | `str` | Default initial value for this field. |
+| `placeholder` | `str` | A short hint that describes the expected input of this field. |
+
 ## Example Usage
 
 ```python
-load('ext://uibutton', 'cmd_button', 'location')
+load('ext://uibutton', 'cmd_button', 'location', 'text_input')
 
 # define resource 'my-resource'
 # k8s_resource('my-resource')
@@ -50,6 +61,17 @@ cmd_button(name='nav-hello-world',
            text='Hello World',
            location=location.NAV,
            icon_name='waving_hand')
+
+cmd_button(name='foo',
+           resource='my-resource',
+           text='Reseed database',
+           inputs=[
+             text_input('SHARD'),
+           ],
+           # If you need env var expansion *within the command itself*
+           # you'll need to run it via a shell.
+           argv=['/bin/sh', '-c', './reseed_database.sh --shard="$SHARD"'],
+   )
 ```
 
 ## Button Placement
@@ -99,6 +121,37 @@ cmd_button('svg-btn',
            icon_svg=icon,
            text='SVG Nav Button') # text will appear on hover
 ```
+
+## Inputs
+If a button has inputs, the UI will attach an arrow to the button, allowing the
+user to set those inputs' values.
+When the button is clicked, those input's values will be set as environment
+variables in the executed process.
+For example:
+```python
+cmd_button('hello',
+           argv=['sh', '-c', 'echo Hello, $NAME'],
+           location=location.NAV,
+           icon_name='front_hand',
+           text='Hello!',
+           inputs=[
+             text_input('NAME', placeholder='Enter your name'),
+           ]
+)
+```
+
+This will create a button (top right) with an options menu (opened by the little arrow):
+![screenshot of button with options menu](assets/button_with_input.png)
+
+When the user clicks the button to run its command, `$NAME` will be set
+to the field's value, e.g.:
+
+```
+Running cmd: echo Hello, $NAME
+Hello, there
+```
+
+Note that if the command needs an env var expanded inside the command itself (e.g., it directly uses `$NAME`, rather than simply invoking a program that uses `$NAME`), it will need to be wrapped in a shell call, e.g. ['sh', '-c', 'mycommand $NAME'].
 
 ## Other notes
 
