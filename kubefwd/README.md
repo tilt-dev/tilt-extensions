@@ -34,6 +34,9 @@ privileges.
 The `kubefwd` operator will watch Tilt to see what namespaces you're deploying
 to, then configure `kubefwd` for that namespace.
 
+If `kubefwd` gets wedged, Tilt has a custom button to the UI to refresh it.
+Click the `kubefwd:run` resource and press the button labelled "Refresh".
+
 ## Future Work
 
 ### Pod Discovery
