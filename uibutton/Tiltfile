@@ -21,10 +21,12 @@ def _button(name, location, text='', icon=None, annotations={}, inputs=[]):
       "location": {
         "componentType": location.type,
         "componentID": location.id,
-      },
-      "inputs": inputs,
+      }
     }
   }
+
+  if len(inputs):
+    btn["spec"]["inputs"] = inputs
 
   if icon:
     if icon.svg:
