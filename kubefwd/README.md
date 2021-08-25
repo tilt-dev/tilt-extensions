@@ -27,9 +27,12 @@ v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-ex
 v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd')
 ```
 
-When Tilt starts up for the first time, 
-it will prompt up your native OS GUI for your sudo password.
-Only `kubefwd` and its operator will get the `sudo` privileges.
+When Tilt starts up for the first time, it will prompt up your native OS GUI for
+your sudo password.  Only `kubefwd` and its operator will get the `sudo`
+privileges.
+
+The `kubefwd` operator will watch Tilt to see what namespaces you're deploying
+to, then configure `kubefwd` for that namespace.
 
 ## Future Work
 
@@ -49,19 +52,13 @@ Possible solutions:
 Currently, this extension uses `entr` to restart `kubefwd`
 without requesting new credentials.
 
-### Namespaces
-
-Currently, kubefwd only works for the `default` namespace.
-
-In a follow-up PR, I want to add a controller that auto-configures kubefwd
-for whatever namespaces you're deploying to.
-
 ### Kubefwd without deploys
 
-The default mode of this extension is going to be to run kubefwd for namespaces
+The default mode of this extension is to run kubefwd for namespaces
 where you're deploying.
 
-In the future, we'd like to be able to support kubefwd for manually-configured namespaces.
+In the future, we'd like to be able to support kubefwd for manually-configured
+namespaces.
 
 For example, you might be running `kubefwd` against a read-only cluster,
 and only running local services for editing.

@@ -1,5 +1,4 @@
 trigger_file = str(local('mktemp --suffix -tilt-kubefwd')).strip()
-local(['chmod', 'a+rw', trigger_file], quiet=True)
 
 # Creates a button that refreshes the kubefwd without
 # requiring new credentials.
@@ -8,4 +7,4 @@ local(['./create-refresh-button.sh', trigger_file])
 local_resource(
   name='kubefwd:run',
   serve_cmd=['./sudo-kubefwd.sh', trigger_file],
-  deps=['sudo-kubefwd.sh', 'run-kubefwd.sh'])
+  deps=['sudo-kubefwd.sh', 'run-kubefwd.sh', 'run-kubefwd-internal.sh'])
