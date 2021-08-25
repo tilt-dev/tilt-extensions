@@ -15,6 +15,8 @@ https://kubefwd.com/
 
 - `bash`
 - `kubefwd`
+- `entr`
+- GNU core utils (`tr`, `sort`) - `brew install coreutils`
 
 ## Usage
 
@@ -27,9 +29,25 @@ v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefw
 
 When Tilt starts up for the first time, 
 it will prompt up your native OS GUI for your sudo password.
-Only `kubefwd` will get the `sudo` privileges.
+Only `kubefwd` and its operator will get the `sudo` privileges.
 
 ## Future Work
+
+### Pod Discovery
+
+If a pod inside the cluster restarts, you need to reboot `kubefwd`.  You can do
+this manually from the tilt UI (the refresh button) or from the CLI with `tilt
+trigger kubefwd:run`.  Could we do something more automatic?
+
+Possible solutions:
+
+1) A system that watches the Tilt `KubernetesDiscovery` API and
+  restarts it for you whenever the pods change.
+  
+2) Even better, a version of `kubefwd` that reads the pods from the Tilt API.
+
+Currently, this extension uses `entr` to restart `kubefwd`
+without requesting new credentials.
 
 ### Namespaces
 
@@ -38,15 +56,20 @@ Currently, kubefwd only works for the `default` namespace.
 In a follow-up PR, I want to add a controller that auto-configures kubefwd
 for whatever namespaces you're deploying to.
 
-### Pod Discovery
+### Kubefwd without deploys
 
-If a pod inside the cluster restarts, you need to reboot `kubefwd`.  You can do
-this manually from the tilt UI (the refresh button) or from the CLI with `tilt
-trigger kubefwd`.  Could we do something more automatic?
+The default mode of this extension is going to be to run kubefwd for namespaces
+where you're deploying.
 
-Possible solutions:
+In the future, we'd like to be able to support kubefwd for manually-configured namespaces.
 
-1) A system that watches the Tilt `KubernetesDiscovery` API and
-  restarts it for you whenever the pods change.
-  
-2) Even better, a version of `kubefwd` that reads the pods from the Tilt API.
+For example, you might be running `kubefwd` against a read-only cluster,
+and only running local services for editing.
+
+### Multi-cluster kubefwd
+
+Long-term, we'd like to be able to run kubefwd against multiple clusters at once
+(e.g., a read-only staging cluster and a writable dev cluster and a local KIND
+cluster.)
+
+
