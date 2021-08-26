@@ -115,3 +115,18 @@ def text_input(name, label='', default='', placeholder=''):
       "placeholder": placeholder,
     }
   }
+
+def bool_input(name, label='', default=False, true_string=None, false_string=None):
+  result = {
+    "name": name,
+    "label": label,
+    "bool": {
+      "defaultValue": default,
+    },
+  }
+  if true_string != None:
+    result["bool"]["trueString"] = true_string
+  if false_string != None:
+    result["bool"]["falseString"] = false_string
+
+  return result
