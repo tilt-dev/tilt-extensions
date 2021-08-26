@@ -90,10 +90,19 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
     delete_flag = ''
     if delete:
         delete_flag = '--delete'
+
+    # Ensure extra kwargs are only passed to local_resource if specified to
+    # provide backward compatibility with older version of tilt.
+
+    extra_args = {}
+
+    if labels:
+        extra_args["labels"] = labels
+
     local_resource(name, '{krsync} {obj} {flags} --progress --stats {delete} -T=/tmp/rsync.tilt {include_exclude} {remote}:{src} {target}'.
                    format(krsync=krsync_path, obj=k8s_object, flags=flags, delete=delete_flag,
                           include_exclude=incl_excl, remote=remote_name, src=src_dir, target=target_dir),
-               trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False, labels=labels)
+               trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False, **extra_args)
 
     # TODO: not necessarily manual/can link up to a resource as a dep
 
