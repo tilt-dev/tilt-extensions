@@ -30,7 +30,7 @@ To specify button location, you can bind the `location` helper type or pass a st
 | Resource   | `resource`  | `location.RESOURCE` |
 | Global nav | `nav`       | `location.NAV`      |
 
-### `text_input`
+### `text_input(name, label='', default='', placeholder='')`
 Specifies that the button's UI will include a text field the user can enter.
 The field's current value will be set in the command's env when it is run.
 
@@ -40,6 +40,19 @@ The field's current value will be set in the command's env when it is run.
 | `label`       | `str` | Text to display next to the text input in the UI. |
 | `default`     | `str` | Default initial value for this field. |
 | `placeholder` | `str` | A short hint that describes the expected input of this field. |
+
+### `bool_input(name, label='', default=False, true_string=None, false_string=None)`
+Specifies that the button's UI will include a checkbox to toggle this value.
+When the command is run, an environment variable will be set based on the
+checkbox's state. By default, the variable will be set to the string `"true"` or `"false"`, as appropriate. Those values can be configured with the `true_string` and `false_string` parameters.
+
+| Argument       | Type   | Description |
+| -------------- | -----  | ----------- |
+| `name`         | `str`  | The input's name. Also the name of the environment variable to be set when running the command. |
+| `label`        | `str`  | Text to display next to the input in the UI. |
+| `default`      | `bool` | Default initial value for this field. |
+| `true_string`  | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "true". |
+| `false_string` | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "false". |
 
 ## Example Usage
 
