@@ -58,7 +58,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
     # ======== Helper methods
     def get_local_repo(repo_name, repo_url):
         # if no repos are present, helm exit code is >0 and stderr output buffered
-        added_helm_repos = decode_yaml(local('helm repo list --output yaml 2>/dev/null || true', command_bat='helm repo list --output yaml 2>&1 || ver>nul', quiet=True))
+        added_helm_repos = decode_yaml(local('helm repo list --output yaml 2>/dev/null || true', command_bat='helm repo list --output yaml 2> nul || ver>nul', quiet=True))
         repo = [item for item in added_helm_repos if item['name'] == chart and item['url'] == repo_url] if added_helm_repos != None else []
 
         return repo[0] if len(repo) > 0 else None
