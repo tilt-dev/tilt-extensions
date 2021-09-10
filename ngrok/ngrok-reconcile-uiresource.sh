@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+# Reconcilation for each uiresource.
+#
+# Given the name of a UIResource, we check:
+# 1) Does it have any localhost links?
+# 2) If so, attach an ngrok button that enables/disables the tunnel
+
+set -euo pipefail
+
+name="$1"
+echo "reconciling $name"
+
+disabled="true"
+ports=()
+links="$(tilt get uiresource "$name" -o jsonpath='{range .status.endpointLinks[*]}{.url}{"\n"}{end}')"
+for link in $links;
+do
+    host="localhost"
+    port="$(echo "$link" | sed -e "s|^http://$host:\([0-9]*\).*|\1|")"
+    if [[ "$port" != "$link" ]]; then
+        ports+=("$port")
+        disabled="false"
+    fi
+done
+
+child_name="ngrok:$name"
+if [[ "$disabled" == "true" ]]; then
+    tilt delete uibutton "$child_name" --ignore-not-found
+    tilt delete configmap "$child_name" --ignore-not-found
+    tilt delete cmd "$child_name" --ignore-not-found
+    exit 0
+fi
+
+cm_enabled="$(tilt get configmap "$child_name" --ignore-not-found -o jsonpath='{.data.enabled}')"
+if [[ "$cm_enabled" == "" ]]; then
+    cat <<EOF | tilt apply -f -
+apiVersion: tilt.dev/v1alpha1
+kind: ConfigMap
+metadata:
+  name: "$child_name"
+  labels:
+    tilt.dev/managed-by: tilt-extensions.ngrok
+data:
+  ports: "${ports[@]}"
+  resource: "$name"
+  enabled: "false"
+EOF
+    cm_enabled="false"
+fi
+
+text="start ngrok"
+if [[ "$cm_enabled" == "true" ]]; then
+    text="stop ngrok"
+fi
+
+dir=$(realpath "$(dirname "$0")")
+cat <<EOF | tilt apply -f -
+apiVersion: tilt.dev/v1alpha1
+kind: UIButton
+metadata:
+  name: "$child_name"
+  annotations:
+    tilt.dev/resource: "$name"
+    tilt.dev/log-span-id: "$child_name"
+  labels:
+    tilt.dev/managed-by: tilt-extensions.ngrok
+spec:
+  text: "$text"
+  location:
+    componentType: resource
+    componentID: $name
+---
+apiVersion: tilt.dev/v1alpha1
+kind: Cmd
+metadata:
+  name: "$child_name"
+  annotations:
+    tilt.dev/resource: "$name"
+    tilt.dev/log-span-id: "$child_name"
+  labels:
+    tilt.dev/managed-by: tilt-extensions.ngrok
+spec:
+  args: ["./toggle-ngrok.sh", "$name"]
+  dir: "$dir"
+  startOn:
+    uiButtons:
+    - "$child_name"
+EOF

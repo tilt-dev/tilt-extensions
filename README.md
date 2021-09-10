@@ -28,6 +28,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`min_k8s_version`](/min_k8s_version): Require a minimum Kubernetes version to run this Tiltfile.
 - [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
 - [`namespace`](/namespace): Functions for interacting with namespaces.
+- [`ngrok`](/ngrok): Expose public URLs for your services with [`ngrok`](https://ngrok.com/).
 - [`pack`](/pack): Build container images using [pack](https://buildpacks.io/docs/install-pack/) and [buildpacks](https://buildpacks.io/).
 - [`podman`](/podman): Build container images using [podman](https://podman.io)
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
