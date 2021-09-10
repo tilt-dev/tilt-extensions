@@ -18,14 +18,21 @@ https://kubefwd.com/
 - `entr`
 - GNU core utils (`tr`, `sort`) - `brew install coreutils`
 
-## Usage
-
-Add these lines to your Tiltfile:
+## Examples
 
 ```python
+# kubefwd all namespaces Tilt deploys to.
 v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
 v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd')
 ```
+
+```python
+# kubefwd all namespaces Tilt deploys to + manually configured additional namespace 'kubesystem'.
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--namespaces=kubesystem'])
+```
+
+## Usage
 
 When Tilt starts up for the first time, it will prompt up your native OS GUI for
 your sudo password.  Only `kubefwd` and its operator will get the `sudo`
@@ -54,17 +61,6 @@ Possible solutions:
 
 Currently, this extension uses `entr` to restart `kubefwd`
 without requesting new credentials.
-
-### Kubefwd without deploys
-
-The default mode of this extension is to run kubefwd for namespaces
-where you're deploying.
-
-In the future, we'd like to be able to support kubefwd for manually-configured
-namespaces.
-
-For example, you might be running `kubefwd` against a read-only cluster,
-and only running local services for editing.
 
 ### Multi-cluster kubefwd
 
