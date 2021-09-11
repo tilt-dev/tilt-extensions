@@ -20,18 +20,31 @@ Every service with a link or port-forward will have a new button labelled 'ngrok
 Clicking the button will create a new tunnel. You can see all the currently
 open tunnels at http://localhost:4040/.
 
+## Flags
+
+`--auth=user:password`: Adds a basic auth prompt to all tunnels.
+
 ## Examples
+
+Default behavior:
 
 ```python
 v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
 v1alpha1.extension(name='ngrok:config', repo_name='default', repo_path='ngrok')
 ```
 
+With auth:
+
+```python
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(
+  name='ngrok:config', 
+  repo_name='default', 
+  repo_path='ngrok', 
+  args=['--auth=user:password'])
+```
+
 ## Future Work
-
-### Authentication
-
-Add a way to add password authentication too all ngrok tunnels.
 
 ### Allowlist/blocklist
 

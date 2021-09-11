@@ -1,4 +1,8 @@
 
+config.define_string("auth")
+cfg = config.parse()
+
+auth = cfg.get('auth', '')
 config_file = str(local('mktemp --suffix -tilt-ngrok.yml')).strip()
 
 local_resource(
@@ -10,4 +14,5 @@ local_resource(
 local_resource(
   name='ngrok:operator',
   serve_cmd=['./ngrok-operator.sh', config_file],
+  serve_env={'TILT_NGROK_AUTH': auth},
   deps=['./ngrok-operator.sh'])
