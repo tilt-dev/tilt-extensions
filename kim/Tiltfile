@@ -1,0 +1,29 @@
+
+# -*- mode: Python -*-
+
+def kim_build(ref, context, ignore=None, extra_flags=None):
+  """Use kim (https://github.com/rancher/kim) to build images for Tilt.
+  Args:
+    ref: The name of the image to build. Must match the image
+      name in the Kubernetes resources you're deploying.
+    context: The build context of the binary to build. Expressed as a file path.
+    ignore: Changes to the given files or directories do not trigger rebuilds.
+      Does not affect the build context.
+    extra_flags: Extra flags to pass to kim build. Expressed as an argv-style array.
+  """
+  extra_flags = extra_flags or []
+  extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
+
+  push_cmd = "echo already pushed $EXPECTED_REF"
+
+  custom_build(
+    ref=ref,
+    command=(
+      "set -ex\n" +
+      "kim build -t $EXPECTED_REF %s %s\n" +
+      push_cmd
+    ) % (extra_flags_str, shlex.quote(context)),
+    ignore=ignore,
+    deps=[context],
+    skips_local_docker=True,
+  )
