@@ -17,7 +17,7 @@ Having the images built directly in the cluster has several benefits:
 Load the extension in your `Tiltfile`, and replace the [`docker_build`][docker_build] calls by `kubectl_build`.
 
 ``` python
-load('ext://kubebuilder', 'kubectl_build')
+load('ext://kubectl_build', 'kubectl_build')
 kubectl_build('gcr.io/foo/bar', '.')
 ```
 
