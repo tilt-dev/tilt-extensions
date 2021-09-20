@@ -35,7 +35,7 @@ def tarfetch(
         paths specified, if relative, should be relative to this dir.
     :param target_dir (str, optional): directory ON THE LOCAL FS to sync to. Defaults to '.'
     :param namespace (str, optional): namespace of the desired k8s_object, if not `default`.
-    :param container (str, optiona): name of the container to sync from (by default,
+    :param container (str, optional): name of the container to sync from (by default,
         the first container)
     :param ignore (List[str], optional): patterns to ignore when syncing, see
         `tar --exclude` documentation for details on supported patterns.
