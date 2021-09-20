@@ -37,6 +37,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
 - [`syncback`](/syncback): Sync files/directories from your container back to your local FS.
+- [`tarfetch`](/tarfetch): Fetch new and updated files from a container to your local FS.
 - [`tests`](/tests): Some common configurations for running your tests in Tilt.
 - [`tilt_inspector`](/tilt_inspector): Debugging server for exploring internal Tilt state.
 - [`uibutton`](/uibutton): Customize your Tilt dashboard with [buttons to run a command](https://blog.tilt.dev/2021/06/21/uibutton.html).
