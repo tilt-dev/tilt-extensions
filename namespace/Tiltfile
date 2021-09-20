@@ -1,22 +1,34 @@
 # -*- mode: Python -*-
 
-def namespace_yaml(name):
+def namespace_yaml(name, annotations=[], labels=[]):
   """Returns YAML for a namespace
 
   Args:
     name: The namespace name. Currently not validated.
+    annotations: Annotations applied to the namespace metadata
+    labels: Labels applied to the namespace metadata
 
   Returns:
     The namespace YAML as a blob
   """
+  annotations_str = ''
+  labels_str = ''
+  if (len(annotations) > 0):
+    annotations_str = """  annotations:
+%s
+""" % '\n'.join(["    %s" % s for s in annotations])
+  if (len(labels) > 0):
+    labels_str = """  labels:
+%s
+""" % '\n'.join(["    %s" % s for s in labels])
 
   return blob("""apiVersion: v1
 kind: Namespace
 metadata:
   name: %s
-""" % name)
+%s%s""" % (name, annotations_str, labels_str))
 
-def namespace_create(name, allow_duplicates=False):
+def namespace_create(name, allow_duplicates=False, annotations=[], labels=[]):
   """Creates a namespace in the current Kubernetes cluster.
 
   Args:
@@ -24,8 +36,13 @@ def namespace_create(name, allow_duplicates=False):
     allow_duplicates: Whether or not k8s should be allowed to have two
       instances of the same resource. Useful if you have more than one
       Tiltfile trying to create the same namespace.
+    annotations: Annotations applied to the namespace metadata
+    labels: Labels applied to the namespace metadata
   """
-  k8s_yaml(namespace_yaml(name), allow_duplicates=allow_duplicates)
+  k8s_yaml(
+    namespace_yaml(name, annotations=annotations, labels=labels),
+    allow_duplicates=allow_duplicates
+  )
 
 def namespace_inject(x, ns):
   """Takes K8s yaml, sets its namespace to `ns`, and returns it as a blob.
