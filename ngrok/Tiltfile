@@ -1,0 +1,13 @@
+
+config_file = str(local('mktemp --suffix -tilt-ngrok.yml')).strip()
+
+local_resource(
+  name='ngrok:status',
+  serve_cmd=['./ngrok-run.sh', config_file],
+  links=['http://localhost:4040/'],
+  deps=['./ngrok-run.sh', config_file])
+
+local_resource(
+  name='ngrok:operator',
+  serve_cmd=['./ngrok-operator.sh', config_file],
+  deps=['./ngrok-operator.sh'])
