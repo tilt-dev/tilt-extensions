@@ -13,12 +13,14 @@ cm="$(tilt get configmap "$child_name" -o json)"
 enabled="$(echo "$cm" | jq -r ".data.enabled")"
 new_val="true"
 new_text="stop ngrok"
+new_icon="stop_circle"
 if [[ "$enabled" == "true" ]]; then
     new_val="false"
     new_text="start ngrok"
+    new_icon="play_circle_outline"
 fi
 
-tilt patch uibutton "$child_name" -p "{\"spec\":{\"text\":\"$new_text\"}}"
+tilt patch uibutton "$child_name" -p "{\"spec\":{\"text\":\"$new_text\", \"iconName\":\"$new_icon\"}}"
 tilt patch configmap "$child_name" -p "{\"data\":{\"enabled\":\"$new_val\"}}"
 
 if [[ "$enabled" != "true" ]]; then

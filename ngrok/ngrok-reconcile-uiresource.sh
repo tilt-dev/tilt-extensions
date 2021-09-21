@@ -34,24 +34,14 @@ fi
 
 cm_enabled="$(tilt get configmap "$child_name" --ignore-not-found -o jsonpath='{.data.enabled}')"
 if [[ "$cm_enabled" == "" ]]; then
-    cat <<EOF | tilt apply -f -
-apiVersion: tilt.dev/v1alpha1
-kind: ConfigMap
-metadata:
-  name: "$child_name"
-  labels:
-    tilt.dev/managed-by: tilt-extensions.ngrok
-data:
-  ports: "${ports[@]}"
-  resource: "$name"
-  enabled: "false"
-EOF
     cm_enabled="false"
 fi
 
 text="start ngrok"
+icon_name="play_circle_outline"
 if [[ "$cm_enabled" == "true" ]]; then
     text="stop ngrok"
+    icon_name="stop_circle"
 fi
 
 dir=$(realpath "$(dirname "$0")")
@@ -67,6 +57,7 @@ metadata:
     tilt.dev/managed-by: tilt-extensions.ngrok
 spec:
   text: "$text"
+  iconName: "$icon_name"
   location:
     componentType: resource
     componentID: $name
@@ -86,4 +77,15 @@ spec:
   startOn:
     uiButtons:
     - "$child_name"
+---
+apiVersion: tilt.dev/v1alpha1
+kind: ConfigMap
+metadata:
+  name: "$child_name"
+  labels:
+    tilt.dev/managed-by: tilt-extensions.ngrok
+data:
+  ports: "${ports[@]}"
+  resource: "$name"
+  enabled: "$cm_enabled"
 EOF

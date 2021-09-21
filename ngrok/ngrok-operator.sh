@@ -16,7 +16,6 @@ function reconcile_uiresource() {
 
 function reconcile_config() {
     tilt get configmap --watch -o name | while read -r name; do
-        short=${name#configmap.tilt.dev/}
         ./ngrok-reconcile-config.sh "$config_file"
     done
 }
