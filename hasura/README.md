@@ -12,7 +12,7 @@ This extension deploys [Hasura Graphql Engine](https://hasura.io/), runs the Has
 
 Basic usage
 
-```sh
+```python
 load('ext://hasura', 'hasura')
 
 hasura()
@@ -39,8 +39,20 @@ The full list of parameters accepted by `hasura` includes:
 - `resource_name` defaults to `'hasura'`
 - `port` is the host port Hasura is redirected to, defaults to `8080`
 - `postgres_port` defaults to `5432`
+- `repository` of the Hasura image, defaults to `'hasura/graphql-engine'`
 - `tag` of the Hasura image, defaults to `'latest'`
 - `hasura_secret` defaults to `'hasura-dev-secret'`
 - `postgresql_password` defaults to `'development-postgres-password'`. Be careful: this password is persisted in the Postgres PV, so a password change while the PV already exists won't have any effect. Let's wait for [this](https://github.com/helm/charts/issues/5167) or [that](https://github.com/bitnami/charts/issues/2061).
 - `yaml` to define a Kubernetes resources to deploy Hasura instead of the default Helm Chart, defaults to `''`
-- `registry` from which images should be pulled, defaults to `quay.io/jetstack`
+- `console`, defaults to `True`. If set to false, it won't run the Hasura console locally, therefore won't apply migrations and metadata.
+
+### Use the Hasura console as a side-car
+
+You may want to start the console at a different time:
+
+```python
+load('ext://hasura', 'hasura')
+load('ext://hasura', 'hasura_console')
+hasura(console=False)
+hasura_console(wait_for_services=['http://another-service/healthz'])
+```

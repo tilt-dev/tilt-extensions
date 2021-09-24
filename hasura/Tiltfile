@@ -6,16 +6,63 @@ load('ext://helm_remote', 'helm_remote')
 def wait_for(url):
     return """while [[ "$(curl -s -o /dev/null -w ''%{{http_code}}'' {})" != "200" ]]; do sleep 5; done""".format(url)
 
+DEFAULT_HASURA_SECRET = 'hasura-dev-secret'
+DEFAULT_HASURA_PORT = 8080
+DEFAULT_HASURA_RESOURCE_NAME = 'hasura'
+
+def hasura_console(release_name='',
+            path='.', 
+            hasura_resource_name=DEFAULT_HASURA_RESOURCE_NAME,
+            port=DEFAULT_HASURA_PORT, 
+            hasura_secret=DEFAULT_HASURA_SECRET,
+            wait_for_services=[]):
+    endpoint = 'http://localhost:{}'.format(port)
+    # * Wait for Hasura, then run the console locally
+    #  ? fetch admin secret from k8s?
+    #  "--admin-secret `kubectl get secret {} -o jsonpath='{{.data.adminSecret}}' | base64 -D`".format(hasura_resource),
+    console_options = '--project {} --endpoint {} --admin-secret {}'.format(
+        path,
+        endpoint,
+        hasura_secret
+    )
+    config = read_yaml(os.path.join(path, 'config.yaml'), False)
+    if not config:
+        local('mkdir -p {}'.format(os.path.join(path, '..')))
+        local('hasura init {} --version 3 --endpoint {}'.format(path, endpoint))
+        # * Bug in the latest hasura cli version - set metadata version.yaml to 3
+        # local('echo "version: 3" > {}'.format(
+        #     os.path.join(path, 'metadata/version.yaml')))
+
+    serve_cmds = [
+        'hasura migrate apply {} --all-databases'.format(console_options),
+        'hasura metadata apply {}'.format(console_options),
+        'hasura console {}'.format(console_options)
+    ]
+    hasura_resource = '{}-{}'.format(release_name,
+                                     hasura_resource_name) if release_name else hasura_resource_name
+    console_resource = '{}-hasura-console'.format(
+        release_name) if release_name else 'hasura-console'
+    local_resource(console_resource,
+                    '\n'.join([wait_for(x) for x in wait_for_services + ['{}/healthz'.format(endpoint)]]),
+                   resource_deps=[hasura_resource],
+                   serve_cmd=' && '.join(serve_cmds),
+                   allow_parallel=True,
+                   links=[link('http://localhost:9695/', 'Hasura Console')],
+                   )
+
 
 def hasura(release_name='',
            path='.',
-           resource_name='hasura',
-           port=8080,
+           resource_name=DEFAULT_HASURA_RESOURCE_NAME,
+           port=DEFAULT_HASURA_PORT,
            postgres_port=5432,
+           repository='hasura/graphql-engine'
            tag='latest',
-           hasura_secret='hasura-dev-secret',
+           hasura_secret=DEFAULT_HASURA_SECRET,
            postgresql_password='development-postgres-password',
-           yaml=''
+           yaml='',
+           wait_for_services=[],
+           console=True
            ):
     # * Expose Hasura service
     hasura_resource = '{}-{}'.format(release_name,
@@ -37,42 +84,13 @@ def hasura(release_name='',
         helm_remote('hasura',
                     repo_url='https://charts.platy.dev',
                     release_name=release_name,
-                    set=['imageConfig.tag={}'.format(tag),
-                         'adminSecret={}'.format(hasura_secret),
-                         'postgresql.postgresqlPassword={}'.format(
-                        postgresql_password),
+                    set=['imageConfig.repository={}'.format(repository),
+                        'imageConfig.tag={}'.format(tag),
+                        'adminSecret={}'.format(hasura_secret),
+                        'postgresql.postgresqlPassword={}'.format(postgresql_password),
                     ]
                     )
 
-    endpoint = 'http://localhost:{}'.format(port)
-    #  ? fetch admin secret from k8s?
-    #  "--admin-secret `kubectl get secret {} -o jsonpath='{{.data.adminSecret}}' | base64 -D`".format(hasura_resource),
-    console_options = '--project {} --endpoint {} --admin-secret {}'.format(
-        path,
-        endpoint,
-        hasura_secret
-    )
-    config = read_yaml(os.path.join(path, 'config.yaml'), False)
-    if not config:
-        local('mkdir -p {}'.format(os.path.join(path, '..')))
-        local('hasura init {} --version 2 --endpoint {}'.format(path, endpoint))
-        # * Bug in the latest hasura cli version - set metadata version.yaml to 3
-        local('echo "version: 2" > {}'.format(
-            os.path.join(path, 'metadata/version.yaml')))
+    if console:
+        hasura_console(release_name, path, resource_name, port, hasura_secret)
 
-    serve_cmds = [
-        'hasura migrate apply {}'.format(console_options),
-        'hasura metadata apply {}'.format(console_options),
-        'hasura console {}'.format(console_options)
-    ]
-
-    # * Wait for Hasura, then run the console locally
-    console_resource = '{}-hasura-console'.format(
-        release_name) if release_name else 'hasura-console'
-    local_resource(console_resource,
-                   wait_for('{}/healthz'.format(endpoint)),
-                   resource_deps=[hasura_resource],
-                   serve_cmd=' && '.join(serve_cmds),
-                   allow_parallel=True,
-                   links=[link('http://localhost:9695/', 'Hasura Console')],
-                   )
