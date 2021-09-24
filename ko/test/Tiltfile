@@ -1,4 +1,4 @@
 load('../Tiltfile', 'ko_build')
 
 k8s_yaml('deployment.yaml')
-ko_build('hello-world-image', 'github.com/mattmoor/warm-image/cmd/sleeper')
+ko_build('hello-world-image', './cmd/hello-world')

@@ -41,6 +41,21 @@ url_test_cases = [
         tree='@myRevisionSha'),
 ]
 
+if os.name == 'nt':
+    url_test_cases.append(
+      _case(input='C:\\Path\\To\\repo',
+            url='C:\\Path\\To\\repo',
+            repo='repo',
+            tree=''),
+    )
+else:
+  url_test_cases.append(
+    _case(input='/path/to/repo',
+          url='/path/to/repo',
+          repo='repo',
+          tree=''),
+  )
+
 for case in url_test_cases:
   (url, expected) = case
   parse_repository_url = symbols['_parse_repository_url']

@@ -60,7 +60,11 @@ def assert_cmd_contains(m, expected, not_expected=None):
     if not not_expected:
         not_expected = []
 
-    argv = m.get('DeployTarget', {}).get('UpdateCmd', {}).get('Argv', [])
+    # TODO(nick): update this to use the `tilt get cmd` api
+    argv = m.get('DeployTarget', {}).get('UpdateCmdSpec', {}).get('args', [])
+    if len(argv) == 0:
+        argv = m.get('DeployTarget', {}).get('UpdateCmd', {}).get('Argv', [])
+
     if not len(argv) == 3:
         fail('expected UpdateCmd for {} to have 3 args, instead found: {}'.format(m['Name'], argv))
 

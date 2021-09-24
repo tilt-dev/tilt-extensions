@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd $(dirname $0)
+cd "$(dirname "$0")" || exit 1
 
 set -x
 tilt ci -f custom.Tiltfile > tilt.log 2>&1
@@ -13,7 +13,7 @@ if [ $CI_EXIT -eq 0 ]; then
   exit 1
 fi
 
-cat tilt.log | grep -q "Are you there, pod?"
+grep -q "Are you there, pod?" tilt.log
 GREP_EXIT=$?
 
 rm tilt.log

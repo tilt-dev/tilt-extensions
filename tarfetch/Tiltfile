@@ -1,0 +1,91 @@
+# -*- mode: Python -*-
+
+DEFAULT_EXCLUDES = [
+    ".git",
+    ".gitignore",
+    ".dockerignore",
+    "Dockerfile",
+    ".tiltignore",
+    "Tiltfile",
+    "tilt_modules",
+]
+
+def tarfetch(
+    name,
+    k8s_object,
+    src_dir,
+    target_dir=".",
+    namespace="default",
+    container="",
+    ignore=None,
+    keep_newer=True,
+    verbose=False,
+    labels=tuple()
+):
+    """
+    Create a local resource that will (via rsync) sync the specified files
+    from the specified k8s object to the local filesystem.
+
+    :param name (str): name of the created local resource.
+    :param k8s_object (str): a Kubernetes object identifier (e.g. deploy/my-deploy,
+        job/my-job, or a pod ID) that Tilt can use to select a pod. As per the
+        behavior of `kubectl exec`, we will act on the first pod of the specified
+        object, using the first container by default.
+    :param src_dir (str): directory IN THE KUBERNETES CONTAINER to sync from. Any
+        paths specified, if relative, should be relative to this dir.
+    :param target_dir (str, optional): directory ON THE LOCAL FS to sync to. Defaults to '.'
+    :param namespace (str, optional): namespace of the desired k8s_object, if not `default`.
+    :param container (str, optional): name of the container to sync from (by default,
+        the first container)
+    :param ignore (List[str], optional): patterns to ignore when syncing, see
+        `tar --exclude` documentation for details on supported patterns.
+    :param keep_newer (bool, optional): prevents files overwrites when the destination
+        file is newer. Default is true.
+    :param verbose (bool, optional): if true, shows tar extract activity.
+    :return:
+    """
+
+    # Verify inputs
+    if not src_dir.endswith("/"):
+        fail(
+            "src_dir must be a directory and have a trailing slash (because of rsync syntax rules)"
+        )
+
+    to_exclude = ignore
+    if not ignore:
+        to_exclude = []
+
+    # Apply defaults
+    to_exclude = DEFAULT_EXCLUDES + to_exclude
+
+    excludes = " ".join(["--exclude={}".format(ex) for ex in to_exclude])
+
+    # bundle container flag with k8s object specifier
+    if container:
+        k8s_object = "{obj} -c {container}".format(obj=k8s_object, container=container)
+
+    target_dir_bat = target_dir.replace("/", "\\")
+    local(["mkdir", "-p", target_dir], command_bat="mkdir {} || ver>nul".format(target_dir_bat))
+
+    local_resource(
+        name,
+        (
+            "(" +
+            "kubectl exec -i -n {namespace} {k8s_object} -- " +
+            "tar -c -f - --directory={src_dir} {exclude} ." +
+            ") | " +
+            "tar -x -f - {verbose} {keep_newer} --directory={target_dir} && " +
+            "echo Done."
+        ).format(
+            namespace=namespace,
+            k8s_object=k8s_object,
+            exclude=excludes,
+            src_dir=src_dir,
+            target_dir=target_dir,
+            keep_newer="--keep-newer-files" if keep_newer else "",
+            verbose="--verbose" if verbose else "",
+        ),
+        trigger_mode=TRIGGER_MODE_MANUAL,
+        auto_init=False,
+        labels=labels,
+    )

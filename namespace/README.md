@@ -7,11 +7,11 @@ namespaces on Kubernetes objects.
 
 ## Functions
 
-### `namespace_yaml(name: str): Blob`
+### `namespace_yaml(name: str, annotations: List [str] = [], labels: List [str] = []): Blob`
 
 Returns YAML for a Kubernetes namespace.
 
-### `namespace_create(name: str, allow_duplicates: boolean = False)`
+### `namespace_create(name: str, allow_duplicates: boolean = False, annotations: List [str] = [], labels: List [str] = [])`
 
 Deploys a namespace to the cluster. Equivalent to
 
@@ -41,6 +41,18 @@ load('ext://namespace', 'namespace_create', 'namespace_inject')
 ns = 'user-%s' % os.environ.get('USER', 'anonymous')
 namespace_create(ns)
 k8s_yaml(namespace_inject(read_file('deployment.yaml'), ns))
+```
+
+### Attach annotations and labels
+
+```
+load('ext://namespace', 'namespace_create', 'namespace_inject')
+namespace_create(
+    'my-namespace',
+    annotations=['kubernetes.io/metadata.name: my-namespace'],
+    labels=['kubernetes.io/metadata.name: my-namespace']
+)
+k8s_yaml(namespace_inject(read_file('deployment.yaml'), 'my-namespace'))
 ```
 
 ## Caveats

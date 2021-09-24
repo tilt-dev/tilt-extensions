@@ -1,0 +1,18 @@
+# Accept namespaces as args. This requires tilt > v0.22.7
+
+config.define_string_list("namespaces")
+cfg = config.parse()
+
+namespaces = cfg.get('namespaces', [])
+
+trigger_file = str(local('mktemp --suffix -tilt-kubefwd')).strip()
+
+# Creates a button that refreshes the kubefwd without
+# requiring new credentials.
+local(['./create-refresh-button.sh', trigger_file])
+
+local_resource(
+  name='kubefwd:run',
+  serve_cmd=['./sudo-kubefwd.sh', trigger_file],
+  deps=['sudo-kubefwd.sh', 'run-kubefwd.sh', 'run-kubefwd-internal.sh', 'watch-namespaces.sh'],
+  serve_env={'TILT_CFG_NAMESPACES': ' '.join(namespaces)})

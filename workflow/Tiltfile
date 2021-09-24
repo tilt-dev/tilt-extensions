@@ -1,0 +1,51 @@
+load('ext://uibutton', 'cmd_button')
+
+cwd = os.getcwd()
+
+def set_work_cmds(flow_name, res_name, work_cmds):
+    cmds = [ os.path.join(cwd, 'write_workflow.sh'), flow_name, res_name ]
+    for i in work_cmds:
+        safe_quoted = [shlex.quote(arg) for arg in i]
+        cmds.append(" ".join(safe_quoted))
+    local(cmds, echo_off=True)
+
+def set_clear_cmd(flow_name, res_name, clear_cmd):
+    cmd = [ os.path.join(cwd, 'write_reset.sh'), flow_name, res_name ]
+    safe_quoted = [shlex.quote(arg) for arg in clear_cmd]
+    cmd.append(" ".join(safe_quoted))
+    local(cmd, echo_off=True)
+
+def workflow(workflow_name, resource_name, work_cmds=[[]], clear_cmd=[]):
+    set_work_cmds(workflow_name, resource_name, work_cmds)
+    set_clear_cmd(workflow_name, resource_name, clear_cmd)
+
+    # only reset the workflow on initial load
+    # TODO(milas): using a Tilt ConfigMap would be a better solution
+    workflow_init_key = 'TILT_WORKFLOW_INIT_{}'.format(workflow_name.lower())
+    if not os.getenv(workflow_init_key):
+        local([ os.path.join(cwd, 'write_index.sh'), workflow_name, resource_name, '0' ], echo_off=True)
+        os.putenv(workflow_init_key, '1')
+
+    cmd_button(
+        name = '%s-%s-play' % (workflow_name, resource_name),
+        resource = resource_name,
+        text = '%s: Next Step' % (workflow_name),
+        argv = [ os.path.join(cwd, 'play.sh'), workflow_name, resource_name ],
+        icon_name = 'play_arrow',
+    )
+
+    cmd_button(
+        name = '%s-%s-replay' % (workflow_name, resource_name),
+        resource = resource_name,
+        text = '%s: Re-run Step' % (workflow_name),
+        argv = [ os.path.join(cwd, 'replay.sh'), workflow_name, resource_name ],
+        icon_name = 'replay',
+    )
+
+    cmd_button(
+        name = '%s-%s-rewind' % (workflow_name, resource_name),
+        resource = resource_name,
+        text = '%s: Reset' % (workflow_name),
+        argv = [ os.path.join(cwd, 'rewind.sh'), workflow_name, resource_name ],
+        icon_name = 'fast_rewind',
+    )
