@@ -57,19 +57,32 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                     branch_flag = '--branch %s' % tree
 
                 local('git clone {repository_url} --recurse-submodules --shallow-submodules --depth 1 {branch_flag} {checkout_dir}'.
-                      format(repository_url=repository_url, branch_flag=branch_flag, checkout_dir=checkout_dir), quiet=True)
+                      format(repository_url=repository_url,
+                             branch_flag=branch_flag,
+                             checkout_dir=checkout_dir),
+                      quiet=True)
             else:
                 checkout_cmd = ''
                 if tree:
                     checkout_cmd = ' && git checkout %s' % tree
 
                 local('git clone {repository_url} --recurse-submodules --shallow-submodules {checkout_dir} && cd {checkout_dir} {checkout_cmd}'.
-                      format(repository_url=repository_url, checkout_dir=checkout_dir, checkout_cmd=checkout_cmd), quiet=True)
+                      format(repository_url=repository_url,
+                             checkout_dir=checkout_dir,
+                             checkout_cmd=checkout_cmd),
+                      quiet=True)
         else:  # dir already exists
-            if os.path.exists('%s/.git' % checkout_dir):  # this is a git repo
+            if os.path.exists(os.path.join(checkout_dir, '.git')):  # this is a git repo
                 has_local_changes = True  # default to True for safety
                 if not unsafe_mode:
-                    has_local_changes = int(str(local('cd %s && git status -sbuno | wc -l' % checkout_dir, quiet=True)).strip()) > 1  # result greater than 1 indicates local modifications are present
+                    local_changes = str(local(
+                        command='cd %s && git status -sbuno' % checkout_dir,
+                        quiet=True,
+                        echo_off=True,
+                    )).strip().splitlines()
+
+                    # result greater than 1 indicates local modifications are present
+                    has_local_changes = len(local_changes) > 1
 
                 if unsafe_mode or not has_local_changes:
                     checkout_cmd = ''
@@ -81,7 +94,9 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                         checkout_cmd = '&& git checkout -f %s' % checkout_branch
 
                     local('cd {checkout_dir} && git fetch -a origin {checkout_cmd} && git submodule update --init'.
-                          format(checkout_dir=checkout_dir, checkout_cmd=checkout_cmd), quiet=True)
+                          format(checkout_dir=checkout_dir,
+                                 checkout_cmd=checkout_cmd),
+                          quiet=True)
                 else:
                     fail('git_checkout() failed: local modifications present and safe_mode is enabled')
 
@@ -136,21 +151,21 @@ def _parse_repository_url(url):
     if is_ssh:
         url = 'git@' + url
 
-    repository_name = str(local('basename %s .git' % url, quiet=True)).strip()
+    repository_name = os.path.basename(url).rstrip('.git')
 
     return url, repository_name, tree
 
 
 def _get_default_checkout_target(repository_url):
     url, repository_name, branch = _parse_repository_url(repository_url)
-    checkout_dir = '%s/%s' % (git_resource_checkout_dir, repository_name)
+    checkout_dir = os.path.join(git_resource_checkout_dir, repository_name)
 
     return checkout_dir
 
 
 def _default_build_callback(resource_name, context, dockerfile='Dockerfile'):  # returns resultant image name
     image_name = resource_name + '-image'
-    docker_build(image_name, context, dockerfile='%s/%s' % (context, dockerfile), ssh='default')
+    docker_build(image_name, context, dockerfile=os.path.join(context, dockerfile), ssh='default')
 
     return image_name
 

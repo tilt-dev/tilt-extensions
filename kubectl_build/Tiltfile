@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+
+def kubectl_build(ref, context, build_args={}, dockerfile='Dockerfile', live_update=[],
+                  match_in_env_vars=False, ignore=[], entrypoint=[], target='', ssh='',
+                  secret='', extra_tag='', cache_from=[], pull=False,
+                  registry_secret=None):
+    # incompatible parameters with docker_build:
+    # dockerfile_contents
+    # only
+    # container_args
+    # network
+    if not kubectl_build_enable():
+        # just run the standard docker_build
+        docker_build(ref=ref, context=context, build_args=build_args, dockerfile=dockerfile, live_update=live_update,
+                  match_in_env_vars=match_in_env_vars, ignore=ignore, entrypoint=entrypoint, target=target, ssh=ssh,
+                  secret=secret, extra_tag=extra_tag, cache_from=cache_from, pull=pull)
+        return
+    registry_secret = registry_secret or kubectl_build_registry_secret()
+    command = ['kubectl', 'build', '--context', k8s_context()]
+    command += ['-f', context + '/' + dockerfile]
+    if registry_secret:
+        command += ['--registry-secret', registry_secret]
+    for arg, value in build_args.items():
+        command += ['--build-arg', arg + '=', value]
+    if target:
+        command += ['--target', target]
+    if extra_tag:
+        if type(extra_tag) == 'string':
+            command += ['-t', extra_tag]
+        else:
+            for t in extra_tag:
+                command += ['-t', t]
+    if pull:
+        command += ['--pull']
+    for c in cache_from:
+        command += ['--cache-from', c]
+    if ssh:
+        if type(ssh) == 'string':
+            command += ['--ssh', ssh]
+        else:
+            for s in ssh:
+                command += ['--ssh', s]
+    if secret:
+        if type(secret) == 'string':
+            command += ['--secret', secret]
+        else:
+            for s in secret:
+                command += ['--secret', s]
+    command = [shlex.quote(c) for c in command]
+    command += ['-t', '$EXPECTED_REF']
+    command += [shlex.quote(context)]
+    command = ' '.join(command)
+
+    custom_build(ref, command, [context], disable_push=True, skips_local_docker=True, live_update=live_update,
+                 match_in_env_vars=match_in_env_vars, ignore=ignore, entrypoint=entrypoint)
+
+
+def image_build(*args, **kwargs):
+    """kubectl_build with a less kubectl build obvious name"""
+    kubectl_build(*args, **kwargs)
+
+
+def kubectl_build_enable(v=None):
+    """Activate kubectl build"""
+    if v != None:
+        os.environ['KUBECTL_BUILD_ENABLE'] = str(v)
+        return to_bool(v)
+    else:
+        return to_bool(os.environ.get('KUBECTL_BUILD_ENABLE', 'on'))
+
+def kubectl_build_registry_secret(v=None):
+    """Set/Get kubectl build registry secret"""
+    if v != None:
+        os.environ['KUBECTL_BUILD_REGISTRY_SECRET'] = str(v)
+        return str(v)
+    else:
+        return os.environ.get('KUBECTL_BUILD_REGISTRY_SECRET', 'docker-registry')
+
+def to_bool(value):
+    """Convert a string to a boolean"""
+    v = str(value).strip().lower()
+    if v in ['on', 'true', 'yes', '1']:
+        return True
+    if v in ['off', 'false', 'no', '0']:
+        return False
+    fail('Unsupported boolean values: ' + str(value))

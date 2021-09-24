@@ -2,7 +2,7 @@
 
 set -x
 
-cd $(dirname $0)
+cd "$(dirname "$0")" || exit 1
 
 msg_and_exit () {
   echo "$1"

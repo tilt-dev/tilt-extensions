@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Usage: ngrok-run.sh $CONFIG_FILE
+
+set -euo pipefail
+
+args=("start")
+config_file="$1"
+default_config_file="$HOME/.ngrok2/ngrok.yml"
+if [[ -f "$default_config_file" ]]; then
+    args+=("--config" "$default_config_file")
+fi
+
+args+=("--config" "$config_file")
+
+if [[ "$(wc -l "$config_file" | cut -d ' ' -f 1)" == "0" ]]; then
+    args+=("--none")
+else
+    args+=("--all")
+fi
+
+set -ex
+ngrok "${args[@]}"
