@@ -22,14 +22,14 @@ _CUSTOM_BUILD_KWARGS_BLACKLIST = [
 _ext_dir = os.getcwd()
 
 # shared code between the two restart functions
-def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, trigger=None, **kwargs):
+def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, trigger=None, exit_policy='restart', **kwargs):
     if not trigger:
         trigger = []
 
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
     df = '''
-    FROM tiltdev/restart-helper:2020-10-16 as restart-helper
+    FROM tiltdev/restart-helper:2021-08-09 as restart-helper
 
     FROM {}
     RUN ["touch", "{}"]
@@ -40,10 +40,13 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
     # Change the entrypoint to use `tilt-restart-wrapper`.
     # `tilt-restart-wrapper` makes use of `entr` (https://github.com/eradman/entr/) to
     # re-execute $entrypoint whenever $restart_file changes
+    entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file)]
+    if exit_policy == 'continue':
+        entrypoint_with_entr = entrypoint_with_entr + ["--entr_flags=-r"]
     if type(entrypoint) == type(""):
-        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file), "sh", "-c", entrypoint]
+        entrypoint_with_entr = entrypoint_with_entr + ["sh", "-c", entrypoint]
     elif type(entrypoint) == type([]):
-        entrypoint_with_entr = ["/tilt-restart-wrapper", "--watch_file={}".format(restart_file)] + entrypoint
+        entrypoint_with_entr = entrypoint_with_entr + entrypoint
     else:
         fail("`entrypoint` must be a string or list of strings: got {}".format(type(entrypoint)))
 
@@ -62,7 +65,7 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
 
 def docker_build_with_restart(ref, context, entrypoint, live_update,
                               base_suffix='-tilt_docker_build_with_restart_base', restart_file=RESTART_FILE,
-                              trigger=None, **kwargs):
+                              trigger=None, exit_policy='restart', **kwargs):
     """Wrap a docker_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
 
@@ -96,12 +99,12 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
     # relevant to building the child image / may conflict with args we specifically
     # pass for the child image.
     cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in KWARGS_BLACKLIST}
-    _helper(base_ref, ref, entrypoint, live_update, restart_file, trigger, **cleaned_kwargs)
+    _helper(base_ref, ref, entrypoint, live_update, restart_file, trigger, exit_policy, **cleaned_kwargs)
 
 
 def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
                               base_suffix='-tilt_docker_build_with_restart_base', restart_file=RESTART_FILE,
-                              trigger=None, **kwargs):
+                              trigger=None, exit_policy='restart', **kwargs):
     """Wrap a custom_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
 
@@ -140,4 +143,4 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
 
     # A few arguments aren't applicable to the docker_build, so remove them.
     cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in _CUSTOM_BUILD_KWARGS_BLACKLIST}
-    _helper(base_ref, ref, entrypoint, live_update, restart_file, trigger, **cleaned_kwargs)
+    _helper(base_ref, ref, entrypoint, live_update, restart_file, trigger, exit_policy, **cleaned_kwargs)

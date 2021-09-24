@@ -1,0 +1,3 @@
+local_resource(
+  name='operator:cancel',
+  serve_cmd='./cancel_btn_controller.sh')

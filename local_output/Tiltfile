@@ -1,2 +1,2 @@
-def local_output(command):
-  return str(local(command)).rstrip('\n')
+def local_output(*args, **kwargs):
+  return str(local(*args, **kwargs)).rstrip('\n')

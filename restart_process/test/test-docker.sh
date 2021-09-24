@@ -6,7 +6,7 @@
 # that docker_build_with_restart surfaces this error code to k8s,
 # so k8s knows that the job failed. (Thus, we expect the `tilt ci`
 # call to fail.)
-cd $(dirname $0)
+cd "$(dirname "$0")" || exit 1
 
 set -x
 tilt ci > tilt.log 2>&1
@@ -19,8 +19,10 @@ if [ $CI_EXIT -eq 0 ]; then
   exit 1
 fi
 
-cat tilt.log | grep -q "Are you there, pod?"
+grep -q "Are you there, pod?" tilt.log
 GREP_EXIT=$?
+
+cat tilt.log
 
 rm tilt.log
 

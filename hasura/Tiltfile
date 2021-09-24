@@ -56,7 +56,7 @@ def hasura(release_name='',
            resource_name=DEFAULT_HASURA_RESOURCE_NAME,
            port=DEFAULT_HASURA_PORT,
            postgres_port=5432,
-           repository='hasura/graphql-engine'
+           repository='hasura/graphql-engine',
            tag='latest',
            hasura_secret=DEFAULT_HASURA_SECRET,
            postgresql_password='development-postgres-password',
@@ -93,4 +93,5 @@ def hasura(release_name='',
 
     if console:
         hasura_console(release_name, path, resource_name, port, hasura_secret)
+
 

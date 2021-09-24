@@ -36,6 +36,7 @@ You may also pass the following optional parameters:
 * **container (str, optional)**: name of the container to sync from (by default, the first container)
 * **namespace (str, optiona)**: namespace of the desired `k8s_object`, if not `default`.
 * **verbose (bool, optional)**: if true, print additional rsync information.
+* **labels (Union[str, List[str]], optional)**: used to group resources in the Web UI.
 
 ### Example invocations
 1. Create a local resource called "syncback-js" which connects to the first pod of "deploy/frontend" (and the default container) and syncs "/app/package.json" and "/app/yarn.lock" to local directory "./frontend":
