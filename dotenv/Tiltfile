@@ -1,0 +1,8 @@
+def dotenv(fn='.env'):
+	f = read_file(fn)
+	lines = str(f).splitlines()
+	for line in lines:
+		v = line.split('=', 1)
+		if len(v) < 2:
+			continue # skip empty lines
+		os.putenv(v[0], v[1])

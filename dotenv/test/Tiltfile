@@ -1,0 +1,12 @@
+load('../Tiltfile', 'dotenv')
+
+dotenv(fn='.env')
+os.putenv('COMPOSE_PROJECT_NAME', 'redmine-api-dev')
+
+if os.getenv('TESTVAR') != 'success':
+    fail('env variable not set')
+
+if os.getenv('THIRD') != 'a = b':
+    fail('env variable not set')
+
+exit()
