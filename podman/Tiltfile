@@ -1,16 +1,18 @@
 # -*- mode: Python -*-
 
-def podman_build(ref, context, ignore=None, extra_flags=None):
+def podman_build(ref, context, deps=None, ignore=None, extra_flags=None):
   """Use Podman (https://podman.io/) to build images for Tilt.
-
   Args:
     ref: The name of the image to build. Must match the image
       name in the Kubernetes resources you're deploying.
     context: The build context of the binary to build. Expressed as a file path.
+    deps: Changes to the given files or directories that will trigger rebuilds.
+      Defaults to the build context.
     ignore: Changes to the given files or directories do not trigger rebuilds.
       Does not affect the build context.
     extra_flags: Extra flags to pass to podman build. Expressed as an argv-style array.
   """
+  deps = deps or [context]
   extra_flags = extra_flags or []
   extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
 
@@ -27,6 +29,6 @@ def podman_build(ref, context, ignore=None, extra_flags=None):
       push_cmd
     ) % (extra_flags_str, shlex.quote(context)),
     ignore=ignore,
-    deps=[context],
+    deps=deps,
     skips_local_docker=True,
   )
