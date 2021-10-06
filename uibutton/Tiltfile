@@ -96,15 +96,22 @@ def cmd_button(name, resource='', argv=[], text=None, location=LOCATION_RESOURCE
     }
   }
 
-  local('echo "${TILT_APPLY_YAML}" | %s apply -f -' % (sys.executable,),
-        env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
-        echo_off=True)
+  local(
+    command='echo "${TILT_APPLY_YAML}" | %s apply -f -' % (sys.executable,),
+    command_bat='(cmd /v:on /c echo !TILT_APPLY_YAML!) | %s apply -f -' % (sys.executable,),
+    env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
+    echo_off=True)
 
 
 def _now():
-  # this is portable across coreutils/busybox/BSD
-  # note: it's missing fractional seconds because that's not available from strftime
-  return str(local('date -u +"%Y-%m-%dT%H:%M:%S.000000Z"', echo_off=True, quiet=True)).rstrip('\r\n')
+  return str(local(
+    # this is portable across coreutils/busybox/BSD
+    # note: it's missing fractional seconds because that's not available from strftime
+    command='date -u +"%Y-%m-%dT%H:%M:%S.000000Z"',
+    command_bat="powershell Get-Date (Get-Date).ToUniversalTime() -UFormat '+%Y-%m-%dT%H:%M:%S.000000Z'",
+    echo_off=True,
+    quiet=True)
+  ).rstrip('\r\n')
 
 def text_input(name, label='', default='', placeholder=''):
   return {
