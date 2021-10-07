@@ -23,7 +23,7 @@ fi
 for name in $names;
 do
     short=${name#configmap.tilt.dev/}
-    cm="$(tilt get configmap "$short" -o json)"
+    cm="$(tilt get configmap -o json -- "$short")"
     value="$(echo "$cm" | jq -r ".data.enabled")"
     port_list="$(echo "$cm" | jq -r '.data.ports')"
     location="$(echo "$cm" | jq -r ".data.resource")"
@@ -40,7 +40,8 @@ do
 done
 
 new_config="tunnels:"
-for tunnel in "${tunnels[@]}";
+# https://stackoverflow.com/a/7577209
+for tunnel in ${tunnels[@]+"${tunnels[@]}"}
 do
     new_config="$new_config
 $tunnel"
