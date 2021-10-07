@@ -9,7 +9,7 @@ set -euo pipefail
 
 name="$1"
 child_name="ngrok:$name"
-cm="$(tilt get configmap "$child_name" -o json)"
+cm="$(tilt get configmap -o json -- "$child_name")"
 enabled="$(echo "$cm" | jq -r ".data.enabled")"
 new_val="true"
 new_text="stop ngrok"
@@ -20,8 +20,8 @@ if [[ "$enabled" == "true" ]]; then
     new_icon="play_circle_outline"
 fi
 
-tilt patch uibutton "$child_name" -p "{\"spec\":{\"text\":\"$new_text\", \"iconName\":\"$new_icon\"}}"
-tilt patch configmap "$child_name" -p "{\"data\":{\"enabled\":\"$new_val\"}}"
+tilt patch uibutton -p "{\"spec\":{\"text\":\"$new_text\", \"iconName\":\"$new_icon\"}}" -- "$child_name"
+tilt patch configmap -p "{\"data\":{\"enabled\":\"$new_val\"}}" -- "$child_name"
 
 if [[ "$enabled" != "true" ]]; then
     echo "ngrok tunnel started"

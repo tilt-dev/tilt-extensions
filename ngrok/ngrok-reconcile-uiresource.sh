@@ -13,7 +13,7 @@ echo "reconciling $name"
 
 disabled="true"
 ports=()
-links="$(tilt get uiresource "$name" -o jsonpath='{range .status.endpointLinks[*]}{.url}{"\n"}{end}')"
+links="$(tilt get uiresource -o jsonpath='{range .status.endpointLinks[*]}{.url}{"\n"}{end}' -- "$name")"
 for link in $links;
 do
     host="localhost"
@@ -26,13 +26,13 @@ done
 
 child_name="ngrok:$name"
 if [[ "$disabled" == "true" ]]; then
-    tilt delete uibutton "$child_name" --ignore-not-found
-    tilt delete configmap "$child_name" --ignore-not-found
-    tilt delete cmd "$child_name" --ignore-not-found
+    tilt delete uibutton --ignore-not-found -- "$child_name"
+    tilt delete configmap --ignore-not-found -- "$child_name"
+    tilt delete cmd --ignore-not-found -- "$child_name"
     exit 0
 fi
 
-cm_enabled="$(tilt get configmap "$child_name" --ignore-not-found -o jsonpath='{.data.enabled}')"
+cm_enabled="$(tilt get configmap --ignore-not-found -o jsonpath='{.data.enabled}' -- "$child_name")"
 if [[ "$cm_enabled" == "" ]]; then
     cm_enabled="false"
 fi
