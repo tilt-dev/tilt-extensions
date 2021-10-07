@@ -24,7 +24,7 @@ function delete_children {
 
 # Check if the object has been deleted.
 name_in_json=$(echo "$cmd" | jq -r '.metadata.name')
-if [[ "$name_in_json" == "null" ]]; then
+if [[ "$cmd" == "" || "$name_in_json" == "null" ]]; then
     delete_children
 fi
 
