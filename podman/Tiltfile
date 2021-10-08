@@ -1,6 +1,6 @@
 # -*- mode: Python -*-
 
-def podman_build(ref, context, deps=None, ignore=None, extra_flags=None):
+def podman_build(ref, context, ignore=None, extra_flags=None, deps=None):
   """Use Podman (https://podman.io/) to build images for Tilt.
   Args:
     ref: The name of the image to build. Must match the image
