@@ -66,7 +66,11 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
     command += [shlex.quote(context)]
     command = pre_command + ' '.join(command)
 
-    custom_build(ref, command, [context], disable_push=True, skips_local_docker=True, live_update=live_update,
+    deps = [context]
+    if dockerfile_path != '-':
+        deps.append(dockerfile_path)
+
+    custom_build(ref, command, deps, disable_push=True, skips_local_docker=True, live_update=live_update,
                  match_in_env_vars=match_in_env_vars, ignore=ignore, entrypoint=entrypoint)
 
 
