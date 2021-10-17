@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-def kubectl_build(ref, context, build_args={}, dockerfile='Dockerfile', live_update=[],
-                  match_in_env_vars=False, ignore=[], entrypoint=[], target='', ssh='',
-                  secret='', extra_tag='', cache_from=[], pull=False,
+def kubectl_build(ref, context, build_args={}, dockerfile=None,
+                  dockerfile_contents=None, live_update=[],
+                  match_in_env_vars=False, ignore=[],
+                  entrypoint=[], target='', ssh='', secret='',
+                  extra_tag='', cache_from=[], pull=False,
                   registry_secret=None):
     # incompatible parameters with docker_build:
-    # dockerfile_contents
     # only
     # container_args
     # network
@@ -15,9 +16,23 @@ def kubectl_build(ref, context, build_args={}, dockerfile='Dockerfile', live_upd
                   match_in_env_vars=match_in_env_vars, ignore=ignore, entrypoint=entrypoint, target=target, ssh=ssh,
                   secret=secret, extra_tag=extra_tag, cache_from=cache_from, pull=pull)
         return
+    pre_command = ""
+
+    if dockerfile_contents != None and dockerfile != None:
+        fail(
+            "Cannot specify both dockerfile and dockerfile_contents keyword arguments"
+        )
+    elif dockerfile != None:
+        dockerfile_path = dockerfile
+    elif dockerfile_contents != None:
+        pre_command += "echo {} | ".format(shlex.quote(dockerfile_contents))
+        dockerfile_path = '-'
+    else:
+        dockerfile_path = context + '/Dockerfile'
+
     registry_secret = registry_secret or kubectl_build_registry_secret()
     command = ['kubectl', 'build', '--context', k8s_context()]
-    command += ['-f', context + '/' + dockerfile]
+    command += ['-f', dockerfile_path]
     if registry_secret:
         command += ['--registry-secret', registry_secret]
     for arg, value in build_args.items():
@@ -49,9 +64,13 @@ def kubectl_build(ref, context, build_args={}, dockerfile='Dockerfile', live_upd
     command = [shlex.quote(c) for c in command]
     command += ['-t', '$EXPECTED_REF']
     command += [shlex.quote(context)]
-    command = ' '.join(command)
+    command = pre_command + ' '.join(command)
 
-    custom_build(ref, command, [context], disable_push=True, skips_local_docker=True, live_update=live_update,
+    deps = [context]
+    if dockerfile_path != '-':
+        deps.append(dockerfile_path)
+
+    custom_build(ref, command, deps, disable_push=True, skips_local_docker=True, live_update=live_update,
                  match_in_env_vars=match_in_env_vars, ignore=ignore, entrypoint=entrypoint)
 
 
