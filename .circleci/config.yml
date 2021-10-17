@@ -25,7 +25,7 @@ jobs:
       - setup_remote_docker:
           version: '20.10.6'
       - checkout
-      - run: ctlptl create cluster kind --registry=ctlptl-registry && ./test.sh
+      - run: ctlptl create cluster kind --registry=ctlptl-registry && timeout -v -k 60s 15m ./test.sh
 
 workflows:
   version: 2

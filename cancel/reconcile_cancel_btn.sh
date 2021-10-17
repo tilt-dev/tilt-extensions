@@ -14,17 +14,17 @@ echo "reconciling $cmd_name"
 
 cancel_cmd_name="$cmd_name:cancel"
 cancel_button_name="$cmd_name:cancel"
-cmd=$(tilt get cmd "$cmd_name" -o json --ignore-not-found)
+cmd=$(tilt get cmd -o json --ignore-not-found -- "$cmd_name")
 
 function delete_children {
-    tilt delete cmd "$cancel_cmd_name" --ignore-not-found
-    tilt delete uibutton "$cancel_button_name" --ignore-not-found
+    tilt delete cmd --ignore-not-found -- "$cancel_cmd_name"
+    tilt delete uibutton --ignore-not-found -- "$cancel_button_name"
     exit 0
 }
 
 # Check if the object has been deleted.
 name_in_json=$(echo "$cmd" | jq -r '.metadata.name')
-if [[ "$name_in_json" == "null" ]]; then
+if [[ "$cmd" == "" || "$name_in_json" == "null" ]]; then
     delete_children
 fi
 
