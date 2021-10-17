@@ -82,7 +82,7 @@ def hasura(release_name='',
         k8s_yaml(yaml)
     else:
         helm_remote('hasura',
-                    repo_url='https://charts.platy.dev',
+                    repo_url='https://charts.platy.plus',
                     release_name=release_name,
                     set=['imageConfig.repository={}'.format(repository),
                         'imageConfig.tag={}'.format(tag),
