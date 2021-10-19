@@ -19,6 +19,28 @@ def min_k8s_version(min_version):
         print(" ---------------------------------------------------------- ")
         fail('Minimum Kubernetes Version Not Met! Current Version is %s' % version_str)
 
+def max_k8s_version(max_version):
+
+   #This relies on the fact that the shell command returning something in the form 'gitVersion: vX.X.X'
+    version_str =  str(local('kubectl version --short| grep "Server Version"', quiet=True))
+   #Get the string, separate it at the colon, remove the 'v' and any spaces
+    version_str = version_str.split(':')[1].replace('v','').strip()
+  
+    cur_ver = _version_tuple(version_str)
+    max_ver = _version_tuple(max_version)
+    
+    if cur_ver > max_ver:
+        print(" ---------------------------------------------------------- ")
+        print("|                                                          |")
+        print("|            Maximum Kubernetes Version Not Met!           |")
+        print("|                Current Version : v{}                 |".format(version_str))
+        print("|            Maximum Required Version : v{}            |".format(max_version))
+        print("|            Current Kubernetes Cluster : {}         |".format( k8s_context()))
+        print("|                                                          |")
+        print(" ---------------------------------------------------------- ")
+        fail('Maximum Kubernetes Version Not Met! Current Version is %s' % version_str)
+
+
 def _version_tuple(v):
   # splits a string into a list of contiguous numeric and non-numeric parts, and makes the numeric parts ints, e.g.:
   # _version_tuple("1.2020.3-beta.2") == [1, ".", 2020, ".", 3, "-beta.", 2]
