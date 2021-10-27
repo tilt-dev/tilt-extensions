@@ -19,7 +19,7 @@ install_rsync_tilt() {
     local tar_path_local=${0%/*}/rsync.tilt.tar  # TODO: option for windows binary
     # ensure our rsync bin is present on container in the expected location
     set +e # disable exit on error
-    kubectl exec "$K8S_OBJECT" -- ls "$RSYNC_PATH" > /dev/null 2>&1
+    kubectl exec "$K8S_OBJECT" -- ls "$rsync_tilt_path" > /dev/null 2>&1
     exit_code="$?"
     set -e
     if [[ "$exit_code" != "0" ]]; then
