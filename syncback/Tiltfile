@@ -70,18 +70,17 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
     excludes = ' '.join(['--exclude="{}***"'.format(ex) for ex in to_exclude])
     incl_excl = '{} {}'.format(excludes, incl_excl)
 
-    # construct remote name (maybe with namespace)
-    # (when we pass `dummy@namespace` to krsync, it gets parsed and then passed to
-    # `rsync --rsh` as two args, `dummy` and `namespace`. We grab the latter to use,
-    # and ignore the former in favor of k8s_object info we stashed in an env variable
-    remote_name = 'dummy'
-    if namespace:
-        remote_name = 'dummy@{}'.format(namespace)
+    # set remote name to a dummy name
+    remote_name = 'syncback'
 
-    # instead of wrestling with passing optional args to krsync.sh that do not then
-    # get passed to rsync, just bundle container flag with k8s object specifier
+    # instead of wrestling with passing optional args to krsync.sh that do not
+    # then get passed to rsync, just bundle container and namespace flags with
+    # k8s object specifier (quoted 1st argument)
     if container:
-        k8s_object = '"{obj} -c {container}"'.format(obj=k8s_object, container=container)
+        k8s_object = '{obj} -c {container}'.format(obj=k8s_object, container=container)
+
+    if namespace:
+        k8s_object = '{obj} -n {namespace}'.format(obj=k8s_object, namespace=namespace)
 
     flags = '-aOv'
     if verbose:
@@ -99,7 +98,7 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
     if labels:
         extra_args["labels"] = labels
 
-    local_resource(name, '{krsync} {obj} {flags} --progress --stats {delete} -T=/tmp/rsync.tilt {include_exclude} {remote}:{src} {target}'.
+    local_resource(name, '{krsync} "{obj}" {flags} --progress --stats {delete} -T=/tmp/rsync.tilt {include_exclude} {remote}:{src} {target}'.
                    format(krsync=krsync_path, obj=k8s_object, flags=flags, delete=delete_flag,
                           include_exclude=incl_excl, remote=remote_name, src=src_dir, target=target_dir),
                trigger_mode=TRIGGER_MODE_MANUAL, auto_init=False, **extra_args)
