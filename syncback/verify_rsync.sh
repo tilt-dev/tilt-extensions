@@ -14,7 +14,7 @@ function verify_rsync_version_at_least() {
     rsync_complain "No local rsync executable found (need version >= $1)"
   fi
 
-  regex='^.*version ([0-9]+\.[0-9]+\.[0-9]+).*$'
+  regex='^.*version v?([0-9]+\.[0-9]+\.[0-9]+).*$'
   if [[ $(rsync --version) =~ $regex ]]; then
     version=${BASH_REMATCH[1]}
     if [[ $version < $1 ]]; then
