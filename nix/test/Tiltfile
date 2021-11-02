@@ -1,0 +1,4 @@
+load("../Tiltfile", "build_nix_image")
+
+k8s_yaml("deployment.yaml")
+build_nix_image("hello-world-image", "./nix/image.nix", "hello-world-image", "./nix/image.nix")
