@@ -3,14 +3,18 @@ FROM tiltdev/tilt:latest
 # Utils for our CI
 RUN apt update && apt install -y git build-essential
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-COPY --from=golang:1.16-buster /usr/local/go /usr/local/go
+COPY --from=golang:1.17-buster /usr/local/go /usr/local/go
 ENV PATH=/root/go/bin:/usr/local/go/bin:$PATH
 
 RUN mkdir -p /root/go/bin
-RUN curl -sSL https://github.com/google/ko/releases/download/v0.8.3/ko_0.8.3_Linux_x86_64.tar.gz | tar xzf - ko && \
+RUN curl -sSL https://github.com/google/ko/releases/download/v0.9.3/ko_0.9.3_Linux_x86_64.tar.gz | tar xzf - ko && \
   chmod +x ko && \
   mv ko /root/go/bin/ko && \
   which ko
+
+RUN curl -sSL https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/releases/download/v0.1.4/kubectl-buildkit_0.1.4_amd64.deb > kubectl-buildkit.deb && \
+  dpkg -i kubectl-buildkit.deb && \
+  apt install -f
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
   echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \

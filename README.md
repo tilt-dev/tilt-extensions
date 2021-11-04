@@ -30,6 +30,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`min_k8s_version`](/min_k8s_version): Require a minimum Kubernetes version to run this Tiltfile.
 - [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
 - [`namespace`](/namespace): Functions for interacting with namespaces.
+- [`nix`](/nix): Use [nix](https://nixos.org/guides/install-nix.html) to build nix-based container images.
 - [`ngrok`](/ngrok): Expose public URLs for your services with [`ngrok`](https://ngrok.com/).
 - [`pack`](/pack): Build container images using [pack](https://buildpacks.io/docs/install-pack/) and [buildpacks](https://buildpacks.io/).
 - [`podman`](/podman): Build container images using [podman](https://podman.io)
@@ -44,7 +45,6 @@ All extensions have been vetted and approved by the Tilt team.
 - [`tilt_inspector`](/tilt_inspector): Debugging server for exploring internal Tilt state.
 - [`uibutton`](/uibutton): Customize your Tilt dashboard with [buttons to run a command](https://blog.tilt.dev/2021/06/21/uibutton.html).
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
-- [`nix`](/nix): Use [nix](https://nixos.org/guides/install-nix.html) to build nix-based container images.
 
 ## Contribute an Extension
 
