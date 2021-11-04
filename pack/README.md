@@ -43,6 +43,10 @@ pack(
 
 ## Examples
 
+### HTTPD
+
+See the [test](./test) directory for an example that builds an Apache HTTPD server.
+
 ### Java
 
 1. Use the [Tilt example repo](https://github.com/tilt-dev/tilt-example-java)
