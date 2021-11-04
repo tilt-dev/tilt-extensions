@@ -1,0 +1,16 @@
+load('../Tiltfile', 'pack')
+
+k8s_yaml('deployment.yaml')
+k8s_resource('example-httpd', port_forwards=[8080])
+
+# Build an httpd server loosely on
+# https://github.com/paketo-buildpacks/samples/tree/main/httpd/httpd-sample
+pack(
+  'example-httpd-image',
+  deps=['httpd.conf', './htdocs'],
+  builder='paketobuildpacks/builder:full',
+  buildpacks=['gcr.io/paketo-buildpacks/httpd'],
+  live_update=[
+    sync('./httpd.conf', '/workspace/httpd.conf'),
+    sync('./htdocs', '/workspace/htdocs'),
+  ])
