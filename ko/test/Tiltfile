@@ -2,4 +2,10 @@ load('../Tiltfile', 'ko_build')
 
 k8s_yaml('deployment.yaml')
 k8s_resource('hello-world', port_forwards=8080)
-ko_build('hello-world-image', './cmd/hello-world')
+ko_build('hello-world-image',
+         './cmd/hello-world',
+         deps=['./cmd'],
+         base_image='busybox',
+         live_update=[
+           sync('./cmd/hello-world/kodata', '/var/run/ko'),
+         ])
