@@ -17,3 +17,6 @@ spec:
           image: hello-world-image
           ports:
             - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              port: 8080
