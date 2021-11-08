@@ -1,4 +1,5 @@
 load('../Tiltfile', 'ko_build')
 
 k8s_yaml('deployment.yaml')
+k8s_resource('hello-world', port_forwards=8080)
 ko_build('hello-world-image', './cmd/hello-world')
