@@ -13,7 +13,9 @@ All extensions have been vetted and approved by the Tilt team.
 - [`conftest`](/conftest): Use [Conftest](https://www.conftest.dev/) to test your configuration files.
 - [`coreos_prometheus`](/coreos_prometheus): Deploys Prometheus to a monitoring namespace, managed by the CoreOS Prometheus Operator and CRDs
 - [`current_namespace`](/current_namespace): Reads the default namespace from your kubectl config.
+- [`custom_build_with_restart`](/restart_process): Wrap a `custom_build` to restart the given entrypoint after a Live Update
 - [`docker_build_sub`](/docker_build_sub): Specify extra Dockerfile directives in your Tiltfile beyond [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build).
+- [`docker_build_with_restart`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update
 - [`dotenv`](/dotenv): Load environment variables from `.env` or another file.
 - [`file_sync_only`](/file_sync_only): No-build, no-push, file sync-only development. Useful when you want to live-reload a single config file into an existing public image, like nginx.
 - [`git_resource`](/git_resource): Deploy a dockerfile from a remote repository -- or specify the path to a local checkout for local development.
@@ -36,7 +38,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`podman`](/podman): Build container images using [podman](https://podman.io)
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
 - [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
-- [`restart_process`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
+- [`restart_process`](/restart_process): Wrap a `docker_build` or `custom_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
 - [`syncback`](/syncback): Sync files/directories from your container back to your local FS.
