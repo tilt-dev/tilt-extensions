@@ -6,9 +6,9 @@ def build_nix_image(ref, path = "", attr_path = "", deps = []):
 
     #hopefully docker does not change output from docker load
     #this sed expression extracts the name from docker load stdout
-    sed_expr = r"s@Loaded image: \(\S*\)@\1@"
+    sed_expr = r"s@Loaded image: \(\S*\)@\1@p"
     commands = [
-        "IMG_NAME=$(docker load --input $({build_cmd})|sed '{sed_expr}')"
+        "IMG_NAME=$(docker load --input $({build_cmd})|sed -n '{sed_expr}')"
             .format(build_cmd = build_cmd, sed_expr = sed_expr),
         "docker tag $IMG_NAME $EXPECTED_REF",
     ]
