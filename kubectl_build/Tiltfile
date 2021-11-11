@@ -36,7 +36,7 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
     if registry_secret:
         command += ['--registry-secret', registry_secret]
     for arg, value in build_args.items():
-        command += ['--build-arg', arg + '=', value]
+        command += ['--build-arg', arg + '=' + value]
     if target:
         command += ['--target', target]
     if extra_tag:

@@ -1,6 +1,6 @@
 # -*- mode: Python -*-
 
-def ko_build(ref, import_path, deps=[]):
+def ko_build(ref, import_path, deps=[], **kwargs):
   """Use Ko (https://github.com/google/ko) to build images for Tilt.
 
   Args:
@@ -8,6 +8,7 @@ def ko_build(ref, import_path, deps=[]):
       name in the Kubernetes resources you're deploying.
     import_path: A Go import path of the binary to build.
     deps: A list of dependencies that can trigger rebuilds.
+    **kwargs: All remaining args will be passed to the underlying `custom_build`.
   """
   commands = [
     "set -eo pipefail",
@@ -28,4 +29,5 @@ def ko_build(ref, import_path, deps=[]):
     # We add the extra file as a workaround for
     # https://github.com/tilt-dev/tilt/issues/3891
     deps=deps + [__file__],
+    **kwargs,
   )

@@ -3,14 +3,15 @@
 def pack(
   name, 
   path=".",
-  builder="gcr.io/paketo-buildpacks/builder:base", 
+  builder="gcr.io/paketo-buildpacks/builder:base",
   buildpacks=[],
   env_vars=[],
+  pull_policy="if-not-present",
+  deps=[],
   **kwargs
   ):
     """
     Build a container image using pack and buildpacks.
-
     Args:
       name: name of the image to build.
       path: path to application directory, defaults to current working directory.
@@ -23,6 +24,14 @@ def pack(
     # Remove possible tag from image name
     name = name.split(":")[0]
 
+    envs = list(env_vars)
+    if 'BP_LIVE_RELOAD_ENABLED=true' not in envs:
+        envs.append('BP_LIVE_RELOAD_ENABLED=true')
+
+    deps_copy = list(deps)
+    if len(deps_copy) == 0:
+        deps_copy = [path]
+
     caching_ref = name + ":tilt-build-pack-caching"
 
     pack_build_cmd = " ".join([
@@ -30,8 +39,9 @@ def pack(
       caching_ref,
       "--path " + path,
       "--builder " + builder,
+      "--pull-policy " + pull_policy,
       " ".join(["--buildpack " + s for s in buildpacks]),
-      " ".join(["--env " + s for s in env_vars]),
+      " ".join(["--env " + s for s in envs]),
     ])
 
     docker_tag_cmd = " ".join([
@@ -43,6 +53,6 @@ def pack(
     custom_build(
         name,
         pack_build_cmd + " && " + docker_tag_cmd,
-        [path],
+        deps=deps_copy,
         **kwargs
     )
