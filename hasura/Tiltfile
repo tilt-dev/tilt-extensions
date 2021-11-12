@@ -12,9 +12,9 @@ DEFAULT_HASURA_RESOURCE_NAME = 'hasura'
 
 def hasura_console(release_name='',
             path='.', 
-            hasura_resource_name=DEFAULT_HASURA_RESOURCE_NAME,
-            hasura_secret=DEFAULT_HASURA_SECRET,
+            hasura_resource_name=None,
             hasura_endpoint= 'http://localhost:8080',
+            hasura_secret=DEFAULT_HASURA_SECRET,
             wait_for_services=[]):
     # * Wait for Hasura, then run the console locally
     #  ? fetch admin secret from k8s?
@@ -28,12 +28,11 @@ def hasura_console(release_name='',
     if not config:
         local('mkdir -p {}'.format(os.path.join(path, '..')))
         local('hasura init {} --version 3 --endpoint {}'.format(path, hasura_endpoint))
-        # * Bug in the latest hasura cli version - set metadata version.yaml to 3
-        # local('echo "version: 3" > {}'.format(
-        #     os.path.join(path, 'metadata/version.yaml')))
 
     serve_cmds = [
         'hasura migrate apply {} --all-databases'.format(console_options),
+        # test if databases.yaml contains more than '[]\n', meaning a database has been set, therefore hasura config has been loaded
+        # this test is not perfect but avoids requiring additional tools such as yq to check if the yaml file is something else thant an empty array
         '[ $(wc -c <"{}/metadata/databases/databases.yaml") -ge 4 ] && hasura metadata apply {} || hasura metadata export {}'.format(path, console_options, console_options),
         'hasura console {}'.format(console_options)
     ]
@@ -43,8 +42,8 @@ def hasura_console(release_name='',
         release_name) if release_name else 'hasura-console'
     local_resource(console_resource,
                     '\n'.join([wait_for(x) for x in wait_for_services + ['{}/healthz'.format(hasura_endpoint)]]),
-                   resource_deps=[hasura_resource],
-                   serve_cmd=' && '.join(serve_cmds),
+                   resource_deps=[hasura_resource] if hasura_resource else [],
+                   serve_cmd=' && '.join(["{{ {}; }}".format(cmd) for cmd in serve_cmds]),
                    allow_parallel=True,
                    links=[link('http://localhost:9695/', 'Hasura Console')])
 
@@ -90,6 +89,6 @@ def hasura(release_name='',
                     )
 
     if console:
-        hasura_console(release_name, path, resource_name, hasura_secret)
+        hasura_console(release_name, path, resource_name, 'http://localhost:8080', hasura_secret)
 
 

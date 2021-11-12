@@ -30,7 +30,7 @@ The extension uses the [Hasura PlatyDev Helm Chart](https://artifacthub.io/packa
 hasura(yaml=helm('./my-local-hasura-chart'))
 ```
 
-## Parameters
+## `hasura` command Parameters
 
 The full list of parameters accepted by `hasura` includes:
 
@@ -46,13 +46,34 @@ The full list of parameters accepted by `hasura` includes:
 - `yaml` to define a Kubernetes resources to deploy Hasura instead of the default Helm Chart, defaults to `''`
 - `console`, defaults to `True`. If set to false, it won't run the Hasura console locally, therefore won't apply migrations and metadata.
 
-### Use the Hasura console as a side-car
+## Use the Hasura console as a side-car
 
-You may want to start the console at a different time:
+You may want to start the console at a different time, or with another Hasura instance that may not be managed by Tilt or the current cluster.
+It will try to connect to the given Hasura instance.
+
+It will check if a project has been set locally in the path given as a parameter. If not, it will initiate it and load the existing metadata from the Hasura server.
+
+### `hasura_console` command parameters
+
+- `release_name`, defaults to `''`
+- `path`, defaults to `'.'`, is the path of your local Hasura projet
+- `hasura_resource_name`, defaults to `None`
+- `hasura_secret`, defaults to ``'hasura-dev-secret'`
+- `hasura_endpoint`, defaults to `'http://localhost:8080'`
+- `wait_for_services`, is an array of http services that will be probed until resolved successfully before starting the console, in addition to the Hasura server in itseld. Defaults to `[]`
+
+### Start the console at a different time
 
 ```python
 load('ext://hasura', 'hasura')
 load('ext://hasura', 'hasura_console')
 hasura(console=False)
-hasura_console(wait_for_services=['http://another-service/healthz'])
+hasura_console(hasura_resource_name='hasura', wait_for_services=['http://another-service/healthz'])
+```
+
+### Start the console against an external Hasura instance
+
+```python
+load('ext://hasura', 'hasura_console')
+hasura_console(hasura_endpoint='https://my-hasura.io', hasura_secret='my-hasura-admin-secret')
 ```
