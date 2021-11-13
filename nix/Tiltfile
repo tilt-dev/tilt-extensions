@@ -1,24 +1,23 @@
 def build_nix_image(ref, path = "", attr_path = "", deps = []):
-    build_cmd = "nix-build --out-link $(mktemp -u) {attr} {path}".format(
+    build_cmd = "nix-build --no-out-link {attr} {path}".format(
         attr = " --attr " + attr_path if attr_path else "",
         path = path,
     )
-
-    #hopefully docker does not change output from docker load
-    #this sed expression extracts the name from docker load stdout
-    sed_expr = r"s@Loaded image: \(\S*\)@\1@p"
     commands = [
-        "IMG_NAME=$(docker load --input $({build_cmd})|sed -n '{sed_expr}')"
-            .format(build_cmd = build_cmd, sed_expr = sed_expr),
-        "docker tag $IMG_NAME $EXPECTED_REF",
+        "set -e",
+        'IMG_PATH="$({})"'.format(build_cmd),
+        'docker load --input "$IMG_PATH"',
+        'IMG_NAME=$(tar -Oxf "$IMG_PATH" manifest.json | jq -r ".[0].RepoTags[0]")',
+        'docker tag "$IMG_NAME" "$EXPECTED_REF"',
     ]
     custom_build(
         ref,
         command = [
             "nix-shell",
             "--packages",
-            "gnused",
             "coreutils",
+            "gnutar",
+            "jq",
             "--run",
             ";\n".join(commands),
         ],
