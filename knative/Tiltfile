@@ -1,0 +1,91 @@
+# -*- mode: Python -*-
+
+# Configuration for all knative CRDs.
+k8s_kind('Service', api_version='serving.knative.dev/v1',
+         image_json_path='{.spec.template.spec.containers[*].image}')
+
+def knative_install():
+  """
+  Installs the knative operators into your cluster.
+
+  Auto-configures knative to use any local dev registries.
+  """
+
+  k8s_custom_deploy(
+    'knative-crds',
+    deps=[],
+    apply_cmd="""
+set -e
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-crds.yaml -o yaml
+kubectl wait --for=condition=Established crd -l=knative.dev/crd-install=true 1>&2
+""",
+    delete_cmd="""
+kubectl delete --ignore-not-found -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-crds.yaml
+""")
+  k8s_resource(
+    'knative-crds',
+    labels=['knative'],
+    pod_readiness='ignore')
+
+  # TODO(nick): Once the registry is in the Tilt API,
+  # we should read that here and use it to set knative configuration.
+  patch_registry_cmd="""
+REGISTRY=$(kubectl get configmap -n kube-public local-registry-hosting -oyaml | grep "host:" | sed 's/ *host: *//')
+if [ "$REGISTRY" != "" ]; then
+  kubectl patch configmap/config-deployment \
+    --namespace knative-serving \
+    --type merge \
+    --patch "{\\"data\\":{\\"registries-skipping-tag-resolving\\": \\"kind.local,ko.local,dev.local,$REGISTRY\\"}}" 1>&2
+fi
+"""
+
+  # knative installs a webhook. If you try to create resources in the cluster
+  # while the webhook is being installed, everything will explode.
+  webhook_wait_cmd="""
+kubectl wait --for=condition=Ready pods -n knative-serving -l=app.kubernetes.io/name=webhook 1>&2
+"""
+
+  k8s_custom_deploy(
+    'knative-core',
+    deps=[],
+    apply_cmd="""
+set -ex
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-core.yaml -o yaml
+set +e
+""" + webhook_wait_cmd + patch_registry_cmd,
+    delete_cmd="""
+kubectl delete --ignore-not-found -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-core.yaml
+""")
+  k8s_resource(
+    'knative-core',
+    labels=['knative'],
+    resource_deps=['knative-crds'])
+
+def knative_yaml(file_name):
+  """Registers a Knative Serving resource for development.
+
+  Auto-configures the resource with min availability=1,
+  so that it will always be available for live updates.
+  """
+
+  # Inject minScale annotation and add dependency on knative-core.
+  # Also adds dependencies on knative-core.
+  stream = read_yaml_stream(file_name)
+  for o in stream:
+    if o.get('apiVersion', '').startswith('serving.knative.dev') and o.get('kind', '') == "Service":
+      spec = o.get('spec', {})
+      tmpl = spec.get('template', {})
+      if 'metadata' not in tmpl:
+        tmpl['metadata'] = {}
+
+      metadata = tmpl['metadata']
+      if 'annotations' not in metadata:
+        metadata['annotations'] = {}
+
+      metadata['annotations']['autoscaling.knative.dev/minScale'] = "1"
+
+      name = o.get('metadata', {}).get('name', '')
+      if name:
+        k8s_resource(name, resource_deps=['knative-core'])
+
+  k8s_yaml(encode_yaml_stream(stream))
