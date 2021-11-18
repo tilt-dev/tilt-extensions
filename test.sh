@@ -16,6 +16,9 @@ coreos_prometheus/test/test.sh
 # on a machine with podman installed.
 #
 podman/test/test.sh
+
+# TODO(nick): Get nix working inside circleci
+nix/test/test.sh
 )
 
 isSkipped() {
@@ -37,7 +40,7 @@ do
 
   if ! isSkipped "$TEST"; then
     echo "running $TEST"
-    # $TEST
+    $TEST
   else
     echo "skipping $TEST"
   fi
