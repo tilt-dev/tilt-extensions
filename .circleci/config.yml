@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:94f33b1e3a4863fb5eb3a56edd5d39ce1b56653a858251a962185079ed9cd4d9
+      - image: tiltdev/tilt-extensions-ci@sha256:caf9617f44d0d34e115904ef403689d303466feb663415cf185cc629e40873f9
 
     steps:
       - checkout
@@ -11,7 +11,7 @@ jobs:
 
   shellcheck:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:94f33b1e3a4863fb5eb3a56edd5d39ce1b56653a858251a962185079ed9cd4d9
+      - image: tiltdev/tilt-extensions-ci@sha256:caf9617f44d0d34e115904ef403689d303466feb663415cf185cc629e40873f9
 
     steps:
       - checkout
@@ -19,7 +19,7 @@ jobs:
 
   test:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:94f33b1e3a4863fb5eb3a56edd5d39ce1b56653a858251a962185079ed9cd4d9
+      - image: tiltdev/tilt-extensions-ci@sha256:caf9617f44d0d34e115904ef403689d303466feb663415cf185cc629e40873f9
 
     steps:
       - setup_remote_docker:
