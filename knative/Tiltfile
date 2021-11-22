@@ -1,5 +1,7 @@
 # -*- mode: Python -*-
 
+version_settings(constraint='>=0.23.0')
+
 # Configuration for all knative CRDs.
 k8s_kind('Service', api_version='serving.knative.dev/v1',
          image_json_path='{.spec.template.spec.containers[*].image}')
