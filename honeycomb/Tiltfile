@@ -1,0 +1,11 @@
+
+home = os.getcwd()
+
+def honeycomb_collector():
+  local_resource(
+    name='honeycomb-collector',
+    labels=['honeycomb'],
+    allow_parallel=True,
+    deps=[os.path.join(home, './honeycomb-collector.py')],
+    serve_dir=home,
+    serve_cmd=['python3', os.path.join(home, './honeycomb-collector.py')])
