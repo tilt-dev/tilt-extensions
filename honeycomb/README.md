@@ -30,7 +30,7 @@ You can also set the environment variable in your Tiltfile:
 
 ```python
 include('ext://honeycomb', 'honeycomb_collector')
-os.environ['HONEYCOMB_API_KEY'] = '[your-private-key]'
+os.environ['HONEYCOMB_API_KEY'] = str(read_file('/path/to/private/key'))
 os.environ['HONEYCOMB_DATASET'] = 'tilt-analytics'
 honeycomb_collector()
 ```
