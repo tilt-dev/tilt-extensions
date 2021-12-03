@@ -1,0 +1,6 @@
+# Don't run the honeycomb collector, just confirm it parses.
+load('../Tiltfile', 'honeycomb_collector')
+
+local_resource(
+  name='event-test',
+  cmd=["python3", "events_test.py"])
