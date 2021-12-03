@@ -22,14 +22,14 @@ Set the following environment variables:
 Then add this to your Tiltfile:
 
 ```python
-include('ext://honeycomb', 'honeycomb_collector')
+load('ext://honeycomb', 'honeycomb_collector')
 honeycomb_collector()
 ```
 
 You can also set the environment variable in your Tiltfile:
 
 ```python
-include('ext://honeycomb', 'honeycomb_collector')
+load('ext://honeycomb', 'honeycomb_collector')
 os.environ['HONEYCOMB_API_KEY'] = str(read_file('/path/to/private/key'))
 os.environ['HONEYCOMB_DATASET'] = 'tilt-analytics'
 honeycomb_collector()
@@ -38,9 +38,9 @@ honeycomb_collector()
 Or conditionally enable it if the environment variable is set:
 
 ```python
-include('ext://honeycomb', 'honeycomb_collector')
+load('ext://honeycomb', 'honeycomb_collector')
 if os.environ.get('HONEYCOMB_API_KEY', '') and os.environ.get('HONEYCOMB_DATASET', ''):
-    honeycomb_collector()
+  honeycomb_collector()
 ```
 
 ## Events
