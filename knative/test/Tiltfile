@@ -1,0 +1,10 @@
+load('../Tiltfile', 'knative_install', 'knative_yaml')
+
+knative_install()
+
+knative_yaml('service.yaml')
+k8s_resource('example-html',
+             port_forwards=8000)
+docker_build('example-html-image', '.', live_update=[
+  sync('.', '/app'),
+])

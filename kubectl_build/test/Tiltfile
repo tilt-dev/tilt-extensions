@@ -1,0 +1,9 @@
+load('../Tiltfile', 'kubectl_build')
+
+k8s_yaml('deployment.yaml')
+k8s_resource('example-html', port_forwards=[8000])
+
+# Add a live_update rule to our docker_build.
+kubectl_build('example-html-image', '.', live_update=[
+  sync('.', '/app'),
+])

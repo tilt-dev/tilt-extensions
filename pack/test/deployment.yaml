@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-httpd
+  labels:
+    app: example-httpd
+spec:
+  selector:
+    matchLabels:
+      app: example-httpd
+  template:
+    metadata:
+      labels:
+        app: example-httpd
+    spec:
+      containers:
+      - name: example-httpd
+        image: example-httpd-image
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        readinessProbe:
+          httpGet:
+            port: 8080

@@ -1,0 +1,20 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: example-html
+  labels:
+    app: example-html
+spec:
+  template:
+    metadata:
+      labels:
+        app: example-html
+    spec:
+      containers:
+      - name: example-html
+        image: example-html-image
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /index.html

@@ -1,0 +1,25 @@
+def build_nix_image(ref, path = "", attr_path = "", deps = []):
+    build_cmd = "nix-build --no-out-link {attr} {path}".format(
+        attr = " --attr " + attr_path if attr_path else "",
+        path = path,
+    )
+    commands = [
+        "set -e",
+        'IMG_PATH="$({})"'.format(build_cmd),
+        'docker load --input "$IMG_PATH"',
+        'IMG_NAME=$(tar -Oxf "$IMG_PATH" manifest.json | jq -r ".[0].RepoTags[0]")',
+        'docker tag "$IMG_NAME" "$EXPECTED_REF"',
+    ]
+    custom_build(
+        ref,
+        command = [
+            "nix-shell",
+            "--packages",
+            "coreutils",
+            "gnutar",
+            "jq",
+            "--run",
+            ";\n".join(commands),
+        ],
+        deps = deps,
+    )
