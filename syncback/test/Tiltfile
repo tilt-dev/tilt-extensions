@@ -1,0 +1,51 @@
+load("../Tiltfile", "syncback")
+
+src = str(local("mktemp -d | tee syncback-dir.txt")).strip("\n")
+python = os.path.join(src, "python")
+ruby = os.path.join(src, "ruby")
+rsync = os.path.join(src, "rsync")
+local("mkdir -p {} {} {}".format(python, ruby, rsync))
+
+k8s_yaml(blob("""
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: syncback-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: syncback-test
+  name: syncback-containers
+spec:
+  selector:
+    matchLabels:
+      app: syncback
+  template:
+    metadata:
+      namespace: syncback-test
+      labels:
+        app: syncback
+    spec:
+      containers:
+        - name: python
+          image: python:3-slim-bullseye
+          command: ["python3", "-m", "http.server", "8000"]
+        - name: ruby
+          image: ruby:3-slim-bullseye
+          command: ["bash", "-c", "cd /root && gem install webrick && ruby -run -e httpd . -p 9000"]
+        - name: rsync
+          image: alpine:latest
+          command: ["sh", "-c", "apk add rsync && nc -kl 10000"]
+"""))
+
+
+local_resource("python-file", "kubectl exec --namespace syncback-test -c python deploy/syncback-containers -- touch /root/main.py",   resource_deps=["syncback-containers"])
+local_resource("ruby-file",   "kubectl exec --namespace syncback-test -c ruby   deploy/syncback-containers -- touch /root/main.rb",   resource_deps=["syncback-containers"])
+local_resource("rsync-file",  "kubectl exec --namespace syncback-test -c rsync  deploy/syncback-containers -- touch /root/rsync.txt", resource_deps=["syncback-containers"])
+
+syncback("python-syncback", "deploy/syncback-containers", "/root/", target_dir=python, container="python", namespace="syncback-test")
+syncback("ruby-syncback", "deploy/syncback-containers", "/root/", target_dir=ruby, container="ruby", namespace="syncback-test")
+syncback("rsync-syncback", "deploy/syncback-containers", "/root/", target_dir=rsync, container="rsync", namespace="syncback-test")
+
+local_resource("syncback-triggers", "tilt trigger python-syncback && tilt trigger ruby-syncback && tilt trigger rsync-syncback", resource_deps=["python-file", "ruby-file", "rsync-file"])
