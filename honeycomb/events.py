@@ -67,7 +67,7 @@ for build in builds:
         'duration_ms': int((end_time - start_time).total_seconds() * 1000),
         'kind': 'dockerimage',
       },
-      'time': completed['finishedAt'],
+      'time': completed['startedAt'],
     })
 
 print(json.dumps(events))
