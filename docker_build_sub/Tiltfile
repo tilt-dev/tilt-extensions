@@ -1,4 +1,4 @@
-def docker_build_sub(ref, context, extra_cmds, child_context=None, base_suffix='-tilt_docker_build_sub_base', live_update=[], **kwargs):
+def docker_build_sub(ref, context, dockerfile, extra_cmds, child_context=None, base_suffix='-tilt_docker_build_sub_base', live_update=[], **kwargs):
   """
   Substitutes in a docker image with extra Dockerfile commands.
 
@@ -39,6 +39,6 @@ def docker_build_sub(ref, context, extra_cmds, child_context=None, base_suffix='
   if not child_context:
     child_context = context
   base_ref = '%s-base' % ref
-  docker_build(base_ref, context, **kwargs)
+  docker_build(base_ref, context, dockerfile, **kwargs)
   df = '\n'.join(['FROM %s' % base_ref] + extra_cmds)
   docker_build(ref, child_context, dockerfile_contents=df, live_update=live_update, **kwargs)
