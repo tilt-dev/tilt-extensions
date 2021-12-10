@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-html
+  labels:
+    app: example-html
+spec:
+  selector:
+    matchLabels:
+      app: example-html
+  template:
+    metadata:
+      labels:
+        app: example-html
+    spec:
+      containers:
+      - name: example-html
+        image: example-html-image
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            port: 8000
