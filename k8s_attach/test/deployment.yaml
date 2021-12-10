@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-html
+  labels:
+    app: example-html
+spec:
+  selector:
+    matchLabels:
+      app: example-html
+  template:
+    metadata:
+      labels:
+        app: example-html
+    spec:
+      containers:
+      - name: example-html
+        image: busybox
+        workingDir: /src
+        command:
+        - sh
+        - -c
+        - echo "Serving files on port 8000" && busybox httpd -f -p 8000
+        ports:
+        - containerPort: 8000

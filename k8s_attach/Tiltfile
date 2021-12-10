@@ -1,0 +1,28 @@
+
+def k8s_attach(name, obj, namespace="", deps=[], live_update=None, **kwargs):
+  """Attach to a kubernetes resource.
+
+  Arguments:
+  name: The name for the resource in the UI.
+  obj: An object name in the form "kind/name", as you would express it to kubectl. e.g., deployment/my-deployment.
+  namespace: The namespace of the object. If not specified, uses the default namespace.
+  live_update: Live-update rules to copy files and run commands in the server whenever
+    they change locally.
+  deps: When using live-update, you must also specify the files as a dependency.
+  **kwargs: Arguments to pass to the underlying k8s_resource, including labels.
+  """
+
+  args = ["kubectl", "get", "-o=yaml", obj]
+  if namespace:
+    args.append("-n", namespace)
+
+  k8s_custom_deploy(
+    name,
+    apply_cmd=args,
+    delete_cmd=["echo", "ok"],
+    deps=deps,
+    live_update=live_update,
+    image_selector='busybox')
+
+  k8s_resource(
+    name, **kwargs)

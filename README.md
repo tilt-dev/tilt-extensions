@@ -24,6 +24,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`helm_remote`](/helm_remote): Install a remote Helm chart (in a way that gets properly uninstalled when running `tilt down`)
 - [`honeycomb`](/honeycomb): Report dev env performance to [Honeycomb](https://honeycomb.io).
 - [`jest_test_runner`](/jest_test_runner): Jest JavaScript test runner. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
+- [`k8s_attach`](/k8s_attach): Attach to an existing Kubernetes resource that's already in your cluster. View their health and live-update them in-place.
 - [`kim`](/kim): Use [kim](https://github.com/rancher/kim) to build images for Tilt
 - [`knative`](/knative): Use [knative serving](https://knative.dev/docs/serving/) to iterate on scale-to-zero servers.
 - [`ko`](/ko): Use [Ko](https://github.com/google/ko) to build Go-based container images
