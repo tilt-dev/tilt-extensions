@@ -1,0 +1,16 @@
+load('../Tiltfile', 'k8s_attach')
+
+# NB: attach() is intended for attaching to existing
+# deployments. Normally, you'd do the kubectl apply
+# outside of the main
+local('kubectl apply -f deployment.yaml')
+
+k8s_attach(
+  'example-html',
+  'deployment/example-html',
+  live_update=[
+    sync('./', '/src'),
+  ],
+  deps=['./'],
+  port_forwards=[8000],
+  image_selector='busybox')

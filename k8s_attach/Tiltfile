@@ -1,0 +1,38 @@
+
+def k8s_attach(name, obj, namespace="", deps=[], live_update=None, image_selector="", container_selector="", **kwargs):
+  """Attach to a kubernetes resource.
+
+  Arguments:
+  name: The name for the resource in the UI.
+  obj: An object name in the form "kind/name", as you would express it to kubectl. e.g., deployment/my-deployment.
+  namespace: The namespace of the object. If not specified, uses the default namespace.
+  deps: When using live-update, you must also specify the files as a dependency.
+  live_update: Live-update rules to copy files and run commands in the server whenever
+    they change locally.
+  image_selector: When using live-update, the image selector finds the container to update
+    by comparing container image name.
+  container_selector: When using live-update, the container selector finds the container to update
+    by comparing container name.
+  **kwargs: Arguments to pass to the underlying k8s_resource, including labels.
+  """
+
+  args = ["kubectl", "get", "-o=yaml", obj]
+  if namespace:
+    args.append("-n", namespace)
+
+  deploy_kwargs={}
+  if image_selector:
+    deploy_kwargs["image_selector"] = image_selector
+  if container_selector:
+    deploy_kwargs["container_selector"] = container_selector
+
+  k8s_custom_deploy(
+    name,
+    apply_cmd=args,
+    delete_cmd=["echo", "Skipping delete. Object managed outside of tilt: %s" % obj],
+    deps=deps,
+    live_update=live_update,
+    **deploy_kwargs)
+
+  k8s_resource(
+    name, **kwargs)
