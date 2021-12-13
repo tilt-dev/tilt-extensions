@@ -12,4 +12,5 @@ k8s_attach(
     sync('./', '/src'),
   ],
   deps=['./'],
-  port_forwards=[8000])
+  port_forwards=[8000],
+  image_selector='busybox')

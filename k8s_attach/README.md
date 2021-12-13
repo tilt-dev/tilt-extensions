@@ -23,10 +23,12 @@ To copy files to the server whenever they change locally, add this:
 
 ```
 load('ext://k8s_attach', 'k8s_attach')
-k8s_attach('my-server', 'deployment/my-server', live_update=[
-  sync('./static', '/app/static').
-  run('echo done'),
-])
+k8s_attach('my-server', 'deployment/my-server', 
+  image_selector='busybox', # the image to live-update
+  live_update=[
+    sync('./static', '/app/static').
+    run('echo done'),
+  ])
 ```
 
 See the [test](./test) directory for an example.
