@@ -19,6 +19,7 @@ def kim_build(ref, context, ignore=None, extra_flags=None, **kwargs):
   custom_build(
     ref=ref,
     command="kim build -t $EXPECTED_REF %s %s\n" % (extra_flags_str, shlex.quote(context)),
+    command_bat="kim build -t %%EXPECTED_REF%% %s %s\n" % (extra_flags_str, shlex.quote(context)),
     ignore=ignore,
     deps=[context],
     skips_local_docker=True,
