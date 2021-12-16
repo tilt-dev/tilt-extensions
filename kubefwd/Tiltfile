@@ -5,7 +5,7 @@ cfg = config.parse()
 
 namespaces = cfg.get('namespaces', [])
 
-trigger_file = str(local('mktemp --suffix -tilt-kubefwd')).strip()
+trigger_file = str(local('mktemp "${TMPDIR:-/tmp}/tilt-kubefwd.XXXXXXXXX"')).strip()
 
 # Creates a button that refreshes the kubefwd without
 # requiring new credentials.
