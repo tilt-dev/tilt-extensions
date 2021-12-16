@@ -3,7 +3,7 @@ config.define_string("auth")
 cfg = config.parse()
 
 auth = cfg.get('auth', '')
-config_file = str(local('mktemp --suffix -tilt-ngrok.yml')).strip()
+config_file = str(local('mktemp "${TMPDIR:-/tmp}/tilt-ngrok.XXXXXXXXX"')).strip()
 
 local_resource(
   name='ngrok:status',
