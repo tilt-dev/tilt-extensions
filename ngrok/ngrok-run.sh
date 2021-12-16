@@ -13,7 +13,7 @@ fi
 
 args+=("--config" "$config_file")
 
-if [[ "$(wc -l "$config_file" | cut -d ' ' -f 1)" == "0" ]]; then
+if [[ "$(wc -l "$config_file" | awk '{print $1}')" == "0" ]]; then
     args+=("--none")
 else
     args+=("--all")
