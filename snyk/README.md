@@ -5,7 +5,7 @@ Author: [Shai Mendel](https://github.com/shaimendel)
 	[Jim Armstrong](https://github.com/jimcodified)
 	[Matt Jarvis](https://github.com/mattj-io)
 
-[Snyk](https://https://snyk.io/) is a product to help developers to continuously find and fix vulnerabilities in open source libraries, containers and Infrastructure as Code configurations.
+[Snyk](https://snyk.io/) is a product to help developers to continuously find and fix vulnerabilities in open source libraries, containers and Infrastructure as Code configurations.
 
 ## Requirements
 
