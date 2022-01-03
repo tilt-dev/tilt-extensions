@@ -13,5 +13,8 @@ kubectl exec -n syncback-test -c python deploy/syncback-containers -- sh -c "[ -
 kubectl exec -n syncback-test -c ruby deploy/syncback-containers -- sh -c "[ -f /bin/rsync.tilt ]"
 # Test that rsync was not copied because it was already installed
 kubectl exec -n syncback-test -c rsync deploy/syncback-containers -- sh -c "[ ! -f /bin/rsync.tilt ]"
+# Test that button was created with correct resource
+test -f syncback-button.txt -a "$(cat syncback-button.txt)" = syncback-containers
+
 tilt down --delete-namespaces
-rm -rf $syncback_dir syncback-dir.txt
+rm -rf $syncback_dir syncback-dir.txt syncback-button.txt

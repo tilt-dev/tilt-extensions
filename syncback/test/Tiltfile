@@ -1,4 +1,5 @@
-load("../Tiltfile", "syncback")
+load("../Tiltfile", "syncback", "syncback_command_args")
+load("../../uibutton/Tiltfile", "cmd_button")
 
 src = str(local("mktemp -d | tee syncback-dir.txt")).strip("\n")
 python = os.path.join(src, "python")
@@ -39,6 +40,9 @@ spec:
           command: ["sh", "-c", "apk add rsync && nc -kl 10000"]
 """))
 
+k8s_resource("syncback-containers")
+cmd_button("Sync", "syncback-containers", syncback_command_args("deploy/syncback-test", "/root/", target_dir=rsync, container="rsync", namespace="syncback-test"))
+local_resource("syncback-button", "tilt get uibuttons/Sync -o jsonpath='{.spec.location.componentID}' > syncback-button.txt && tilt get cmd/btn-Sync", resource_deps=["syncback-containers"])
 
 local_resource("python-file", "kubectl exec --namespace syncback-test -c python deploy/syncback-containers -- touch /root/main.py",   resource_deps=["syncback-containers"])
 local_resource("ruby-file",   "kubectl exec --namespace syncback-test -c ruby   deploy/syncback-containers -- touch /root/main.rb",   resource_deps=["syncback-containers"])
