@@ -22,6 +22,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`hasura`](/hasura): Deploys [Hasura GraphQL Engine](https://hasura.io/) and monitors metadata/migrations changes locally.
 - [`hello_world`](/hello_world): Print "Hello world!". Used in [Extensions](https://docs.tilt.dev/extensions.html).
 - [`helm_remote`](/helm_remote): Install a remote Helm chart (in a way that gets properly uninstalled when running `tilt down`)
+- [`helm_resource`](/helm_resource): Deploy with the Helm CLI. New Tilt users should prefer this approach over `helm_remote`.
 - [`honeycomb`](/honeycomb): Report dev env performance to [Honeycomb](https://honeycomb.io).
 - [`jest_test_runner`](/jest_test_runner): Jest JavaScript test runner. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
 - [`k8s_attach`](/k8s_attach): Attach to an existing Kubernetes resource that's already in your cluster. View their health and live-update them in-place.
