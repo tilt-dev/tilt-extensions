@@ -1,0 +1,64 @@
+# -*- mode: Python -*-
+
+version_settings(constraint='>=0.23.4')
+
+def helm_resource(
+    name,
+    chart,
+    deps=[],
+    release_name='',
+    image_deps=None,
+    image_keys=None,
+    flags=None,
+    image_selector='',
+    container_selector='',
+    live_update=None):
+
+  if not release_name:
+    release_name=name
+
+  if not image_deps:
+    image_deps = []
+
+  if not image_keys:
+    image_keys = []
+
+  if len(image_deps) != len(image_keys):
+    fail('image_deps and image_keys must have the same length, so that we know how to inject images into the helm chart;')
+
+  if flags:
+    # copy and escape the flags array, since we're going to mutate it.
+    flags = [shlex.quote(f) for f in flags]
+  else:
+    flags = []
+
+  for i in range(len(image_deps)):
+    key = image_keys[i]
+    if type(key) == 'str':
+      flags.extend(['--set', '%s=$TILT_IMAGE_%s' % (shlex.quote(key), i)])
+    elif type(key) == 'tuple':
+      # NOTE(nick): This is a PITA because it's hard to separate
+      # out the repository from the tag.
+      flags.extend([
+        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed -r \'s,:[^/]*$,,\')' % (shlex.quote(key[0]), i),
+        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed -r \'s,^.*:([^/]*)$,\\1,\')' % (shlex.quote(key[1]), i),
+      ])
+    else:
+      fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
+
+  print(flags)
+  k8s_custom_deploy(
+    name,
+    apply_cmd="""
+set -ex
+helm upgrade %s --install %s %s 1>&2
+helm get manifest %s | kubectl get -oyaml -f -
+""" % (' '.join(flags), shlex.quote(release_name), shlex.quote(chart), shlex.quote(release_name)),
+    delete_cmd="""
+helm uninstall %s || true
+""" % shlex.quote(release_name),
+    deps=deps,
+    image_deps=image_deps,
+    image_selector=image_selector,
+    container_selector=container_selector,
+    live_update=live_update)
