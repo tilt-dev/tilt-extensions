@@ -12,7 +12,40 @@ def helm_resource(
     flags=None,
     image_selector='',
     container_selector='',
-    live_update=None):
+    live_update=None,
+    resource_deps=None,
+    labels=None):
+  """Installs a helm chart to a cluster.
+
+  Args:
+    name: The name of the resource in the Tilt UI.
+    chart: A reference to a chart. Uses the same syntax as `helm install
+      [release-name] [chart]`. May be a local path, a local tarball, or a `repo/name`
+      reference.
+    deps: A list of file dependencies that should trigger a deployment.
+    release_name: The name of the release. If not specified, defaults to the Tilt UI resource name.
+    image_deps: A list of images built by Tilt to inject into the chart. If Tilt doesn't know
+      how to build one of these images, this will be an error.
+    image_keys`: A list of specifications for how to inject images into the
+      chart. Must be the same length as `image_deps`.  There are two common patterns.
+
+      - If your chart accepts an image as a single tagged image reference, specify the key as a string.
+
+      - If your chart accepts an image as a 'repository' and a 'tag', spectify the key
+        as a tuple ('image.repository', 'image.tag'). This is how charts created with
+        `helm create` are structured.
+
+    flags: Additional flags to pass to `helm install` (e.g., `['--set', 'key=value']`)
+    image_selector: Image reference to determine containers eligible for Live Update.
+      Only applicable if there are no images in `image_deps`.
+    container_selector: Container reference to determine containers eligible for Live Update.
+      Only applicable if there are no images in `image_deps`.
+    live_update: Live Update steps for images not built by Tilt.
+      Only applicable if there are no images in `image_deps`.
+    resource_deps: Tilt resources to depend on. Useful for
+      adding a dependency on a helm repo install.
+    labels: Labels for categorizing the resource.
+  """
 
   if not release_name:
     release_name=name
@@ -46,7 +79,6 @@ def helm_resource(
     else:
       fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
 
-  print(flags)
   k8s_custom_deploy(
     name,
     apply_cmd="""
@@ -62,3 +94,40 @@ helm uninstall %s || true
     image_selector=image_selector,
     container_selector=container_selector,
     live_update=live_update)
+
+  if resource_deps:
+    k8s_resource(name, resource_deps=resource_deps)
+
+  if labels:
+    k8s_resource(name, labels=labels)
+
+def helm_repo(
+    name,
+    url,
+    resource_name='',
+    username='',
+    password='',
+    **kwargs):
+  """Installs a helm repo on tilt up.
+
+  name: The name of the helm repo.
+  url: The url of the helm repo.
+  resource_name: The name of the resource in the tilt UI. Defaults to `helm-[name]`.
+  username: The username for authenticating (if the helm repo is private).
+  password: The password for authenticating (if the helm repo is private).
+  **kwargs: Arguments to pass to the underlying resource like `labels` (for organization).
+  """
+
+  if not resource_name:
+    resource_name=name
+
+  args = [
+    'helm', 'repo', 'add', name, url,
+    '--force-update', # Replace the repo if it already exists.
+  ]
+  if username:
+    args.extend(['--username', username])
+  if password:
+    args.extend(['--password', password])
+
+  local_resource(resource_name, args, allow_parallel=True, **kwargs)

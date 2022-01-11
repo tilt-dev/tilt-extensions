@@ -27,7 +27,9 @@ def helm_resource(
     flags=None,
     image_selector='',
     container_selector='',
-    live_update=None):
+    live_update=None,
+    resource_deps=None,
+    labels=None):
   ...
 ```
 
@@ -68,6 +70,35 @@ chart. Must be the same length as `image_deps`.  There are two common patterns.
 `live_update`: Live Update steps for images not built by Tilt.
   Only applicable if there are no images in `image_deps`.
 
+`resource_deps`: Tilt resources to depend on. Useful for adding a dependency on a helm repo install.
+
+`labels`: Labels for categorizing the resource.
+
+### helm_repo
+
+```
+def helm_repo(
+    name,
+    url,
+    username='',
+    password='',
+    **kwargs):
+  ...
+```
+
+Installs a helm repo on tilt up.
+
+Arguments:
+
+`name`: The name of the helm repo.
+
+`url`: The url of the helm repo.
+
+`username`: The username for authenticating (if the helm repo is private).
+
+`password`: The password for authenticating (if the helm repo is private).
+
+`**kwargs:` Arguments to pass to the underlying resource like `labels` (for organization).
 
 ## Examples
 
@@ -112,7 +143,7 @@ evolution from Helm 2 to Helm 3.
 
 ### Future Work
 
-Currently, this extension doesn't manage `helm repo add` or `helm repo update`.
+Currently, `helm_repo` doesn't try to keep the repo up to date.
 
 In the past, we've found it difficult to efficiently manage this information
 from the Tiltfile. Ideally, `tilt up` against an existing environment should be
