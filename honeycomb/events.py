@@ -31,8 +31,12 @@ ui_resource_list = json.loads(ui_resource_list_json)
 docker_image_list_json = subprocess.check_output(['tilt', 'get', 'dockerimage', '-o=json'])
 docker_image_list = json.loads(docker_image_list_json)
 
-custom_build_list_json = subprocess.check_output(['tilt', 'get', 'cmdimages', '-o=json'])
-custom_build_list = json.loads(custom_build_list_json)
+comst_build_list = {}
+try:
+  custom_build_list_json = subprocess.check_output(['tilt', 'get', 'cmdimages', '-o=json'])
+  custom_build_list = json.loads(custom_build_list_json)
+except:
+  pass
 
 current_report_time = datetime.datetime.now().astimezone(datetime.timezone.utc)
 
