@@ -1,6 +1,6 @@
 # -*- mode: Python -*-
 
-load('../Tiltfile', 'helm_resource')
+load('../Tiltfile', 'helm_resource', 'helm_repo')
 
 docker_build(
   'helloworld-image',
@@ -14,8 +14,21 @@ helm_resource(
   './helloworld',
   deps=['./helloworld'],
   image_deps=['helloworld-image'],
-  image_keys=[('image.repository', 'image.tag')])
+  image_keys=[('image.repository', 'image.tag')],
+  labels=['helloworld'])
 
 k8s_resource(
   'helloworld',
   port_forwards=['8080:80'])
+
+helm_repo(
+  'bitnami',
+  'https://charts.bitnami.com/bitnami',
+  labels=['memcached'],
+  resource_name='helm-repo-bitnami')
+
+helm_resource(
+  'memcached',
+  'bitnami/memcached',
+  labels=['memcached'],
+  resource_deps=['helm-repo-bitnami'])
