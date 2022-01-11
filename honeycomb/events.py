@@ -58,7 +58,7 @@ for item in items:
   })
 
 # Report duration times for each Docker Image and custom build
-all_builds = docker_image_list | custom_build_list
+all_builds = {**docker_image_list, **custom_build_list}
 builds = sorted(docker_image_list.get('items', []), key=lambda item: item['metadata']['name'])
 for build in builds:
   completed = build.get('status', {}).get('completed', None)
