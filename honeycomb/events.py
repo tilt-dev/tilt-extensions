@@ -30,6 +30,10 @@ ui_resource_list = json.loads(ui_resource_list_json)
 
 docker_image_list_json = subprocess.check_output(['tilt', 'get', 'dockerimage', '-o=json'])
 docker_image_list = json.loads(docker_image_list_json)
+
+custom_build_list_json = subprocess.check_output(['tilt', 'get', 'cmdimages', '-o=json'])
+custom_build_list = json.loads(custom_build_list_json)
+
 current_report_time = datetime.datetime.now().astimezone(datetime.timezone.utc)
 
 events = []
@@ -49,7 +53,8 @@ for item in items:
     'time': current_report_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
   })
 
-# Report duration times for each Docker Image build.
+# Report duration times for each Docker Image and custom build
+all_builds = docker_image_list | custom_build_list
 builds = sorted(docker_image_list.get('items', []), key=lambda item: item['metadata']['name'])
 for build in builds:
   completed = build.get('status', {}).get('completed', None)
@@ -65,7 +70,7 @@ for build in builds:
         'user': user,
         'image_name': build['spec']['ref'],
         'duration_ms': int((end_time - start_time).total_seconds() * 1000),
-        'kind': 'dockerimage',
+        'kind': build['kind'],
       },
       'time': completed['startedAt'],
     })
