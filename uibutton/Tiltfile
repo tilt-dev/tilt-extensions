@@ -6,6 +6,7 @@ location = struct(
     NAV=LOCATION_NAV,
 )
 
+valid_subcommands = ['up', 'ci']
 
 def _button(name, location, text='', icon=None, annotations={}, inputs=[]):
     text = text or name
@@ -41,10 +42,7 @@ def _button(name, location, text='', icon=None, annotations={}, inputs=[]):
 def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
                inputs=[]):
-    if config.tilt_subcommand == 'down':
-        return
-
-    if config.tilt_subcommand == 'docker-prune':
+    if config.tilt_subcommand not in valid_subcommands:
         return
 
     if not location:
