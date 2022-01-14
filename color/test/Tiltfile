@@ -1,0 +1,5 @@
+load('../Tiltfile', 'color')
+
+message = color.green('Hello') + ' ' + color.blue('World') + '!'
+
+local_resource('test', cmd='echo {message}'.format(message=shlex.quote(message)))

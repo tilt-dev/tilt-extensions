@@ -1,0 +1,74 @@
+RESET='\033[0m'
+
+BLACK='\033[0;30m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+magenta='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[0;37m'
+
+
+def should_enable_colors():
+    if 'NO_COLOR' in os.environ:
+        return False
+    if 'FORCE_COLOR' in os.environ:
+        return True
+    if (config.tilt_subcommand == 'ci' and
+        (os.getenv('TERM', '') == 'dumb' or os.name == 'nt')):
+        return False
+    return True
+
+
+colors_enabled = should_enable_colors()
+
+
+def _color(c, value):
+    if not colors_enabled:
+        return value
+    return c + value + RESET
+
+
+def black(value):
+    return _color(BLACK, value)
+
+
+def red(value):
+    return _color(RED, value)
+
+
+def green(value):
+    return _color(GREEN, value)
+
+
+def yellow(value):
+    return _color(YELLOW, value)
+
+
+def blue(value):
+    return _color(BLUE, value)
+
+
+def magenta(value):
+    return _color(magenta, value)
+
+
+def cyan(value):
+    return _color(CYAN, value)
+
+
+def white(value):
+    return _color(WHITE, value)
+
+
+color = struct(
+    black=black,
+    red=red,
+    green=green,
+    yellow=yellow,
+    blue=blue,
+    magenta=magenta,
+    cyan=cyan,
+    white=white,
+)
