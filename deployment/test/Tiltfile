@@ -1,0 +1,8 @@
+load('../Tiltfile', 'deployment_create')
+
+docker_build('deployment_html', './assets', dockerfile_contents="""
+FROM nginx:latest
+COPY . /usr/share/nginx/html
+""")
+
+deployment_create('html', 'deployment_html', ports='80')

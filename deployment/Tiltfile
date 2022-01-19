@@ -1,0 +1,124 @@
+def deployment_create(name, image, command=None, namespace="", replicas=None, ports=[]):
+    """
+    Create a Kubernetes deployment in the current cluster. If ports specified, 
+    create a Kubernetes service connected to the given port(s) in the deployment.
+
+    Args:
+      name: The deployment name
+      image: The image name
+      command: The command to run, if different from the entrypoint in the image
+      namespace: The namespace to create the deployment in, if different from the current namespace.
+      ports: The ports to expose as a ClusterIP service.
+    """
+    port = None
+
+    if type(ports) == "string":
+        ports = [ports]
+
+    if len(ports) > 0:
+        port = ports[0].split(':')[-1]
+
+    blobs = [deployment_yaml(name, image, command, namespace, replicas, port)]
+
+    if len(ports) > 0:
+        blobs.append(service_yaml(name, namespace=namespace, ports=ports))
+
+    k8s_yaml(blobs)
+
+
+def deployment_yaml(name, image, command=None, namespace="", replicas=None, port=None):
+    """
+    Create Kubernetes YAML for a simple deployment.
+
+    Args:
+      name(string): The deployment name
+      image(string): The image name
+      command(string or list): The command to run, if different from the entrypoint in the image
+      namespace(string): The namespace to create the deployment in, if different from the current namespace.
+      replicas(int): The number of replicas to create if different than 1.
+      port(string): The container port to declare
+
+    Returns:
+      The deployment YAML as a blob
+    """
+
+    args = [
+        "kubectl",
+        "create",
+        "deployment",
+        name,
+    ]
+
+    args.extend(create_args(image, command, namespace, replicas=replicas, port=port))
+    return local(args, quiet=True)
+
+
+valid_svc_types = ['clusterip', 'nodeport', 'loadbalancer', 'externalname']
+
+
+def service_yaml(name, svc_type='ClusterIP', external_name=None, namespace="", ports=[]):
+    """
+    Create Kubernetes YAML for a service.
+
+    Args:
+      name(string): The service name
+      svc_type(string): The service type (default ClusterIP)
+      external_name(string): The external name to use with svc_type=ExternalName
+      namespace(string): The namespace to create the service in, if different from the current namespace.
+      ports(string or list[string]): The port pairs to use for the service
+    """
+    svc_type = svc_type.lower()
+    if not svc_type in valid_svc_types:
+        fail("svc_type %s not recognized, must be one of: %s" % (svc_type, valid_svc_types))
+
+    if external_name:
+        svc_type = 'externalname'
+
+    args = [
+        "kubectl",
+        "create",
+        "service",
+        svc_type,
+        name
+    ]
+        
+    args.extend(create_args(external_name=external_name, namespace=namespace, ports=ports))
+    return local(args, quiet=True)
+    
+
+def create_args(image=None, command=None, namespace="", external_name=None, ports=[], port=None, replicas=None):
+    args = []
+
+    if image:
+        args.append("--image={}".format(shlex.quote(image)))
+
+    if namespace:
+        args.append("--namespace={}".format(shlex.quote(namespace)))
+
+    if external_name:
+        args.append("--external-name={}".format(shlex.quote(external_name)))
+
+    if port:
+        args.append("--port={}".format(shlex.quote(port)))
+
+    if type(ports) == "string":
+        ports = [ports]
+
+    for p in ports:
+        args.append("--tcp={}".format(shlex.quote(p)))
+
+    if replicas:
+        args.append("--replicas={}".format(shlex.quote(replicas)))
+
+    args.extend(["--dry-run=client", "-o=yaml"])
+
+    if command:
+        args.append("--")
+        if type(command) == "string":
+            args.append(command)
+        elif type(command) == "list":
+            args.extend(command)
+        else:
+            fail("command must be a string or list: %s" % command)
+
+    return args
