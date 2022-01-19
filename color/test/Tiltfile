@@ -1,0 +1,9 @@
+load('../Tiltfile', 'color')
+
+message = color.green('Hello') + ' ' + color.blue('World') + '!'
+
+local_resource('test', cmd='echo {message}'.format(message=shlex.quote(message)))
+
+# ensure all the color functions can be called without error
+for c in dir(color):
+    print(getattr(color, c)(c))
