@@ -44,10 +44,10 @@ Return a blob of Kubernetes YAML for a service.
 service_yaml(name: str, svc_type: str ='ClusterIP', external_name: str = None, namespace: str = "", ports: Union[str, List[str]] = []): Blob
 ```
 * `name` (string): The service name
-* `svc_type` (string): The service type (default `ClusterIP`)
-* `external_name` (string): The external name to use with `svc_type='ExternalName'`
+* `svc_type` (string): The service type (default `ClusterIP`, see `kubectl create service --help` for available types)
+* `external_name` (string): The external name to use (forces `svc_type='ExternalName'`)
 * `namespace` (string): The namespace to create the service in, if different from the current namespace.
-* `ports` (string or list\[string\]): The port pairs to use for the service
+* `ports` (string or list\[string\]): The port pairs to use for the service (format: `<port>` or `<service-port>:<container-port>`)
 
 
 ## Examples
