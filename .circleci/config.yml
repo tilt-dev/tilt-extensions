@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:fe48f0a2b785c4af71165a3240e9bf06427971cac1081e42018c825903415ba2
+      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:7679045310506a20f9cc1f8a82df939241d6f937ca96affbee15d5544213f823
 
     steps:
       - checkout
@@ -11,7 +11,7 @@ jobs:
 
   shellcheck:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:fe48f0a2b785c4af71165a3240e9bf06427971cac1081e42018c825903415ba2
+      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:7679045310506a20f9cc1f8a82df939241d6f937ca96affbee15d5544213f823
 
     steps:
       - checkout
@@ -19,7 +19,7 @@ jobs:
 
   test:
     docker:
-      - image: tiltdev/tilt-extensions-ci@sha256:fe48f0a2b785c4af71165a3240e9bf06427971cac1081e42018c825903415ba2
+      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:7679045310506a20f9cc1f8a82df939241d6f937ca96affbee15d5544213f823
 
     steps:
       - setup_remote_docker:
