@@ -6,54 +6,6 @@ Authors:
 
 Extend the Tilt UI with custom actions for your resources.
 
-## Functions
-
-### `cmd_button(name, resource, argv, text=None, location=location.RESOURCE, icon_name=None, icon_svg=None)`
-
-Creates a button for a resource that runs the given command when clicked.
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| `name`      | `str`            | Unique ID for button |
-| `resource`  | `str`            | Resource to associate button with (required if `location=location.RESOURCE`) |
-| `argv`      | `List[str]`      | Local command to run when button is clicked |
-| `text`      | `str`            | Text to display on button (optional: defaults to `name`) |
-| `location`  | `str` (enum)     | Button placement in UI (see `location` section below) |
-| `icon_name` | `str`            | Name of [Material Icons font ligature][material-icons-font] to use as icon (at most one of `icon_name` or `icon_svg` should be specified) |
-| `icon_svg`  | `str` or `Blob`  | `<svg>` to use as icon; should have 24x24px viewport (at most one of `icon_name` or `icon_svg` should be specified) |
-
-### `location`
-To specify button location, you can bind the `location` helper type or pass a string, e.g. `location=location.NAV` and `location='nav'` are equivalent.
-
-| Location   | `str` Value | `location` Value    |
-| ---------- | ----------- | ------------------- |
-| Resource   | `resource`  | `location.RESOURCE` |
-| Global nav | `nav`       | `location.NAV`      |
-
-### `text_input(name, label='', default='', placeholder='')`
-Specifies that the button's UI will include a text field the user can enter.
-The field's current value will be set in the command's env when it is run.
-
-| Argument      | Type  | Description |
-| ------------- | ----- | ----------- |
-| `name`        | `str` | The text input's name. Also the name of the environment variable to be set when running the command. |
-| `label`       | `str` | Text to display next to the text input in the UI. |
-| `default`     | `str` | Default initial value for this field. |
-| `placeholder` | `str` | A short hint that describes the expected input of this field. |
-
-### `bool_input(name, label='', default=False, true_string=None, false_string=None)`
-Specifies that the button's UI will include a checkbox to toggle this value.
-When the command is run, an environment variable will be set based on the
-checkbox's state. By default, the variable will be set to the string `"true"` or `"false"`, as appropriate. Those values can be configured with the `true_string` and `false_string` parameters.
-
-| Argument       | Type   | Description |
-| -------------- | -----  | ----------- |
-| `name`         | `str`  | The input's name. Also the name of the environment variable to be set when running the command. |
-| `label`        | `str`  | Text to display next to the input in the UI. |
-| `default`      | `bool` | Default initial value for this field. |
-| `true_string`  | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "true". |
-| `false_string` | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "false". |
-
 ## Example Usage
 
 ```python
@@ -69,12 +21,15 @@ cmd_button(name='my-resource-hello-world',
            text='Hello World',
            icon_name='travel_explore')
 
+# create a button in the navbar
+# (logs will go to Tiltfile)
 cmd_button(name='nav-hello-world',
            argv=['echo', 'Hello nav!'],
            text='Hello World',
            location=location.NAV,
            icon_name='waving_hand')
 
+# create a button with a text field input
 cmd_button(name='foo',
            resource='my-resource',
            text='Reseed database',
@@ -87,6 +42,73 @@ cmd_button(name='foo',
    )
 ```
 
+## API
+
+### `cmd_button`
+```python
+cmd_button(
+    name,
+    resource,
+    argv,
+    text=None,
+    location=location.RESOURCE,
+    icon_name=None,
+    icon_svg=None,
+    inputs=[],
+)
+```
+
+Creates a button for a resource that runs the given command when clicked.
+
+| Argument    | Type                                         | Description                                                                                                                               |
+|-------------|----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`      | `str`                                        | Unique ID for button                                                                                                                      |
+| `resource`  | `str`                                        | Resource to associate button with (required if `location=location.RESOURCE`)                                                              |
+| `argv`      | `List[str]`                                  | Local command to run when button is clicked                                                                                               |
+| `text`      | `str`                                        | Text to display on button (optional: defaults to `name`)                                                                                  |
+| `location`  | `str` (enum)                                 | Button placement in UI (see `location` section below)                                                                                     |
+| `icon_name` | `str`                                        | Name of [Material Icons font ligature][material-icons-font] to use as icon (at most one of `icon_name` or `icon_svg` should be specified) |
+| `icon_svg`  | `str` or `Blob`                              | `<svg>` to use as icon; should have 24x24px viewport (at most one of `icon_name` or `icon_svg` should be specified)                       |
+| `inputs`    | `List[typing.Union[text_input, bool_input]]` | Form inputs for butdown (optional)                                                                                                        |
+
+### `location`
+To specify button location, you can bind the `location` helper type or pass a string, e.g. `location=location.NAV` and `location='nav'` are equivalent.
+
+| Location   | `str` Value | `location` Value    |
+| ---------- | ----------- | ------------------- |
+| Resource   | `resource`  | `location.RESOURCE` |
+| Global nav | `nav`       | `location.NAV`      |
+
+### `text_input`
+```python
+text_input(name, label="", default="", placeholder="")
+```
+Specifies that the button's UI will include a text field the user can enter.
+The field's current value will be set in the command's env when it is run.
+
+| Argument      | Type  | Description |
+| ------------- | ----- | ----------- |
+| `name`        | `str` | The text input's name. Also the name of the environment variable to be set when running the command. |
+| `label`       | `str` | Text to display next to the text input in the UI. |
+| `default`     | `str` | Default initial value for this field. |
+| `placeholder` | `str` | A short hint that describes the expected input of this field. |
+
+### `bool_input`
+```python
+(name, label='', default=False, true_string=None, false_string=None)
+```
+Specifies that the button's UI will include a checkbox to toggle this value.
+When the command is run, an environment variable will be set based on the
+checkbox's state. By default, the variable will be set to the string `"true"` or `"false"`, as appropriate. Those values can be configured with the `true_string` and `false_string` parameters.
+
+| Argument       | Type   | Description |
+| -------------- | -----  | ----------- |
+| `name`         | `str`  | The input's name. Also the name of the environment variable to be set when running the command. |
+| `label`        | `str`  | Text to display next to the input in the UI. |
+| `default`      | `bool` | Default initial value for this field. |
+| `true_string`  | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "true". |
+| `false_string` | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "false". |
+
 ## Button Placement
 Currently, you can create buttons for a specific resource, which will be shown with other resource contextual actions such as "Copy Pod ID" or as part of the global nav next to the help and account buttons.
 
@@ -98,11 +120,13 @@ Any command output will appear interleaved with the associated resource's logs.
 Providing an icon is optional.
 
 ### Global Nav
-To create a global nav button, pass `location=location.NAV` and omit the `resource` argument or explicitly pass `resource=None`.
+To create a global nav button, pass `location=location.NAV`.
+Optionally, you can pass a resource name via `resource='my-resource'`.
 
-Any command output will appear in the "All Resources" log view under `(global)`.
+Any command output will appear interleaved with the associated resource's logs if specified and the `(Tiltfile)` resource if not.
 
-Global nav buttons SHOULD specify an icon via either the `icon_name` or `icon_svg` arguments. The `text` value will appear on hover.
+Global nav buttons SHOULD specify an icon via either the `icon_name` or `icon_svg` arguments.
+The `text` value will appear on hover.
 
 ## Icons
 Button icons can either come from the set of built-in icons that ship with Tilt or a custom SVG.
@@ -116,7 +140,8 @@ If both `icon_name` and `icon_svg` are specified, `icon_svg` will take precedenc
 Tilt includes the [Material Icons][material-icons-font] by default.
 Use the `icon_name` argument and pass the "font ligature" value for your desired icon.
 The font ligatures are visible in the sidebar after clicking on an icon on the Material Fonts site.
-Tip: They are `lower_snake_case` values, e.g. the "Check Circle" icon has a font ligature value of `check_circle`.
+
+> **💡 Tip**: They are `lower_snake_case` values, e.g. the "Check Circle" icon has a font ligature value of `check_circle`.
 
 ### Custom Icons (SVG)
 Use the `icon_svg` argument and pass a full `<svg>` element.

@@ -48,11 +48,12 @@ def cmd_button(name, resource='', argv=[], text=None,
     if not location:
         fail('location is required')
 
-    if location == LOCATION_RESOURCE:
-        if not resource:
+    if not resource:
+        if location == LOCATION_RESOURCE:
             fail('Must provide a resource name')
-    elif resource:
-        fail('Cannot specify resource for location type {}'.format(location))
+        else:
+            # for nav buttons, default logs to Tiltfile if no resource specified
+            resource = '(Tiltfile)'
 
     if not argv:
         fail('argv cannot be empty')
