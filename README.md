@@ -14,6 +14,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`coreos_prometheus`](/coreos_prometheus): Deploys Prometheus to a monitoring namespace, managed by the CoreOS Prometheus Operator and CRDs
 - [`current_namespace`](/current_namespace): Reads the default namespace from your kubectl config.
 - [`custom_build_with_restart`](/restart_process): Wrap a `custom_build` to restart the given entrypoint after a Live Update
+- [`deployment`](/deployment): Create K8s deployments, jobs, and services without manifest YAML files.
 - [`docker_build_sub`](/docker_build_sub): Specify extra Dockerfile directives in your Tiltfile beyond [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build).
 - [`docker_build_with_restart`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update
 - [`dotenv`](/dotenv): Load environment variables from `.env` or another file.
