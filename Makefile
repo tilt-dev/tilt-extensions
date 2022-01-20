@@ -4,8 +4,8 @@ test:
 	./test.sh
 
 publish-ci-image:
-	cd .circleci && docker build --pull -t tiltdev/tilt-extensions-ci .
-	docker push tiltdev/tilt-extensions-ci
+	docker build --platform linux/amd64 -t gcr.io/windmill-public-containers/tilt-extensions-ci -f .circleci/Dockerfile .circleci
+	docker push gcr.io/windmill-public-containers/tilt-extensions-ci
 
 shellcheck:
 	find . -type f -name '*.sh' -not -path "*/node_modules/*" -not -path "*/.git-sources/*" -not -path "*/.git/*" -exec \

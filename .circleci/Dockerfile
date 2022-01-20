@@ -1,7 +1,7 @@
 FROM tiltdev/tilt:latest
 
 # Utils for our CI
-RUN apt update && apt install -y git build-essential apt-transport-https software-properties-common ca-certificates wget jq
+RUN apt update && apt install -y git build-essential apt-transport-https software-properties-common ca-certificates wget jq netcat
 
 # Install Helm
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
