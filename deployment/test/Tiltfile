@@ -1,0 +1,23 @@
+load('../Tiltfile', 'deployment_create', 'job_create')
+
+docker_build(
+    'assets',
+    './assets',
+    dockerfile_contents="""
+FROM nginx:latest
+COPY . /usr/share/nginx/html
+"""
+)
+
+deployment_create(
+    'assets',
+    ports='80',
+    readiness_probe={'http_get': {'port': 80}}
+)
+
+job_create(
+    'verify',
+    image='curlimages/curl',
+    command=['sh', '-c', 'curl -sf http://assets/ | grep "Test deployment_create"'],
+    resource_deps=['assets']
+)

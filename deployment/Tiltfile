@@ -1,0 +1,216 @@
+def deployment_create(name, image=None, command=None, namespace="", replicas=None, ports=[], resource_deps=[], **kwargs):
+    """
+    Create a Kubernetes deployment in the current cluster. If ports specified,
+    create a Kubernetes service connected to the given port(s) in the
+    deployment.
+
+    Remaining keyword arguments are merged as fields of the container in the
+    deployment. Keys can be either snake_case or camelCase format.
+    See `kubectl explain deployment.spec.template.spec.containers` for more
+    info on available fields.
+
+    Args:
+      name(string): The deployment name
+      image(string): The image name. If omitted, same as the deployment name
+      command(string): The command to run, if different from the entrypoint in the image
+      namespace(string): The namespace to create the deployment in, if different from the current namespace.
+      replicas(int): The number of replicas to create if different than 1
+      ports: The ports to expose as a ClusterIP service.
+      resource_deps(list[string]): Resource dependencies, passed to k8s_resource
+      **kwargs: Fields to add to the container spec.
+    """
+    port = None
+
+    if type(ports) == "string":
+        ports = [ports]
+
+    if len(ports) > 0:
+        port = ports[0].split(':')[-1]
+
+    blobs = [deployment_yaml(name, image, command, namespace, replicas, port, **kwargs)]
+
+    if len(ports) > 0:
+        blobs.append(service_yaml(name, namespace=namespace, ports=ports))
+
+    k8s_yaml(blobs)
+    if len(resource_deps) > 0:
+        k8s_resource(name, resource_deps=resource_deps)
+
+
+def job_create(name, image=None, command=None, namespace="", resource_deps=[], **kwargs):
+    """
+    Create a Kubernetes job in the current cluster.
+
+    Remaining keyword arguments are merged as fields of the container in the
+    job. Keys can be either snake_case or camelCase format.
+    See `kubectl explain job.spec.template.spec.containers` for more
+    info on available fields.
+
+    Args:
+      name(string): The job name
+      image(string): The image name. If omitted, same as the job name
+      command(string): The command to run, if different from the entrypoint in the image
+      namespace(string): The namespace to create the job in, if different from the current namespace.
+      resource_deps(list[string]): Resource dependencies, passed to k8s_resource
+      **kwargs: Fields to add to the container spec.
+    """
+    k8s_yaml(job_yaml(name, image, command, namespace, **kwargs))
+    if len(resource_deps) > 0:
+        k8s_resource(name, resource_deps=resource_deps)
+
+
+def deployment_yaml(name, image=None, command=None, namespace="", replicas=None, port=None, **kwargs):
+    """
+    Create Kubernetes YAML for a simple deployment. Remaining keyword arguments
+    are merged as fields of the container in the deployment YAML.
+
+    Args:
+      name(string): The deployment name
+      image(string): The image name. If omitted, same as the deployment name
+      command(string or list[string]): The command to run, if different from the entrypoint in the image
+      namespace(string): The namespace to create the deployment in, if different from the current namespace
+      replicas(int): The number of replicas to create if different than 1
+      port(string): The container port to declare
+      **kwargs: Fields to add to the container spec.
+
+    Returns:
+      The deployment YAML as a blob
+    """
+    args = [
+        "kubectl",
+        "create",
+        "deployment",
+        name,
+    ]
+
+    if not image:
+        image = name
+
+    args.extend(create_args(image, command, namespace, replicas=replicas, port=port))
+    return workload_yaml(args, kwargs)
+
+
+def job_yaml(name, image=None, command=None, namespace="", **kwargs):
+    """
+    Create Kubernetes YAML for a job. Remaining keyword arguments are merged
+    as fields of the container in the job YAML.
+
+    Args:
+      name(string): The job name
+      image(string): The image name. If omitted, same as the job name
+      command(string or list[string]): The command to run, if different from the entrypoint in the image
+      namespace(string): The namespace to create the job in, if different from the current namespace
+      **kwargs: Fields to add to the container spec.
+
+    Returns:
+      The job YAML as a blob
+    """
+    args = [
+        "kubectl",
+        "create",
+        "job",
+        name,
+    ]
+
+    if not image:
+        image = name
+
+    args.extend(create_args(image, command, namespace))
+    return workload_yaml(args, kwargs)
+
+
+def service_yaml(name, svc_type='ClusterIP', external_name=None, namespace="", ports=[]):
+    """
+    Create Kubernetes YAML for a service.
+
+    Args:
+      name(string): The service name
+      svc_type(string): The service type (default `ClusterIP`, see `kubectl create service --help` for available types)
+      external_name(string): The external name to use (forces `svc_type='ExternalName'`)
+      namespace(string): The namespace to create the service in, if different from the current namespace.
+      ports(string or list[string]): The port pairs to use for the service (format: `<port>` or `<service-port>:<container-port>`)
+    """
+    svc_type = svc_type.lower()
+    if external_name:
+        svc_type = 'externalname'
+
+    args = [
+        "kubectl",
+        "create",
+        "service",
+        svc_type,
+        name
+    ]
+
+    args.extend(create_args(external_name=external_name, namespace=namespace, ports=ports))
+    return local(args, quiet=True)
+
+
+def create_args(image=None, command=None, namespace="", external_name=None, ports=[], port=None, replicas=None):
+    args = []
+
+    if image:
+        args.append("--image={}".format(image))
+
+    if namespace:
+        args.append("--namespace={}".format(namespace))
+
+    if external_name:
+        args.append("--external-name={}".format(external_name))
+
+    if port:
+        args.append("--port={}".format(port))
+
+    if type(ports) == "string":
+        ports = [ports]
+
+    for p in ports:
+        args.append("--tcp={}".format(p))
+
+    if replicas:
+        args.append("--replicas={}".format(replicas))
+
+    args.extend(["--dry-run=client", "-o=yaml"])
+
+    if command:
+        args.append("--")
+        if type(command) == "string":
+            args.append(command)
+        elif type(command) == "list":
+            args.extend(command)
+        else:
+            fail("command must be a string or list: %s" % command)
+
+    return args
+
+def workload_yaml(args, extra_container_fields={}):
+    def camelCase(obj, convert_string_value=True):
+        if type(obj) == 'dict':
+            result = {}
+            result.update([(camelCase(key), camelCase(val, False)) for key, val in obj.items()])
+            return result
+        elif type(obj) == 'string' and convert_string_value:
+            if obj.find("_") == -1:
+                return obj
+            tup = obj.partition("_")
+            rest = tup[2]
+            if len(rest) > 0:
+                rest = camelCase(rest)
+                rest = rest[0].upper() + rest[1:]
+            return "".join([tup[0], rest])
+        elif type(obj) == 'list':
+            return [camelCase(x, False) for x in obj]
+        elif type(obj) == 'tuple':
+            return tuple([camelCase(x, False) for x in obj])
+        else:
+            return obj
+
+    result_yaml = local(args, quiet=True)
+
+    if len(extra_container_fields) > 0:
+        workload = decode_yaml(result_yaml)
+        container = workload['spec']['template']['spec']['containers'][0]
+        container.update(camelCase(extra_container_fields))
+        result_yaml = encode_yaml(workload)
+
+    return result_yaml
