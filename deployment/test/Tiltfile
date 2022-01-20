@@ -1,8 +1,28 @@
 load('../Tiltfile', 'deployment_create')
 
-docker_build('deployment_html', './assets', dockerfile_contents="""
+docker_build(
+    'html',
+    './assets',
+    dockerfile_contents="""
 FROM nginx:latest
 COPY . /usr/share/nginx/html
-""")
+"""
+)
 
-deployment_create('html', 'deployment_html', ports='80')
+deployment_create(
+    'html',
+    ports='80',
+    readiness_probe={'http_get': {'port': 80}}
+)
+
+k8s_resource(
+    'html',
+    port_forwards=['8008:80']
+)
+
+# Need to specify a connect timeout to wait for port-forward to light up
+local_resource(
+    'verify',
+    cmd='curl -sf --connect-timeout 2 http://localhost:8008 | grep "Test deployment_create"',
+    resource_deps=['html']
+)
