@@ -3,4 +3,14 @@ load('../Tiltfile', 'honeycomb_collector')
 
 local_resource(
   name='event-test',
-  cmd=["python3", "events_test.py"])
+  cmd=["python3", "events_test.py"],
+  resource_deps=['bobo'])
+
+k8s_yaml('crd.yaml')
+k8s_yaml('um.yaml')
+
+docker_build('bobo1', '.')
+custom_build('bobo2', 'DOCKER_BUILDKIT=1 docker build -t $EXPECTED_REF .', deps=['Dockerfile'])
+
+k8s_kind('UselessMachine', image_json_path='{.spec.containers[*].image}')
+k8s_resource('bobo', pod_readiness='ignore')
