@@ -9,6 +9,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`api_server_logs`](/api_server_logs): Print API server logs. Example from [Contribute an Extension](https://docs.tilt.dev/contribute_extension.html).
 - [`cancel`](/cancel): Adds a cancel button to the UI.
 - [`cert_manager`](/cert_manager): Deploys cert-manager.
+- [`color`](/color): Allows colorful log prints.
 - [`configmap`](/configmap): Create configmaps from files and auto-deploy them.
 - [`conftest`](/conftest): Use [Conftest](https://www.conftest.dev/) to test your configuration files.
 - [`coreos_prometheus`](/coreos_prometheus): Deploys Prometheus to a monitoring namespace, managed by the CoreOS Prometheus Operator and CRDs
