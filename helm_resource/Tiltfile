@@ -73,8 +73,8 @@ def helm_resource(
       # NOTE(nick): This is a PITA because it's hard to separate
       # out the repository from the tag.
       flags.extend([
-        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed -r \'s,:[^/]*$,,\')' % (shlex.quote(key[0]), i),
-        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed -r \'s,^.*:([^/]*)$,\\1,\')' % (shlex.quote(key[1]), i),
+        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed -e \'s,:[^/]*$,,\')' % (shlex.quote(key[0]), i),
+        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed -e \'s,^.*:\\([^/]*\\)$,\\1,\')' % (shlex.quote(key[1]), i),
       ])
     else:
       fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
