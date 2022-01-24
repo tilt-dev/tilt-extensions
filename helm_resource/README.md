@@ -22,6 +22,7 @@ def helm_resource(
     chart,
     deps=[],
     release_name='',
+    namespace=None,
     image_deps=None,
     image_keys=None,
     flags=None,
@@ -46,6 +47,8 @@ reference.
 `deps`: A list of file dependencies that should trigger a deployment.
 
 `release_name`: The name of the release. If not specified, defaults to the Tilt UI resource name.
+
+`namespace`: Install into the specified namespace.
 
 `image_deps`: A list of images built by Tilt to inject into the chart. If Tilt doesn't know
 how to build one of these images, this will be an error.

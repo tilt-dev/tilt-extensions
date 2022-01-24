@@ -7,6 +7,7 @@ def helm_resource(
     chart,
     deps=[],
     release_name='',
+    namespace=None,
     image_deps=None,
     image_keys=None,
     flags=None,
@@ -24,6 +25,7 @@ def helm_resource(
       reference.
     deps: A list of file dependencies that should trigger a deployment.
     release_name: The name of the release. If not specified, defaults to the Tilt UI resource name.
+    namespace: Install into the specified namespace.
     image_deps: A list of images built by Tilt to inject into the chart. If Tilt doesn't know
       how to build one of these images, this will be an error.
     image_keys`: A list of specifications for how to inject images into the
@@ -79,16 +81,23 @@ def helm_resource(
     else:
       fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
 
+  command_args = {
+    'chart': shlex.quote(chart),
+    'flags': ' '.join(flags),
+    'namespace_arg': '--namespace %s' % shlex.quote(namespace) if namespace else '',
+    'release_name': shlex.quote(release_name)
+  }
+
   k8s_custom_deploy(
     name,
     apply_cmd="""
 set -ex
-helm upgrade %s --install %s %s 1>&2
-helm get manifest %s | kubectl get -oyaml -f -
-""" % (' '.join(flags), shlex.quote(release_name), shlex.quote(chart), shlex.quote(release_name)),
+helm upgrade %(flags)s %(namespace_arg)s --install %(release_name)s %(chart)s 1>&2
+helm get manifest %(namespace_arg)s %(release_name)s | kubectl get %(namespace_arg)s -oyaml -f -
+""" % command_args,
     delete_cmd="""
-helm uninstall %s || true
-""" % shlex.quote(release_name),
+helm uninstall %(namespace_arg)s %(release_name)s || true
+""" % command_args,
     deps=deps,
     image_deps=image_deps,
     image_selector=image_selector,
