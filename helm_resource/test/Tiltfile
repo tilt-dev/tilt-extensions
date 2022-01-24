@@ -17,6 +17,16 @@ helm_resource(
   image_keys=[('image.repository', 'image.tag')],
   labels=['helloworld'])
 
+helm_resource(
+  'helloworld-app',
+  './helloworld',
+  namespace='app',
+  deps=['./helloworld'],
+  image_deps=['helloworld-image'],
+  image_keys=[('image.repository', 'image.tag')],
+  labels=['helloworld'],
+  flags=['--create-namespace'],)
+
 k8s_resource(
   'helloworld',
   port_forwards=['8080:80'])
