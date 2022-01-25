@@ -1,0 +1,8 @@
+apiVersion: tilt.dev/v1alpha1
+kind: UselessMachine
+metadata:
+  name: bobo
+spec:
+  containers:
+  - image: bobo1
+  - image: bobo2
