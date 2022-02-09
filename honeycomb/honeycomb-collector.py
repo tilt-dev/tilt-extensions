@@ -22,7 +22,7 @@ while True:
   current_report_time = datetime.datetime.now().astimezone(datetime.timezone.utc)
   args = ['python3', 'events.py']
   if last_report_time:
-    args.append(current_report_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'))
+    args.append(last_report_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'))
 
   body = subprocess.check_output(args)
 
