@@ -18,7 +18,7 @@ def _find_cache_dir():
         cachedir = os.path.join(_find_root_tiltfile_dir(), '.tilt-cache')
 
     if not os.path.exists(cachedir):
-        local('mkdir -p %s' % cachedir, echo_off=True)
+        local('mkdir -p %s' % shlex.quote(cachedir), echo_off=True)
 
     os.putenv('TILT_CACHE_DIR', cachedir)
     return cachedir
@@ -44,28 +44,30 @@ def replace_target(src, target):
     if not os.path.exists(target):
         fail("target path '%s' not found!" % target)
 
-    local("cp %s %s" % (src, target))
+    local("cp %s %s" % (shlex.quote(src), shlex.quote(target)))
 
 def download_files():
     cachedir = _find_cache_dir()
 
     kube_prometheus_version = '0.8.0'
     kube_prometheus_tarball = os.path.join(cachedir, 'coreos-kube-prometheus-%s.tar.gz' % kube_prometheus_version)
+    kube_prometheus_tarball_quoted = shlex.quote(kube_prometheus_tarball)
 
     tmpdir = _create_temp_dir()
     extract_path = os.path.join(tmpdir, 'prometheus-operator-kube-prometheus-%s' % kube_prometheus_version)
+    extract_path_quoted = shlex.quote(extract_path)
 
     if not os.path.exists(kube_prometheus_tarball):
-        local("curl -sSL https://github.com/prometheus-operator/kube-prometheus/archive/refs/tags/v%s.tar.gz -o %s.tmp" % (kube_prometheus_version, kube_prometheus_tarball), echo_off=True)
+        local("curl -sSL https://github.com/prometheus-operator/kube-prometheus/archive/refs/tags/v%s.tar.gz -o %s.tmp" % (kube_prometheus_version, shlex.quote(kube_prometheus_tarball)), echo_off=True)
         # only copy file to final location to prevent redoing the above if the above
         # have completed successfully.
-        local("mv %s.tmp %s" % (kube_prometheus_tarball, kube_prometheus_tarball), echo_off=True)
+        local("mv %s.tmp %s" % (kube_prometheus_tarball_quoted, kube_prometheus_tarball_quoted), echo_off=True)
 
-    local("rm -rf %s.tmp && mkdir %s.tmp" % (extract_path, extract_path), echo_off=True)
-    local("tar -C %s.tmp -xzf %s --strip-components=1 'kube-prometheus-%s/manifests'" % (extract_path, kube_prometheus_tarball, kube_prometheus_version), echo_off=True)
+    local("rm -rf %s.tmp && mkdir %s.tmp" % (extract_path_quoted, extract_path_quoted), echo_off=True)
+    local("tar -C %s.tmp -xzf %s --strip-components=1 'kube-prometheus-%s/manifests'" % (extract_path_quoted, kube_prometheus_tarball_quoted, kube_prometheus_version), echo_off=True)
 
     # only move path to final location if extraction completed successfully
-    local("rm -rf %s && mv %s.tmp %s" % (extract_path, extract_path, extract_path), echo_off=True)
+    local("rm -rf %s && mv %s.tmp %s" % (extract_path_quoted, extract_path_quoted, extract_path_quoted), echo_off=True)
 
     # return path containing manifests directory
     return extract_path
