@@ -59,7 +59,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                 local('git clone {repository_url} --recurse-submodules --shallow-submodules --depth 1 {branch_flag} {checkout_dir}'.
                       format(repository_url=repository_url,
                              branch_flag=branch_flag,
-                             checkout_dir=checkout_dir),
+                             checkout_dir=shlex.quote(checkout_dir)),
                       quiet=True)
             else:
                 checkout_cmd = ''
@@ -68,7 +68,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
 
                 local('git clone {repository_url} --recurse-submodules --shallow-submodules {checkout_dir} && cd {checkout_dir} {checkout_cmd}'.
                       format(repository_url=repository_url,
-                             checkout_dir=checkout_dir,
+                             checkout_dir=shlex.quote(checkout_dir),
                              checkout_cmd=checkout_cmd),
                       quiet=True)
         else:  # dir already exists
@@ -76,7 +76,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                 has_local_changes = True  # default to True for safety
                 if not unsafe_mode:
                     local_changes = str(local(
-                        command='cd %s && git status -sbuno' % checkout_dir,
+                        command='cd %s && git status -sbuno' % shlex.quote(checkout_dir),
                         quiet=True,
                         echo_off=True,
                     )).strip().splitlines()
@@ -94,7 +94,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                         checkout_cmd = '&& git checkout -f %s' % checkout_branch
 
                     local('cd {checkout_dir} && git fetch -a origin {checkout_cmd} && git submodule update --init'.
-                          format(checkout_dir=checkout_dir,
+                          format(checkout_dir=shlex.quote(checkout_dir),
                                  checkout_cmd=checkout_cmd),
                           quiet=True)
                 else:
