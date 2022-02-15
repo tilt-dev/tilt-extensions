@@ -32,7 +32,7 @@ kubectl delete --ignore-not-found -f https://github.com/knative/serving/releases
   # TODO(nick): Once the registry is in the Tilt API,
   # we should read that here and use it to set knative configuration.
   patch_registry_cmd="""
-REGISTRY=$(kubectl get configmap -n kube-public local-registry-hosting -oyaml | grep "host:" | sed 's/ *host: *//')
+REGISTRY=$(kubectl get configmap -n kube-public local-registry-hosting -o=jsonpath='{.data.localRegistryHosting\\.v1}' | grep "host:" | sed 's/ *host: *//')
 if [ "$REGISTRY" != "" ]; then
   kubectl patch configmap/config-deployment \
     --namespace knative-serving \
