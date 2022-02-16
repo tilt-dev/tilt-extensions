@@ -19,12 +19,6 @@ podman/test/test.sh
 
 # TODO(nick): Get nix working inside circleci
 nix/test/test.sh
-
-# TODO(nick): For some reason, this test blows up circleci
-# sometimes with:
-# Error: apply command exited with status 137
-# but we don't understand why this would happen
-knative/test/test.sh
 )
 
 isSkipped() {
