@@ -6,7 +6,7 @@ version_settings(constraint='>=0.23.0')
 k8s_kind('Service', api_version='serving.knative.dev/v1',
          image_json_path='{.spec.template.spec.containers[*].image}')
 
-def knative_install():
+def knative_install(version="v1.0.0"):
   """
   Installs the knative operators into your cluster.
 
@@ -18,12 +18,12 @@ def knative_install():
     deps=[],
     apply_cmd="""
 set -e
-kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-crds.yaml -o yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-%s/serving-crds.yaml -o yaml
 kubectl wait --for=condition=Established crd -l=knative.dev/crd-install=true 1>&2
-""",
+""" % version,
     delete_cmd="""
-kubectl delete --ignore-not-found -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-crds.yaml
-""")
+kubectl delete --ignore-not-found -f https://github.com/knative/serving/releases/download/knative-%s/serving-crds.yaml
+""" % version)
   k8s_resource(
     'knative-crds',
     labels=['knative'],
@@ -52,12 +52,12 @@ kubectl wait --for=condition=Ready pods -n knative-serving -l=app.kubernetes.io/
     deps=[],
     apply_cmd="""
 set -ex
-kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-core.yaml -o yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-%s/serving-core.yaml -o yaml
 set +e
-""" + webhook_wait_cmd + patch_registry_cmd,
+""" % version + webhook_wait_cmd + patch_registry_cmd,
     delete_cmd="""
-kubectl delete --ignore-not-found -f https://github.com/knative/serving/releases/download/knative-v1.0.0/serving-core.yaml
-""")
+kubectl delete --ignore-not-found -f https://github.com/knative/serving/releases/download/knative-%s/serving-core.yaml
+""" % version)
   k8s_resource(
     'knative-core',
     labels=['knative'],
