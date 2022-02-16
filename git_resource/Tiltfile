@@ -51,52 +51,46 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
             tree = tree[7:]
 
         if not os.path.exists(checkout_dir):  # needs clone
+            clone_cmd = ['git','clone', repository_url, '--recurse-submodules', '--shallow-submodules']
             if is_branch or is_tag:
-                branch_flag = ''
+                clone_cmd.extend(['--depth', '1'])
                 if tree:
-                    branch_flag = '--branch %s' % tree
-
-                local('git clone {repository_url} --recurse-submodules --shallow-submodules --depth 1 {branch_flag} {checkout_dir}'.
-                      format(repository_url=repository_url,
-                             branch_flag=branch_flag,
-                             checkout_dir=shlex.quote(checkout_dir)),
-                      quiet=True)
+                    clone_cmd.extend(['--branch', tree])
+                clone_cmd.append(checkout_dir)
+                local(clone_cmd, quiet=True)
             else:
-                checkout_cmd = ''
+                clone_cmd.append(checkout_dir)
+                local(clone_cmd, quiet=True)
                 if tree:
-                    checkout_cmd = ' && git checkout %s' % tree
+                    local(['git', 'checkout', tree], dir=checkout_dir)
 
-                local('git clone {repository_url} --recurse-submodules --shallow-submodules {checkout_dir} && cd {checkout_dir} {checkout_cmd}'.
-                      format(repository_url=repository_url,
-                             checkout_dir=shlex.quote(checkout_dir),
-                             checkout_cmd=checkout_cmd),
-                      quiet=True)
         else:  # dir already exists
             if os.path.exists(os.path.join(checkout_dir, '.git')):  # this is a git repo
                 has_local_changes = True  # default to True for safety
                 if not unsafe_mode:
                     local_changes = str(local(
-                        command='cd %s && git status -sbuno' % shlex.quote(checkout_dir),
+                        command='git status -sbuno',
                         quiet=True,
                         echo_off=True,
+                        dir=checkout_dir,
                     )).strip().splitlines()
 
                     # result greater than 1 indicates local modifications are present
                     has_local_changes = len(local_changes) > 1
 
                 if unsafe_mode or not has_local_changes:
-                    checkout_cmd = ''
+                    checkout_cmd = None
                     if tree:
                         checkout_branch = tree
                         if not is_tag and not is_revision:
                             checkout_branch = 'origin/%s' % tree
 
-                        checkout_cmd = '&& git checkout -f %s' % checkout_branch
+                        checkout_cmd = 'git checkout -f %s' % checkout_branch
 
-                    local('cd {checkout_dir} && git fetch -a origin {checkout_cmd} && git submodule update --init'.
-                          format(checkout_dir=shlex.quote(checkout_dir),
-                                 checkout_cmd=checkout_cmd),
-                          quiet=True)
+                    local('git fetch -a origin', dir=checkout_dir, quiet=True)
+                    if checkout_cmd:
+                        local(checkout_cmd, dir=checkout_dir, quiet=True)
+                    local('git submodule update --init', dir=checkout_dir, quiet=True)
                 else:
                     fail('git_checkout() failed: local modifications present and safe_mode is enabled')
 
