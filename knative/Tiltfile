@@ -1,6 +1,8 @@
 # -*- mode: Python -*-
 
 version_settings(constraint='>=0.23.0')
+# knative-serving namespace takes around 4 minutes finish terminating
+update_settings(k8s_upsert_timeout_secs=300)
 
 # Configuration for all knative CRDs.
 k8s_kind('Service', api_version='serving.knative.dev/v1',
