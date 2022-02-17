@@ -67,6 +67,8 @@ None
 
 ### `containerd` Address
 
+If your `containerd` socket is located in a non-default location, you'll need to provide the address to Tilt.
+
 Set the `CONTAINERD_ADDRESS` in your shell before launching Tilt:
 
 ```bash
@@ -86,6 +88,14 @@ if 'CONTAINERD_ADDRESS' not in os.environ:
         )
     )
 ```
+
+## Troubleshooting
+
+### `nerdctl: command not found` / `Custom build command failed: exit status 127`
+
+Tilt cannot find `nerdctl` in your `PATH`.
+
+Open `Rancher Desktop > Preferences > Supporting Utilities`, check the box for `nerdctl`, and retry your build in Tilt.
 
 [nerdctl]: https://github.com/containerd/nerdctl
 [containerd]: https://github.com/containerd/containerd
