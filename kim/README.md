@@ -7,7 +7,7 @@ Use [kim](https://github.com/rancher/kim) to build images directly within your K
 
 ⚠️ **DEPRECATED**
 
-Rancher Desktop users should switch to [`nerdctl_build`](https://github.com/tilt-dev/tilt-extensions/tree/master/cancel) if using the `containerd` runtime (default) or Tilt's built-in `docker_build` if using the `moby` (Docker) runtime.
+Rancher Desktop users should switch to [`nerdctl_build`](https://github.com/tilt-dev/tilt-extensions/tree/master/cancel) if using the `containerd` runtime (default) or Tilt's built-in `docker_build` if using the `dockerd (moby)` runtime.
 
 ## Functions
 ### `kim_build(ref: str, context: str, ignore: List[str] = None, extra_flags: List[str] = None, **kwargs)`
