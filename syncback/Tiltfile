@@ -7,7 +7,7 @@ verify_rsync_path = os.path.join(os.getcwd(), 'verify_rsync.sh')
 
 # if no local rsync/insufficient version, bail
 print('-- syncback extension checking for local rsync --')
-local('{} {}'.format(verify_rsync_path, MIN_LOCAL_RSYNC_VERSION))
+local([verify_rsync_path, MIN_LOCAL_RSYNC_VERSION])
 
 DEFAULT_EXCLUDES = ['.git', '.gitignore', '.dockerignore', 'Dockerfile', '.tiltignore', 'Tiltfile', 'tilt_modules']
 
