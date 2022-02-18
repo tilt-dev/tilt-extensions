@@ -18,6 +18,9 @@ jobs:
       - run: make shellcheck
 
   test:
+    # A common error is to build an extension that doesn't properly handle
+    # spaces in paths, which is common on macOS (/Application Support/)
+    working_directory: ~/tilt extensions
     docker:
       - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:d28e3730cf8bfd8be86ec7d67b94bc163529e10018cb3c4d8ea8ecade58e4cad
 

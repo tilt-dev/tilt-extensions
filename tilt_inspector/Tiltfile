@@ -11,8 +11,8 @@ def tilt_inspector(port=11351):
   local_resource(
     name="tilt:inspector",
     deps=[],
-    cmd='cd %s && yarn install' % _dir,
+    cmd='cd %s && yarn install' % shlex.quote(_dir),
     serve_env={'TILT_INSPECTOR_PORT': '%d' % port},
-    serve_cmd='cd %s && yarn run tilt-inspector' % _dir,
+    serve_cmd='cd %s && yarn run tilt-inspector' % shlex.quote(_dir),
     readiness_probe=probe(http_get=http_get_action(port=port)),
     links=['http://localhost:%d/' % port])
