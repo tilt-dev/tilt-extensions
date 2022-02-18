@@ -12,5 +12,6 @@ assert_equal(['6379:6379'], redis['services']['redis']['ports'])
 docker_run('redis', ports=['6379:6379'])
 docker_run('nginx', ports=['8008:80'])
 
-local_resource('redis-test', ['bash', '-xc', 'sleep 1 && result=$(echo -ne "PING\r\n" | nc localhost 6379 2>&1) && [ "${result:1:4}" = "PONG" ]'], resource_deps=['redis'])
-local_resource('nginx-test', 'sleep 1 && curl -sf http://localhost:8008 | grep "Welcome to nginx"', resource_deps=['nginx'])
+wait_for_port='while ! nc -z localhost %s; do sleep 1; done && '
+local_resource('redis-test', ['bash', '-xc', (wait_for_port % '6379') + 'result=$(echo -ne "PING\r\n" | nc localhost 6379 2>&1) && [ "${result:1:4}" = "PONG" ]'], resource_deps=['redis'])
+local_resource('nginx-test', (wait_for_port % '8008') + 'curl -sf http://localhost:8008 | grep "Welcome to nginx"', resource_deps=['nginx'])
