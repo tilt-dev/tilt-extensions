@@ -12,6 +12,16 @@ assert_equal(['6379:6379'], redis['services']['redis']['ports'])
 docker_run('redis', ports=['6379:6379'])
 docker_run('nginx', ports=['8008:80'])
 
+# CI/Remote docker, use ctlptl-portforward-service to forward ports
+if os.environ.get('DOCKER_HOST', None):
+    for port in ('6379', '8008'):
+        local_resource('forward-%s' % port,
+                       serve_cmd=[
+                           'socat',
+                           'TCP-LISTEN:%s,reuseaddr,fork' % port,
+                           "EXEC:'docker exec -i ctlptl-portforward-service socat STDIO TCP:localhost:%s'" % port
+                       ])
+
 wait_for_port='while ! nc -z localhost %s; do sleep 1; done && '
-local_resource('redis-test', ['bash', '-xc', (wait_for_port % '6379') + 'result=$(echo -ne "PING\r\n" | nc localhost 6379 2>&1) && [ "${result:1:4}" = "PONG" ]'], resource_deps=['redis'])
+local_resource('redis-test', ['bash', '-xc', (wait_for_port % '6379') + 'echo -ne "PING\r\nQUIT\r\n" | nc localhost 6379 2>&1 | grep "+PONG"'], resource_deps=['redis'])
 local_resource('nginx-test', (wait_for_port % '8008') + 'curl -sf http://localhost:8008 | grep "Welcome to nginx"', resource_deps=['nginx'])
