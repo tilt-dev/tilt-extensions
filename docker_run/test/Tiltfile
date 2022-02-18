@@ -1,0 +1,16 @@
+load('../Tiltfile', 'docker_compose_yaml', 'docker_run')
+
+def assert_equal(x, y):
+    if x != y:
+        fail("Expected '{}' to equal '{}'".format(y, x))
+
+redis = decode_yaml(docker_compose_yaml('redis', ports=['6379:6379']))
+
+assert_equal('redis', redis['services']['redis']['image'])
+assert_equal(['6379:6379'], redis['services']['redis']['ports'])
+
+docker_run('redis', ports=['6379:6379'])
+docker_run('nginx', ports=['8008:80'])
+
+local_resource('redis-test', ['bash', '-xc', 'sleep 1 && result=$(echo -ne "PING\r\n" | nc localhost 6379 2>&1) && [ "${result:1:4}" = "PONG" ]'], resource_deps=['redis'])
+local_resource('nginx-test', 'sleep 1 && curl -sf http://localhost:8008 | grep "Welcome to nginx"', resource_deps=['nginx'])

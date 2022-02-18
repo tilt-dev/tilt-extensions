@@ -1,0 +1,104 @@
+
+def docker_compose_yaml(image, command=None, container_name=None, env=None, env_file=None,
+                        entrypoint=None, expose=[], links=[], networks=[], ports=[], privileged=False,
+                        restart=None, runtime=None, volumes=[], **kwargs):
+    """Build Compose YAML for a single service with the given image and parameters.
+
+    Args:
+      image: The image name to run
+      command: An override for the command to run, either a string or list of strings.
+      container_name: An override the container name
+      env: Environment variables to set, a dict with string values.
+      env_file: An environment file to use. Must be a path to a file or a list of paths.
+      entrypoint: An override for the image entrypoint.
+      expose: A list of ports to be exposed.
+      links: A list of network links.
+      networks: A list of networks to attach.
+      ports: A list of ports to be forwarded, either a list of strings or port specs.
+         See https://github.com/compose-spec/compose-spec/blob/master/spec.md#ports for details.
+      privileged: Whether to run the container in privileged mode, a boolean.
+      restart: Restart spec, one of (no|always|on-failure|unless-stopped).
+      runtime: The name of the runtime to use.
+      volumes: A list of volumes to attach.
+    """
+    def ensure_list(obj):
+        if type(obj) == 'list':
+            return obj
+        return [obj]
+
+    svc = {'image': image}
+
+    if command:
+        svc['command'] = command
+
+    if container_name:
+        svc['container_name'] = container_name
+
+    if env:
+        svc['environment'] = env
+
+    if env_file:
+        svc['env_file'] = env_file
+
+    if entrypoint:
+        svc['entrypoint'] = entrypoint
+
+    if expose:
+        svc['expose'] = ensure_list(expose)
+
+    if links:
+        svc['links'] = ensure_list(links)
+
+    if networks:
+        svc['networks'] = ensure_list(networks)
+
+    if ports:
+        svc['ports'] = ensure_list(ports)
+
+    if privileged:
+        svc['privileged'] = privileged
+
+    if restart:
+        svc['restart'] = restart
+
+    if runtime:
+        svc['runtime'] = runtime
+
+    if volumes:
+        svc['volumes'] = ensure_list(volumes)
+
+    if len(kwargs) > 0:
+        svc.update(kwargs)
+
+    name = image.replace(':', '_').replace('/','_')
+    return encode_yaml({'services': {name: svc}})
+
+
+def docker_run(image, command=None, container_name=None, env=None, env_file=None,
+               entrypoint=None, expose=[], links=[], networks=[], ports=[], privileged=False,
+               restart=None, runtime=None, volumes=[], **kwargs):
+    """Run a single docker container, as one would with `docker run`.
+
+    Simulates `docker run` using Tilt's `docker_compose` orchestrator with inline
+    Compose YAML built by `docker_compose_yaml`.
+
+    Args:
+      image: The image name to run
+      command: An override for the command to run, either a string or list of strings.
+      container_name: An override the container name
+      env: Environment variables to set, a dict with string values.
+      env_file: An environment file to use. Must be a path to a file or a list of paths.
+      entrypoint: An override for the image entrypoint.
+      expose: A list of ports to be exposed.
+      links: A list of network links.
+      networks: A list of networks to attach.
+      ports: A list of ports to be forwarded, either a list of strings or port specs.
+         See https://github.com/compose-spec/compose-spec/blob/master/spec.md#ports for details.
+      privileged: Whether to run the container in privileged mode, a boolean.
+      restart: Restart spec, one of (no|always|on-failure|unless-stopped).
+      runtime: The name of the runtime to use.
+      volumes: A list of volumes to attach.
+    """
+    docker_compose(docker_compose_yaml(image, command, container_name, env, env_file, entrypoint,
+                                       expose, links, networks, ports, privileged,
+                                       restart, runtime, volumes))
