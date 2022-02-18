@@ -29,3 +29,9 @@ RUN curl -sSL "https://github.com/buildpacks/pack/releases/download/v0.21.1/pack
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
   echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
   apt update && apt install -y yarn
+
+# install docker-compose
+ARG DOCKER_COMPOSE_VERSION=v2.2.3
+RUN curl -fL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s | tr '[A-Z]' '[a-z]')-$(uname -m)" -o /usr/local/bin/docker-compose \
+  && chmod a+x /usr/local/bin/docker-compose \
+  && docker-compose version
