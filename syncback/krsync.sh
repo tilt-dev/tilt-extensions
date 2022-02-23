@@ -7,8 +7,14 @@ set -e
 
 # make sure local tmp dir exists (see -T= argument in Tiltfile)
 mkdir -p /tmp/rsync.tilt
+mkdir -p /tmp/rsync.tilt.krsync
 
 rsync_tilt_path=/bin/rsync.tilt
+
+krsync_path="/tmp/rsync.tilt.krsync/krsync.sh" 
+if [ "$0" != "$krsync_path" ]; then
+    cp "$0" "$krsync_path"
+fi
 
 install_rsync_tilt() {
     if [ -z "$RSYNC_PATH" ]; then
@@ -16,7 +22,6 @@ install_rsync_tilt() {
         return 0
     fi
 
-    local tar_path_local=${0%/*}/rsync.tilt.tar  # TODO: option for windows binary
     # ensure our rsync bin is present on container in the expected location
     set +e # disable exit on error
     # $K8S_OBJECT is intentionally not quoted here so -n/-c flags can be
@@ -26,7 +31,7 @@ install_rsync_tilt() {
     set -e
     if [[ "$exit_code" != "0" ]]; then
         # shellcheck disable=SC2002
-        cat "$tar_path_local" | kubectl exec -i $K8S_OBJECT -- tar -xf - -C $(dirname $rsync_tilt_path)
+        cat "$KRSYNC_TAR_PATH" | kubectl exec -i $K8S_OBJECT -- tar -xf - -C $(dirname $rsync_tilt_path)
     fi
 }
 
@@ -45,10 +50,11 @@ if [ -z "$KRSYNC_STARTED" ]; then
     # Quote/set to the entire first argument, which could contain
     # '-n namespace'/'-c container' flags
     export K8S_OBJECT="$1"
+    export KRSYNC_TAR_PATH="${0%/*}/rsync.tilt.tar"
     shift
     export KRSYNC_STARTED=true
     export RSYNC_PATH=$(find_rsync_path)
-    exec rsync $RSYNC_PATH --blocking-io --rsh "$0" "$@"
+    exec rsync $RSYNC_PATH --blocking-io --rsh "$krsync_path" "$@"
 fi
 
 ## Shift away server and possible username arguments
