@@ -66,6 +66,8 @@ def nerdctl_build(
             for v in cache_from:
                 cmd += ['--cache-from', v]
 
+    cmd = [_quote(x) for x in cmd]
+
     # add the expected ref arg _after_ quoting since we actually
     # want shell expansion here and quoting will turn this into
     # a literal
@@ -74,6 +76,8 @@ def nerdctl_build(
     else:
         cmd += ['-t', '"${EXPECTED_REF}"']
 
+    # nerdctl only supports context as a positional arg,
+    # so it needs to go last and be manually quoted
     cmd += [_quote(context)]
     cmd = ' '.join(cmd)
 
