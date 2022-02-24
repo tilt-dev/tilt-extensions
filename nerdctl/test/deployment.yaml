@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-nerdctl
+  labels:
+    app: example-nerdctl
+spec:
+  selector:
+    matchLabels:
+      app: example-nerdctl
+  template:
+    metadata:
+      labels:
+        app: example-nerdctl
+    spec:
+      containers:
+      - name: example-nerdctl
+        image: example-nerdctl-image
+        ports:
+        - containerPort: 8000

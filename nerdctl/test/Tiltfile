@@ -1,0 +1,6 @@
+# -*- mode: Python -*-
+
+load('../Tiltfile', 'nerdctl_build')
+
+nerdctl_build('example-nerdctl-image', '.')
+k8s_yaml('deployment.yaml')

@@ -11,6 +11,13 @@ SKIPPED_TESTS=(
 # TODO(milas): the prometheus resources need more CPU than
 #   our CI KIND cluster can provide
 coreos_prometheus/test/test.sh
+
+# TODO(milas): we use kind w/ containerd in CI, but there's
+#   not an easy to get access to the containerd socket. You
+#   can still run this manually on a machine with Rancher
+#   Desktop in containerd mode.
+nerdctl/test/test.sh
+
 # TODO(nick): Currently it's a PITA to run podman in CI,
 # so we've turned this off. You can still run it manually
 # on a machine with podman installed.

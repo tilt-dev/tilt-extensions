@@ -1,0 +1,111 @@
+def _quote(v):
+    if os.name == 'nt':
+        return v
+    return shlex.quote(v)
+
+def _env_key(ref):
+    out = 'NERDCTL_DF_'
+    for c in ref.elems():
+        if c.isalnum():
+            out += c
+        else:
+            out += '_'
+    return out
+
+def nerdctl_build(
+    ref,
+    context,
+    build_args={},
+    dockerfile=None,
+    dockerfile_contents=None,
+    live_update=[],
+    match_in_env_vars=False,
+    ignore=[],
+    entrypoint=[],
+    target='',
+    ssh='',
+    secret='',
+    extra_tag='',
+    cache_from=[],
+    platform='',
+):
+    cmd = ['nerdctl']
+
+    cmd += ['--namespace', 'k8s.io']
+
+    cmd += ['build']
+
+    for arg, value in build_args.items():
+        cmd += ['--build-arg', arg + '=' + value]
+
+    if dockerfile:
+        cmd += ['-f', dockerfile]
+    elif dockerfile_contents:
+        cmd += ['-f', '-']
+
+    if target:
+        cmd += ['--target', target]
+
+    if ssh:
+        cmd += ['--ssh', ssh]
+
+    if secret:
+        cmd += ['--secret', secret]
+
+    if extra_tag:
+        if type(extra_tag) == 'string':
+            cmd += ['-t', extra_tag]
+        else:
+            for t in extra_tag:
+                cmd += ['-t', t]
+
+    if cache_from:
+        if type(cache_from) == 'string':
+            cmd += ['--cache-from', cache_from]
+        else:
+            for v in cache_from:
+                cmd += ['--cache-from', v]
+
+    cmd = [_quote(x) for x in cmd]
+
+    # add the expected ref arg _after_ quoting since we actually
+    # want shell expansion here and quoting will turn this into
+    # a literal
+    if os.name == 'nt':
+        cmd += ['-t', '%%EXPECTED_REF%%']
+    else:
+        cmd += ['-t', '"${EXPECTED_REF}"']
+
+    # nerdctl only supports context as a positional arg,
+    # so it needs to go last and be manually quoted
+    cmd += [_quote(context)]
+    cmd = ' '.join(cmd)
+
+    kwargs = {}
+    if dockerfile_contents:
+        # TODO(milas): this should use `env` arg, but custom_build
+        #   doesn't currently support that
+        env_key = _env_key(ref)
+        os.putenv(env_key, dockerfile_contents)
+        base_cmd = cmd
+        cmd = 'echo "${{{env_key}}}" | {cmd}'.format(
+            env_key=env_key,
+            cmd=base_cmd,
+        )
+        kwargs['command_bat'] = '(cmd /v:on /c echo !{env_key}!) | {cmd}'.format(
+            env_key=env_key,
+            cmd=base_cmd
+        )
+
+    custom_build(
+        ref=ref,
+        command=cmd,
+        deps=[context],
+        disable_push=True,
+        skips_local_docker=True,
+        live_update=live_update,
+        match_in_env_vars=match_in_env_vars,
+        ignore=ignore,
+        entrypoint=entrypoint,
+        **kwargs
+    )
