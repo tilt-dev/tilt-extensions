@@ -41,7 +41,7 @@ def _button(name, location, text='', icon=None, annotations={}, inputs=[]):
 
 def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
-               inputs=[]):
+               inputs=[], requires_confirmation=False):
     if config.tilt_subcommand not in valid_subcommands:
         return
 
@@ -78,6 +78,7 @@ def cmd_button(name, resource='', argv=[], text=None,
         text=text,
         icon=struct(name=icon_name, svg=icon_svg),
         annotations=btn_annotations,
+        requires_confirmation=requires_confirmation,
         inputs=inputs,
     )
     cmd = {
