@@ -42,7 +42,7 @@ You may also pass the following optional parameters:
 1. Create a local resource called "syncback-js" which connects to the first pod of "deploy/frontend" (and the default container) and syncs "/app/package.json" and "/app/yarn.lock" to local directory "./frontend":
     ```python
     syncback('syncback-js', 'deploy/frontend',
-             ['package.json', 'yarn.lock'], '/app/',
+             '/app/', paths=['package.json', 'yarn.lock'],
              target_dir='./frontend',
     )
     ```
@@ -51,7 +51,7 @@ You may also pass the following optional parameters:
     ```python
     ns = str(local('whoami')).strip()
     syncback('syncback-portal', 'deploy/portal-app',
-             [], '/src/node_modules/',
+             '/src/node_modules/', paths=[],
              target_dir='./portal/node_modules',
              container='app',
              namespace=ns
@@ -61,7 +61,7 @@ You may also pass the following optional parameters:
 3. Create a local resource called "syncback-data" which connects to the first pod of "job/data-cron" syncs the contents of "/data" to the local cwd. Protect several files ("k8s.yaml", "config.json") that exist locally but not in the container (otherwise they would be deleted locally on sync):
     ```python
     syncback('syncback-data', 'job/data-cron',
-             [], '/data/',
+             '/data/', paths=[],
              ignore=['k8s.yaml', 'config.json']
    )
     ```
