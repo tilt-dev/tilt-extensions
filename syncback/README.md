@@ -38,6 +38,8 @@ You may also pass the following optional parameters:
 * **verbose (bool, optional)**: if true, print additional rsync information.
 * **labels (Union[str, List[str]], optional)**: used to group resources in the Web UI.
 
+Please note that `paths` and `ignore` are mutually exclusive, since the extension sets an exclude of `*` whenever `paths` is used.
+
 ### Example invocations
 1. Create a local resource called "syncback-js" which connects to the first pod of "deploy/frontend" (and the default container) and syncs "/app/package.json" and "/app/yarn.lock" to local directory "./frontend":
     ```python
@@ -61,7 +63,7 @@ You may also pass the following optional parameters:
 3. Create a local resource called "syncback-data" which connects to the first pod of "job/data-cron" syncs the contents of "/data" to the local cwd. Protect several files ("k8s.yaml", "config.json") that exist locally but not in the container (otherwise they would be deleted locally on sync):
     ```python
     syncback('syncback-data', 'job/data-cron',
-             [], '/data/',
+             '/data/',
              ignore=['k8s.yaml', 'config.json']
    )
     ```
