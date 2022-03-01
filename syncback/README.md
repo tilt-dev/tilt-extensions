@@ -44,7 +44,7 @@ Please note that `paths` and `ignore` are mutually exclusive, since the extensio
 1. Create a local resource called "syncback-js" which connects to the first pod of "deploy/frontend" (and the default container) and syncs "/app/package.json" and "/app/yarn.lock" to local directory "./frontend":
     ```python
     syncback('syncback-js', 'deploy/frontend',
-             ['package.json', 'yarn.lock'], '/app/',
+             '/app/', paths=['package.json', 'yarn.lock'],
              target_dir='./frontend',
     )
     ```
@@ -53,7 +53,7 @@ Please note that `paths` and `ignore` are mutually exclusive, since the extensio
     ```python
     ns = str(local('whoami')).strip()
     syncback('syncback-portal', 'deploy/portal-app',
-             [], '/src/node_modules/',
+             '/src/node_modules/', paths=[],
              target_dir='./portal/node_modules',
              container='app',
              namespace=ns
