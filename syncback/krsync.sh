@@ -37,10 +37,12 @@ install_rsync_tilt() {
 
 find_rsync_path() {
     local rsync_path=--rsync-path=$rsync_tilt_path
+    # ensure pipeline status is non-zero if rsync is missing in the container
+    set -o pipefail
     # see if we already have a compatible rsync on the container
-    local rsync_version=$(kubectl exec $K8S_OBJECT -- rsync --version 2> /dev/null \
+    detected_rsync_version=$(kubectl exec $K8S_OBJECT -- rsync --version 2> /dev/null \
                               | head -1 | awk '{ print $3 }')
-    if [ "$rsync_version" ] && [[ "$rsync_version" > 3 ]]; then
+    if [ $? -eq 0 -a "$detected_rsync_version" ] && [[ "$detected_rsync_version" > 3 ]]; then
         rsync_path=
     fi
     echo $rsync_path
