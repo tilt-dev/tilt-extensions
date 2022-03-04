@@ -107,10 +107,14 @@ helm uninstall %(namespace_arg)s %(release_name)s || true
     live_update=live_update)
 
   if resource_deps:
-    k8s_resource(name, resource_deps=resource_deps, port_forwards=port_forwards)
+    k8s_resource(name, resource_deps=resource_deps)
 
   if labels:
-    k8s_resource(name, labels=labels, port_forwards=port_forwards)
+    k8s_resource(name, labels=labels)
+
+  if len(port_forwards):
+    k8s_resource(name, port_forwards=port_forwards)
+
 
 def helm_repo(
     name,
