@@ -15,7 +15,8 @@ def helm_resource(
     container_selector='',
     live_update=None,
     resource_deps=None,
-    labels=None):
+    labels=None,
+    port_forwards=[]):
   """Installs a helm chart to a cluster.
 
   Args:
@@ -47,6 +48,7 @@ def helm_resource(
     resource_deps: Tilt resources to depend on. Useful for
       adding a dependency on a helm repo install.
     labels: Labels for categorizing the resource.
+    port_forwards: Host port to connect to the pod.
   """
 
   if not release_name:
@@ -109,6 +111,10 @@ helm uninstall %(namespace_arg)s %(release_name)s || true
 
   if labels:
     k8s_resource(name, labels=labels)
+
+  if len(port_forwards):
+    k8s_resource(name, port_forwards=port_forwards)
+
 
 def helm_repo(
     name,
