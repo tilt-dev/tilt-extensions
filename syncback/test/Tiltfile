@@ -43,12 +43,12 @@ spec:
 cmd_button("Sync", "syncback-containers", syncback_command_args("deploy/syncback-containers", "/root/", target_dir=rsync, container="rsync", namespace="syncback-test"))
 local_resource("syncback-button", "tilt get uibuttons/Sync -o jsonpath='{.spec.location.componentID}' > syncback-button.txt && tilt get cmd/btn-Sync", resource_deps=["syncback-containers"])
 
-local_resource("python-file", "kubectl exec --namespace syncback-test -c python deploy/syncback-containers -- touch /root/main.py",   resource_deps=["syncback-containers"])
-local_resource("ruby-file",   "kubectl exec --namespace syncback-test -c ruby   deploy/syncback-containers -- touch /root/main.rb",   resource_deps=["syncback-containers"])
-local_resource("rsync-file",  "kubectl exec --namespace syncback-test -c rsync  deploy/syncback-containers -- touch /root/rsync.txt", resource_deps=["syncback-containers"])
+local_resource("python-file", "kubectl exec --namespace syncback-test -c python deploy/syncback-containers -- touch /root/main.py /root/example.txt",   resource_deps=["syncback-containers"])
+local_resource("ruby-file",   "kubectl exec --namespace syncback-test -c ruby   deploy/syncback-containers -- touch /root/main.rb /root/example.txt",   resource_deps=["syncback-containers"])
+local_resource("rsync-file",  "kubectl exec --namespace syncback-test -c rsync  deploy/syncback-containers -- touch /root/rsync.txt /root/example.txt", resource_deps=["syncback-containers"])
 
-syncback("python-syncback", "deploy/syncback-containers", "/root/", target_dir=python, container="python", namespace="syncback-test")
-syncback("ruby-syncback", "deploy/syncback-containers", "/root/", target_dir=ruby, container="ruby", namespace="syncback-test")
-syncback("rsync-syncback", "deploy/syncback-containers", "/root/", target_dir=rsync, container="rsync", namespace="syncback-test")
+syncback("python-syncback", "deploy/syncback-containers", "/root/", paths=['main.py'],  target_dir=python, container="python", namespace="syncback-test")
+syncback("ruby-syncback", "deploy/syncback-containers", "/root/",   paths=['main.rb'],  target_dir=ruby,   container="ruby",   namespace="syncback-test")
+syncback("rsync-syncback", "deploy/syncback-containers", "/root/",  paths=['rsync.txt'], target_dir=rsync, container="rsync",  namespace="syncback-test")
 
 local_resource("syncback-triggers", "tilt trigger python-syncback && tilt trigger ruby-syncback && tilt trigger rsync-syncback", resource_deps=["python-file", "ruby-file", "rsync-file"])

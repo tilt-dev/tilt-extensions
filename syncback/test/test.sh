@@ -6,8 +6,11 @@ set -ex
 tilt ci $@
 syncback_dir=$(cat syncback-dir.txt)
 test -f $syncback_dir/python/main.py
+test ! -f $syncback_dir/python/example.txt
 test -f $syncback_dir/ruby/main.rb
+test ! -f $syncback_dir/ruby/example.txt
 test -f $syncback_dir/rsync/rsync.txt
+test ! -f $syncback_dir/rsync/example.txt
 # Test that rsync was copied for containers that needed it
 kubectl exec -n syncback-test -c python deploy/syncback-containers -- sh -c "[ -f /bin/rsync.tilt ]"
 kubectl exec -n syncback-test -c ruby deploy/syncback-containers -- sh -c "[ -f /bin/rsync.tilt ]"
