@@ -30,7 +30,8 @@ def helm_resource(
     container_selector='',
     live_update=None,
     resource_deps=None,
-    labels=None):
+    labels=None,
+    port_forwards=[]):
   ...
 ```
 
@@ -76,6 +77,8 @@ chart. Must be the same length as `image_deps`.  There are two common patterns.
 `resource_deps`: Tilt resources to depend on. Useful for adding a dependency on a helm repo install.
 
 `labels`: Labels for categorizing the resource.
+
+`port_forwards`: Host port to connect to the pod. Takes the same form as `port_forwards` in [the `k8s_resource` command](https://docs.tilt.dev/api.html#api.k8s_resource).
 
 ### helm_repo
 
