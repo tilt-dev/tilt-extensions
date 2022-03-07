@@ -4,7 +4,7 @@ test:
 	./test.sh
 
 publish-ci-image:
-	docker build --platform linux/amd64 -t gcr.io/windmill-public-containers/tilt-extensions-ci -f .circleci/Dockerfile .circleci
+	docker build --pull --platform linux/amd64 -t gcr.io/windmill-public-containers/tilt-extensions-ci -f .circleci/Dockerfile .circleci
 	docker push gcr.io/windmill-public-containers/tilt-extensions-ci
 
 shellcheck:
