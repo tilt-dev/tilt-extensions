@@ -11,10 +11,8 @@ mkdir -p /tmp/rsync.tilt.krsync
 
 rsync_tilt_path=/bin/rsync.tilt
 
-krsync_path="/tmp/rsync.tilt.krsync/krsync.sh" 
-if [ "$0" != "$krsync_path" ]; then
-    cp "$0" "$krsync_path"
-fi
+krsync_callback_path="/tmp/rsync.tilt.krsync/krsync-callback.sh" 
+cp "$(dirname "$0")/krsync-callback.sh" "$krsync_callback_path"
 
 install_rsync_tilt() {
     if [ -z "$RSYNC_PATH" ]; then
@@ -48,30 +46,11 @@ find_rsync_path() {
     echo $rsync_path
 }
 
-if [ -z "$KRSYNC_STARTED" ]; then
-    # Quote/set to the entire first argument, which could contain
-    # '-n namespace'/'-c container' flags
-    export K8S_OBJECT="$1"
-    export KRSYNC_TAR_PATH="${0%/*}/rsync.tilt.tar"
-    shift
-    export KRSYNC_STARTED=true
-    export RSYNC_PATH=$(find_rsync_path)
-    exec rsync $RSYNC_PATH --blocking-io --rsh "$krsync_path" "$@"
-fi
-
-## Shift away server and possible username arguments
-# Running as --rsh
-depl=$1
+# Quote/set to the entire first argument, which could contain
+# '-n namespace'/'-c container' flags
+export K8S_OBJECT="$1"
+export KRSYNC_TAR_PATH="${0%/*}/rsync.tilt.tar"
 shift
-
-# If user uses depl@namespace rsync passes as: {us} -l depl namespace ...
-if [ "X$depl" = "X-l" ]; then
-    depl=$1
-    shift
-    shift
-fi
-
+export RSYNC_PATH=$(find_rsync_path)
 install_rsync_tilt
-
-# $K8S_OBJECT is intentionally not quoted here, see above
-exec kubectl exec -i $K8S_OBJECT -- "$@"
+exec rsync $RSYNC_PATH --blocking-io --rsh "$krsync_callback_path" "$@"
