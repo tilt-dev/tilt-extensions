@@ -7,6 +7,11 @@ ruby = os.path.join(src, "ruby")
 rsync = os.path.join(src, "rsync")
 local("mkdir -p {} {} {}".format(python, ruby, rsync))
 
+docker_build('my-rsync', '.', dockerfile_contents="""
+FROM alpine:latest
+RUN apk add rsync
+""")
+
 k8s_yaml(blob("""
 apiVersion: v1
 kind: Namespace
@@ -36,8 +41,8 @@ spec:
           image: ruby:3-slim-bullseye
           command: ["bash", "-c", "cd /root && gem install webrick && ruby -run -e httpd . -p 9000"]
         - name: rsync
-          image: alpine:latest
-          command: ["sh", "-c", "apk add rsync && nc -kl 10000"]
+          image: my-rsync
+          command: ["sh", "-c", "nc -v -lk -p 10000"]
 """))
 
 cmd_button("Sync", "syncback-containers", syncback_command_args("deploy/syncback-containers", "/root/", target_dir=rsync, container="rsync", namespace="syncback-test"))
