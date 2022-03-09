@@ -5,6 +5,12 @@
 
 set -e
 
+if [ "$CI" != "" ]; then
+    # Print syncback output on CI to make it easier
+    # to diagnose failures.
+    set -x
+fi
+
 # make sure local tmp dir exists (see -T= argument in Tiltfile)
 mkdir -p /tmp/rsync.tilt
 mkdir -p /tmp/rsync.tilt.krsync
@@ -29,19 +35,20 @@ install_rsync_tilt() {
     set -e
     if [[ "$exit_code" != "0" ]]; then
         # shellcheck disable=SC2002
+        echo "installing tilt's rsync"
         cat "$KRSYNC_TAR_PATH" | kubectl exec -i $K8S_OBJECT -- tar -xf - -C $(dirname $rsync_tilt_path)
     fi
 }
 
 find_rsync_path() {
     local rsync_path=--rsync-path=$rsync_tilt_path
-    # ensure pipeline status is non-zero if rsync is missing in the container
-    set -o pipefail
     # see if we already have a compatible rsync on the container
-    detected_rsync_version=$(kubectl exec $K8S_OBJECT -- rsync --version 2> /dev/null \
-                              | head -1 | awk '{ print $3 }')
-    if [ $? -eq 0 -a "$detected_rsync_version" ] && [[ "$detected_rsync_version" > 3 ]]; then
-        rsync_path=
+    rsync_output=$(kubectl exec $K8S_OBJECT -- rsync --version 2> /dev/null)
+    if [ $? -eq 0 ]; then
+        detected_rsync_version=$(echo "$rsync_output" | head -1 | awk '{ print $3 }')
+        if [[ "$detected_rsync_version" > 3 ]]; then
+            rsync_path=
+        fi
     fi
     echo $rsync_path
 }
