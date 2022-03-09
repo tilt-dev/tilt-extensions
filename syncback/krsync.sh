@@ -5,6 +5,12 @@
 
 set -e
 
+if [ "$CI" != "" ]; then
+    # Print syncback output on CI to make it easier
+    # to diagnose failures.
+    set -x
+fi
+
 # make sure local tmp dir exists (see -T= argument in Tiltfile)
 mkdir -p /tmp/rsync.tilt
 mkdir -p /tmp/rsync.tilt.krsync
