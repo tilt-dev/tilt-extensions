@@ -1,0 +1,3 @@
+name: busybox
+runtime: nodejs
+description: A minimal Kubernetes JavaScript Pulumi program

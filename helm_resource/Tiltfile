@@ -71,7 +71,7 @@ def helm_resource(
 
   for i in range(len(image_deps)):
     key = image_keys[i]
-    if type(key) == 'str':
+    if type(key) == 'string':
       flags.extend(['--set', '%s=$TILT_IMAGE_%s' % (shlex.quote(key), i)])
     elif type(key) == 'tuple':
       # NOTE(nick): This is a PITA because it's hard to separate
