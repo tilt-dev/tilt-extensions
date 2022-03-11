@@ -1,0 +1,15 @@
+# -*- mode: Python -*-
+
+load('../Tiltfile', 'pulumi_resource')
+
+docker_build('pulumi-helloworld-image', './helloworld')
+
+pulumi_resource(
+  'helloworld',
+  stack='dev',
+  dir='./',
+  deps=['./index.js'],
+  image_deps=['pulumi-helloworld-image'],
+  image_configs=['image'],
+  labels=['helloworld'],
+  port_forwards=['8000:8000'])
