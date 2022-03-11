@@ -11,7 +11,6 @@ Use this to add a fast dev loop to your Pulumi-based projects.
 - Tilt v0.23.4+
 - Pulumi
 - Python3
-- MacOS, Linux, or WSL
 
 ## Functions
 
@@ -41,7 +40,7 @@ Arguments:
 
 `name`: The name of the resource in the Tilt UI.
 
-`stack`: The stack to operate on. Defaults to the current stack.
+`stack`: The Pulumi stack to operate on. Defaults to the current stack.
 
 `dir`: The directory to run 'pulumi up' in. Defaults to the current working directory.
 
@@ -63,7 +62,9 @@ Assumes that the stack uses Pulumi's Configuration API for injecting images.
 `live_update`: Live Update steps for images not built by Tilt.
   Only applicable if there are no images in `image_deps`.
 
-`resource_deps`: Tilt resources to depend on. Useful for adding a dependency on a helm repo install.
+`resource_deps`: Tilt [resources to depend
+on](https://docs.tilt.dev/resource_dependencies.html). Useful for adding a
+dependency on a helm repo install.
 
 `labels`: Labels for categorizing the resource.
 

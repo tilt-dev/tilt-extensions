@@ -2,7 +2,7 @@
 
 version_settings(constraint='>=0.23.4')
 
-pulumi_get_path = os.path.abspath('pulumi-get.py')
+pulumi_apply_path = os.path.abspath('pulumi-apply-helper.py')
 
 def pulumi_resource(
     name,
@@ -21,7 +21,7 @@ def pulumi_resource(
 
   Args:
     name: The name of the resource in the Tilt UI.
-    stack: The stack to operate on. Defaults to the current stack.
+    stack: The Pulumi stack to operate on. Defaults to the current stack.
     dir: The directory to run 'pulumi up' in. Defaults to the current working directory.
     deps: A list of file dependencies that should trigger a deployment.
     release_name: The name of the release. If not specified, defaults to the Tilt UI resource name.
@@ -55,34 +55,25 @@ def pulumi_resource(
   if len(image_deps) != len(image_configs):
     fail('image_deps and image_configs must have the same length, so that we know how to inject images into the pulumi stack')
 
+  apply_cmd = ['python3', pulumi_apply_path]
   delete_cmd = ["pulumi", "destroy", "-y"]
   flags = []
-  stack_arg = ""
   for i in range(len(image_deps)):
     config = image_configs[i]
     if type(config) == 'string':
-      flags.extend(['--config', '%s=$TILT_IMAGE_%s' % (shlex.quote(config), i)])
+      apply_cmd.extend([config])
     else:
       fail("invalid argument to image_configs at %s: %s" % (i, type(config)))
 
   if stack:
-    flags.extend(['--stack', shlex.quote(stack)])
-    delete_cmd.extend(['--stack', shlex.quote(stack)])
-    stack_arg = shlex.quote(stack)
-
-  command_args = {
-    'flags': ' '.join(flags),
-    'pulumi_get_path': shlex.quote(pulumi_get_path),
-    'stack': stack_arg,
-  }
+    delete_cmd.extend(['--stack', stack])
 
   k8s_custom_deploy(
     name,
-    apply_cmd="""
-set -ex
-pulumi up --refresh -y %(flags)s 1>&2
-python3 %(pulumi_get_path)s %(stack)s
-""" % command_args,
+    apply_cmd=apply_cmd,
+    apply_env={
+      'STACK': stack,
+    },
     apply_dir=dir,
     delete_cmd=delete_cmd,
     delete_dir=dir,
