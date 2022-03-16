@@ -51,7 +51,6 @@ how to build one of these images, this will be an error.
 
 `image_configs`: A list of config keys for how to inject images into the Pulumi stack.
 Assumes that the stack uses Pulumi's Configuration API for injecting images.
-(see the example code).
 
 `image_selector`: Image reference to determine containers eligible for Live Update.
   Only applicable if there are no images in `image_deps`.
@@ -70,14 +69,14 @@ dependency on a helm repo install.
 
 `port_forwards`: Host port to connect to the pod. Takes the same form as `port_forwards` in [the `k8s_resource` command](https://docs.tilt.dev/api.html#api.k8s_resource).
 
+## Example
+
+See the [test](./test) directory for an example of a project that uses Pulumi to
+deploy, then adds live-update and port-forwards on top.
+
 ## Future Work
 
 Contributions welcome!
 
 We mainly built this as a proof of concept to show how to integrate Tilt's
 custom deploy system with other deploy tools.
-
-### Windows
-
-Native Windows support should be a matter of adapting the Tiltfile to
-work with Batch scripting (in place of Bash).
