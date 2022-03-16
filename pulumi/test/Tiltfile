@@ -2,7 +2,12 @@
 
 load('../Tiltfile', 'pulumi_resource')
 
-docker_build('pulumi-helloworld-image', './helloworld')
+docker_build(
+  'pulumi-helloworld-image',
+  './helloworld',
+  live_update=[
+    sync('./helloworld', '/app'),
+  ])
 
 pulumi_resource(
   'helloworld',
