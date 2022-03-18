@@ -9,7 +9,9 @@ pack(
   'example-httpd-image',
   deps=['httpd.conf', './htdocs'],
   builder='paketobuildpacks/builder:full',
-  buildpacks=['gcr.io/paketo-buildpacks/httpd'],
+  # 0.3.0 has a bug, see
+  # https://github.com/paketo-buildpacks/httpd/issues/297
+  buildpacks=['gcr.io/paketo-buildpacks/httpd:0.2.1'],
   live_update=[
     sync('./httpd.conf', '/workspace/httpd.conf'),
     sync('./htdocs', '/workspace/htdocs'),
