@@ -1,13 +1,23 @@
 FROM tiltdev/tilt:latest
 
 # Utils for our CI
-RUN apt update && apt install -y git build-essential apt-transport-https software-properties-common ca-certificates wget jq netcat
+RUN apt update \
+    && apt install -y --no-install-recommends \
+      apt-transport-https \
+      build-essential \
+      ca-certificates \
+      git \
+      jq \
+      netcat \
+      software-properties-common \
+      wget \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Helm
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # Install Go toolchain
-COPY --from=golang:1.17-buster /usr/local/go /usr/local/go
+COPY --from=golang:1.18-bullseye /usr/local/go /usr/local/go
 ENV PATH=/root/go/bin:/usr/local/go/bin:$PATH
 
 # install Ko
@@ -18,24 +28,28 @@ RUN mkdir -p /root/go/bin && \
   which ko
 
 # install kubectl build
-RUN curl -sSL https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/releases/download/v0.1.4/kubectl-buildkit_0.1.4_amd64.deb > kubectl-buildkit.deb && \
-  dpkg -i kubectl-buildkit.deb && \
-  apt install -f
+RUN curl -sSL https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/releases/download/v0.1.4/kubectl-buildkit_0.1.4_amd64.deb -o kubectl-buildkit.deb && \
+  dpkg -i kubectl-buildkit.deb
 
 # install buildpack CLI
 RUN curl -sSL "https://github.com/buildpacks/pack/releases/download/v0.21.1/pack-v0.21.1-linux.tgz" | \
   tar -C /usr/local/bin/ --no-same-owner -xzv pack
 
-# install nodejs
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
-  apt install -y nodejs
-
-# install yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-  apt update && apt install -y yarn
+# install nodejs + yarn
+RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt install -y -q --no-install-recommends \
+      default-jdk \
+      nodejs \
+      yarn \
+    && rm -rf /var/lib/apt/lists/*
 
 # install Pulumi CLI
 RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH=/root/.pulumi/bin:$PATH
 
+# ensure any dependencies from manual dpkg installs are ok
+RUN apt update \
+  && apt install -f \
+  && rm -rf /var/lib/apt/lists/*
