@@ -10,6 +10,7 @@ Prefer this extension to `helm_remote` for new projects.
 
 - Tilt v0.23.4+
 - Helm 3
+- Python 3
 
 ## Functions
 

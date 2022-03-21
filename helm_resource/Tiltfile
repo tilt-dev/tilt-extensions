@@ -2,6 +2,9 @@
 
 version_settings(constraint='>=0.23.4')
 
+_helm_apply_path = os.path.abspath('helm-apply-helper.py')
+_helm_delete_path = os.path.abspath('helm-delete-helper.py')
+
 def helm_resource(
     name,
     chart,
@@ -29,7 +32,7 @@ def helm_resource(
     namespace: Install into the specified namespace.
     image_deps: A list of images built by Tilt to inject into the chart. If Tilt doesn't know
       how to build one of these images, this will be an error.
-    image_keys`: A list of specifications for how to inject images into the
+    image_keys: A list of specifications for how to inject images into the
       chart. Must be the same length as `image_deps`.  There are two common patterns.
 
       - If your chart accepts an image as a single tagged image reference, specify the key as a string.
@@ -63,43 +66,34 @@ def helm_resource(
   if len(image_deps) != len(image_keys):
     fail('image_deps and image_keys must have the same length, so that we know how to inject images into the helm chart;')
 
+  apply_cmd = ['python3', _helm_apply_path]
+  delete_cmd = ['python3', _helm_delete_path]
+  env = {
+    'CHART': chart,
+    'RELEASE_NAME': release_name,
+    'NAMESPACE': namespace or '',
+    'TILT_IMAGE_COUNT': str(len(image_keys)),
+  }
+
   if flags:
-    # copy and escape the flags array, since we're going to mutate it.
-    flags = [shlex.quote(f) for f in flags]
-  else:
-    flags = []
+    apply_cmd.extend(flags)
 
   for i in range(len(image_deps)):
     key = image_keys[i]
     if type(key) == 'string':
-      flags.extend(['--set', '%s=$TILT_IMAGE_%s' % (shlex.quote(key), i)])
+      env['TILT_IMAGE_KEY_%s' % i] = key
     elif type(key) == 'tuple':
-      # NOTE(nick): This is a PITA because it's hard to separate
-      # out the repository from the tag.
-      flags.extend([
-        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed \'s,:[^/]*$,,\')' % (shlex.quote(key[0]), i),
-        '--set', '%s=$(echo "$TILT_IMAGE_%s" | sed \'s,^.*:\\([^/]*\\)$,\\1,\')' % (shlex.quote(key[1]), i),
-      ])
+      env['TILT_IMAGE_KEY_REPO_%s' % i] = key[0]
+      env['TILT_IMAGE_KEY_TAG_%s' % i] = key[1]
     else:
       fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
 
-  command_args = {
-    'chart': shlex.quote(chart),
-    'flags': ' '.join(flags),
-    'namespace_arg': '--namespace %s' % shlex.quote(namespace) if namespace else '',
-    'release_name': shlex.quote(release_name)
-  }
-
   k8s_custom_deploy(
     name,
-    apply_cmd="""
-set -ex
-helm upgrade %(flags)s %(namespace_arg)s --install %(release_name)s %(chart)s 1>&2
-helm get manifest %(namespace_arg)s %(release_name)s | kubectl get %(namespace_arg)s -oyaml -f -
-""" % command_args,
-    delete_cmd="""
-helm uninstall %(namespace_arg)s %(release_name)s || true
-""" % command_args,
+    apply_cmd=apply_cmd,
+    apply_env=env,
+    delete_cmd=delete_cmd,
+    delete_env=env,
     deps=deps,
     image_deps=image_deps,
     image_selector=image_selector,
