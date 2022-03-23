@@ -1,5 +1,11 @@
 load('../Tiltfile', 'knative_install', 'knative_yaml')
 
+# knative extension increases default timeout to 5 mins
+# because it's slow to tear down; in CI, where we're
+# often more resource constrained, that's still too slow
+# sometimes
+update_settings(k8s_upsert_timeout_secs=60 * 7)
+
 knative_install()
 
 knative_yaml('service.yaml')

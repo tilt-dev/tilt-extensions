@@ -2,17 +2,16 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:2d903e95370da8ec430cb80446d1ac3b6e5a04d6b6b00baa2bdfb99b5e528662
+      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:13da9ee95199c128f18d0a472a73ed4808f673f6cb92d3b01932e9fa083a6a31
 
     steps:
       - checkout
-      - run: GOBIN=$HOME/.bin go get github.com/tilt-dev/tilt-extensions-ci && go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
+      - run: GOBIN=$HOME/.bin go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
       - run: $HOME/.bin/tilt-extensions-ci .
 
   shellcheck:
     docker:
-      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:2d903e95370da8ec430cb80446d1ac3b6e5a04d6b6b00baa2bdfb99b5e528662
-
+      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:13da9ee95199c128f18d0a472a73ed4808f673f6cb92d3b01932e9fa083a6a31
 
     steps:
       - checkout
@@ -23,7 +22,7 @@ jobs:
     # spaces in paths, which is common on macOS (/Application Support/)
     working_directory: ~/tilt extensions
     docker:
-      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:2d903e95370da8ec430cb80446d1ac3b6e5a04d6b6b00baa2bdfb99b5e528662
+      - image: gcr.io/windmill-public-containers/tilt-extensions-ci@sha256:13da9ee95199c128f18d0a472a73ed4808f673f6cb92d3b01932e9fa083a6a31
 
     steps:
       - setup_remote_docker:
