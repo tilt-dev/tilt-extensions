@@ -72,7 +72,7 @@ def nerdctl_build(
     # want shell expansion here and quoting will turn this into
     # a literal
     if os.name == 'nt':
-        cmd += ['-t', '%%EXPECTED_REF%%']
+        cmd += ['-t', '{percent}EXPECTED_REF{percent}'.format(percent='%')]
     else:
         cmd += ['-t', '"${EXPECTED_REF}"']
 
