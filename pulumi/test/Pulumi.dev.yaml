@@ -1,2 +1,2 @@
 config:
-  busybox:image: localhost:38137/pulumi-helloworld-image:tilt-eda6a8a7c61b8530
+  busybox:image: localhost:42097/pulumi-helloworld-image:tilt-1ab394ac4c52874b
