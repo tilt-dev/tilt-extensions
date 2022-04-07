@@ -1,10 +1,5 @@
 def min_k8s_version(min_version):
-
-   #This relies on the fact that the shell command returning something in the form 'gitVersion: vX.X.X'
-    version_str =  str(local('kubectl version --short| grep "Server Version"', quiet=True))
-   #Get the string, separate it at the colon, remove the 'v' and any spaces
-    version_str = version_str.split(':')[1].replace('v','').strip()
-  
+    version_str = _get_server_version()
     cur_ver = _version_tuple(version_str)
     min_ver = _version_tuple(min_version)
     
@@ -20,12 +15,7 @@ def min_k8s_version(min_version):
         fail('Minimum Kubernetes Version Not Met! Current Version is %s' % version_str)
 
 def max_k8s_version(max_version):
-
-   #This relies on the fact that the shell command returning something in the form 'gitVersion: vX.X.X'
-    version_str =  str(local('kubectl version --short| grep "Server Version"', quiet=True))
-   #Get the string, separate it at the colon, remove the 'v' and any spaces
-    version_str = version_str.split(':')[1].replace('v','').strip()
-  
+    version_str = _get_server_version()
     cur_ver = _version_tuple(version_str)
     max_ver = _version_tuple(max_version)
     
@@ -39,6 +29,22 @@ def max_k8s_version(max_version):
         print("|                                                          |")
         print(" ---------------------------------------------------------- ")
         fail('Maximum Kubernetes Version Not Met! Current Version is %s' % version_str)
+
+
+def _get_server_version():
+    # This relies on the fact that the shell command returning something in the
+    # form 'Server Version: vX.X.X'.
+    #
+    # The previous version used 'grep' to filter out the server version. Use a
+    # native way to support systems without 'grep'.
+    kubectl_version_output = str(local('kubectl version --short', quiet=True))
+    version_str = ''
+    for line in kubectl_version_output.split('\n'):
+        if line.startswith('Server Version'):
+            version_str = line
+            break
+    # Get the string, separate it at the colon, remove the 'v' and any spaces.
+    return version_str.split(':')[1].replace('v','').strip()
 
 
 def _version_tuple(v):
