@@ -41,5 +41,5 @@ def docker_build_sub(ref, context, extra_cmds, child_context=None, base_suffix='
   base_ref = '%s-base' % ref
   docker_build(base_ref, context, **kwargs)
   df = '\n'.join(['FROM %s' % base_ref] + extra_cmds)
-  child_kwargs = {k: v for k, v in kwargs.items() if k not in ["dockerfile_contents", "dockerfile"]}
+  child_kwargs = {k: v for k, v in kwargs.items() if k not in ["dockerfile_contents", "dockerfile", "target"]}
   docker_build(ref, child_context, dockerfile_contents=df, live_update=live_update, **child_kwargs)
