@@ -10,7 +10,6 @@ PKEXEC=$(command -v pkexec)
 KDESUDO=$(command -v kdesudo)
 GKSUDO=$(command -v gksudo)
 KUBEFWD=$(command -v kubefwd)
-RUN_KUBEFWD=$(pwd)/run-kubefwd.sh
 DIR=$(realpath "$(dirname "$0")")
 KUBECONFIG=${KUBECONFIG:-${HOME}/.kube/config}
 
@@ -28,6 +27,17 @@ if [[ "$ENTR" == "" ]]; then
     echo "Run: brew install entr"
     exit 1
 fi
+
+# Copy kubefwd script into a new directory to avoid path normalization issues.
+mkdir -p /tmp/kubefwd.tilt
+
+run_kubefwd_path="/tmp/kubefwd.tilt/run-kubefwd.sh"
+cp "$(dirname "$0")/run-kubefwd.sh" $run_kubefwd_path
+
+run_kubefwd_internal_path="/tmp/kubefwd.tilt/run-kubefwd-internal.sh"
+cp "$(dirname "$0")/run-kubefwd-internal.sh" $run_kubefwd_internal_path
+
+RUN_KUBEFWD=$run_kubefwd_path
 
 # Initialize the trigger file
 touch "$TRIGGER"
