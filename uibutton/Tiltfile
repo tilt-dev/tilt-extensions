@@ -38,6 +38,26 @@ def _button(name, location, text='', icon=None, annotations={}, inputs=[]):
 
     return btn
 
+# shelling out to get the timestamp can be slow on windows, and we don't need *that* much precision, so cache it once per Tiltfile execution
+load('ext://global_vars', 'get_global', 'set_global')
+_cached_start_after_key = 'UI_BUTTON_CACHED_START_AFTER'
+set_global(_cached_start_after_key, '')
+
+def _start_after():
+    ts = get_global(_cached_start_after_key)
+    if ts == '':
+        ts = str(local(
+            # this is portable across coreutils/busybox/BSD
+            # note: it's missing fractional seconds because that's not available
+            # from strftime
+            command='date -u +"%Y-%m-%dT%H:%M:%S.000000Z"',
+            command_bat="powershell Get-Date (Get-Date).ToUniversalTime()\
+                -UFormat '+%Y-%m-%dT%H:%M:%S.000000Z'",
+            echo_off=True,
+            quiet=True)
+        ).rstrip('\r\n')
+        set_global(_cached_start_after_key, ts)
+    return ts
 
 def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
@@ -94,7 +114,7 @@ def cmd_button(name, resource='', argv=[], text=None,
             "args": argv,
             "dir": config.main_dir,
             "startOn": {
-                "startAfter": _now(),
+                "startAfter": _start_after(),
                 "uiButtons": [name],
             },
         }
@@ -107,20 +127,6 @@ def cmd_button(name, resource='', argv=[], text=None,
            | %s apply -f -' % (sys.executable,),
         env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
         echo_off=True)
-
-
-def _now():
-    return str(local(
-        # this is portable across coreutils/busybox/BSD
-        # note: it's missing fractional seconds because that's not available
-        # from strftime
-        command='date -u +"%Y-%m-%dT%H:%M:%S.000000Z"',
-        command_bat="powershell Get-Date (Get-Date).ToUniversalTime()\
-           -UFormat '+%Y-%m-%dT%H:%M:%S.000000Z'",
-        echo_off=True,
-        quiet=True)
-    ).rstrip('\r\n')
-
 
 def text_input(name, label='', default='', placeholder=''):
     return {
