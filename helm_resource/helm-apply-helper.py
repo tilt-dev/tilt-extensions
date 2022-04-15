@@ -4,6 +4,7 @@
 # python3 helm-apply-helper.py ... [image config keys in order]
 
 import os
+import re
 import subprocess
 import sys
 
@@ -36,7 +37,6 @@ namespace = os.environ.get('NAMESPACE', '')
 if namespace:
   install_cmd.extend(['--namespace', namespace])
   get_cmd.extend(['--namespace', namespace])
-  kubectl_cmd.extend(['--namespace', namespace])
 
 install_cmd.extend([release_name, chart])
 get_cmd.extend([release_name])
@@ -46,8 +46,33 @@ print("Running cmd: %s" % install_cmd, file=sys.stderr)
 subprocess.check_call(install_cmd, stdout=sys.stderr)
 
 print("Running cmd: %s" % get_cmd, file=sys.stderr)
-out = subprocess.check_output(get_cmd)
+out = subprocess.check_output(get_cmd).decode('utf-8')
+
+# We have to do namespace defaulting ourselves :(
+# See: https://github.com/tilt-dev/tilt-extensions/issues/374
+def add_default_namespace(yaml, namespace):
+  if not namespace:
+    return yaml
+
+  divider = '%s---%s' % (os.linesep, os.linesep)
+  resources = yaml.split(divider)
+
+  for i in range(len(resources)):
+    r = resources[i]
+
+    # Remove empty namespace blocks.
+    r = re.sub("\n\\s+namespace:\\s*\n", "\n", r, flags=re.MULTILINE)
+
+    has_namespace = re.search("\n\\s+namespace: *\\w", r, re.MULTILINE)
+    if not has_namespace:
+      resources[i] = r.replace(
+        "\nmetadata:",
+        "\nmetadata:\n  namespace: %s" % namespace, 1)
+
+  return divider.join(resources)
 
 print("Running cmd: %s" % kubectl_cmd, file=sys.stderr)
-completed = subprocess.run(kubectl_cmd, input=out)
+completed = subprocess.run(
+  kubectl_cmd,
+  input=add_default_namespace(out, namespace).encode('utf-8'))
 completed.check_returncode()

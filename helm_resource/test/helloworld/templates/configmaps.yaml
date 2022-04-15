@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-default-namespace
+data:
+  hi: world
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-empty-namespace
+  namespace:
+data:
+  hi: world
