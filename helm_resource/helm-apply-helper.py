@@ -18,13 +18,17 @@ for i in range(image_count):
     flags.extend(['--set', '%s=%s' % (key, image)])
     continue
 
+  key0 = os.environ.get('TILT_IMAGE_KEY_REGISTRY_%s' % i, '')
   key1 = os.environ.get('TILT_IMAGE_KEY_REPO_%s' % i, '')
   key2 = os.environ.get('TILT_IMAGE_KEY_TAG_%s' % i, '')
-  parts = image.split(':')
-  repo = ':'.join(parts[:len(parts)-1])
-  tag = ':'.join(parts[len(parts)-1:])
-  flags.extend(['--set', '%s=%s' % (key1, repo),
-                '--set', '%s=%s' % (key2, tag)])
+  registry, image = image.split('/', 1)
+  image, tag = image.split(':', 1)
+  if key0 != '':
+    flags.extend(['--set', '%s=%s' % (key0, registry),
+                  '--set', '%s=%s' % (key1, image)])
+  else:
+    flags.extend(['--set', '%s=%s/%s' % (key1, registry, image)])
+  flags.extend(['--set', '%s=%s' % (key2, tag)])
 install_cmd = ['helm', 'upgrade', '--install']
 install_cmd.extend(flags)
 
