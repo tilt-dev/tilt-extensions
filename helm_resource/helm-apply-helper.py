@@ -7,6 +7,15 @@ import os
 import re
 import subprocess
 import sys
+from typing import Dict
+
+def _parse_image_string(image: str) -> Dict:
+  if '.' in image or 'localhost' in image or image.count(":") > 1:
+    registry, repository = image.split('/', 1)
+    repository, tag = repository.rsplit(':', 1)
+    return {"registry": registry, "repository": repository, "tag": tag}
+  repository, tag = image.rsplit(':', 1)
+  return {"registry": None, "repository": repository, "tag": tag}
 
 flags = sys.argv[1:]
 
@@ -18,17 +27,24 @@ for i in range(image_count):
     flags.extend(['--set', '%s=%s' % (key, image)])
     continue
 
+  image_parts = _parse_image_string(image)
   key0 = os.environ.get('TILT_IMAGE_KEY_REGISTRY_%s' % i, '')
   key1 = os.environ.get('TILT_IMAGE_KEY_REPO_%s' % i, '')
-  key2 = os.environ.get('TILT_IMAGE_KEY_TAG_%s' % i, '')
-  registry, image = image.split('/', 1)
-  image, tag = image.split(':', 1)
-  if key0 != '':
-    flags.extend(['--set', '%s=%s' % (key0, registry),
-                  '--set', '%s=%s' % (key1, image)])
+  key2 = os.environ.get('TILT_IMAGE_KEY_TAG_%s' % i, '') 
+
+  if image_parts['registry']: 
+    if key0 != '':
+      # Image has a registry AND a specific helm key for the registry
+      flags.extend(['--set', '%s=%s' % (key0, image_parts["registry"]),
+                    '--set', '%s=%s' % (key1, image_parts["repository"])])
+    else:
+      # Image has a registry but does not have a specific helm key for registry
+      flags.extend(['--set', '%s=%s/%s' % (key1, image_parts["registry"], image_parts["repository"])])
   else:
-    flags.extend(['--set', '%s=%s/%s' % (key1, registry, image)])
-  flags.extend(['--set', '%s=%s' % (key2, tag)])
+    # Image does NOT have a registry component
+    flags.extend(['--set', '%s=%s' % (key1, image_parts["repository"])])
+  flags.extend(['--set', '%s=%s' % (key2, image_parts["tag"])])
+
 install_cmd = ['helm', 'upgrade', '--install']
 install_cmd.extend(flags)
 
