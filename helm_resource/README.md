@@ -64,6 +64,10 @@ chart. Must be the same length as `image_deps`.  There are two common patterns.
   as a tuple ('image.repository', 'image.tag'). This is how charts created with
   `helm create` are structured.
 
+- If your chart accepts an image as a 'registry', 'repository' and a 'tag', specify the key
+  as a tuple ('image.registry', 'image.repository', 'image.tag'). This is another common pattern used
+  by many charts.
+
 `flags`: Additional flags to pass to `helm install` (e.g., `['--set', 'key=value']`)
 
 `image_selector`: Image reference to determine containers eligible for Live Update.

@@ -41,6 +41,10 @@ def helm_resource(
         as a tuple ('image.repository', 'image.tag'). This is how charts created with
         `helm create` are structured.
 
+      - If your chart accepts an image as a 'registry', 'repository' and a 'tag', specify the key
+        as a tuple ('image.registry', 'image.repository', 'image.tag'). This is another common pattern used
+        by many charts.
+
     flags: Additional flags to pass to `helm install` (e.g., `['--set', 'key=value']`)
     image_selector: Image reference to determine containers eligible for Live Update.
       Only applicable if there are no images in `image_deps`.
@@ -83,8 +87,13 @@ def helm_resource(
     if type(key) == 'string':
       env['TILT_IMAGE_KEY_%s' % i] = key
     elif type(key) == 'tuple':
-      env['TILT_IMAGE_KEY_REPO_%s' % i] = key[0]
-      env['TILT_IMAGE_KEY_TAG_%s' % i] = key[1]
+      if len(key) == 2:
+        env['TILT_IMAGE_KEY_REPO_%s' % i] = key[0]
+        env['TILT_IMAGE_KEY_TAG_%s' % i] = key[1]
+      if len(key) == 3:
+        env['TILT_IMAGE_KEY_REGISTRY_%s' % i] = key[0]
+        env['TILT_IMAGE_KEY_REPO_%s' % i] = key[1]
+        env['TILT_IMAGE_KEY_TAG_%s' % i] = key[2]
     else:
       fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
 

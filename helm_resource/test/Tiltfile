@@ -19,9 +19,24 @@ helm_resource(
   labels=['helloworld'],
   flags=['--create-namespace'])
 
+helm_resource(
+  'helloregistry',
+  './helloregistry',
+  namespace='app',
+  deps=['./helloregistry'],
+  image_deps=['helloworld-image'],
+  image_keys=[('image.registry', 'image.repository', 'image.tag')],
+  labels=['helloregistry'],
+  flags=['--create-namespace'])
+
 k8s_resource(
   'helloworld',
   port_forwards=['8080:80'])
+
+k8s_resource(
+  'helloregistry',
+  port_forwards=['8081:80']
+)
 
 helm_repo(
   'bitnami',
