@@ -18,7 +18,7 @@ def k8s_attach(name, obj, namespace="", deps=[], live_update=None, image_selecto
 
   args = ["kubectl", "get", "-o=yaml", obj]
   if namespace:
-    args.append("-n", namespace)
+    args.extend(["-n", namespace])
 
   deploy_kwargs={}
   if image_selector:
