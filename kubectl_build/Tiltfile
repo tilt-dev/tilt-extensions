@@ -4,7 +4,7 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
                   dockerfile_contents=None, live_update=[],
                   match_in_env_vars=False, ignore=[],
                   entrypoint=[], target='', ssh='', secret='',
-                  extra_tag='', cache_from=[], pull=False,
+                  extra_tag=None, cache_from=[], pull=False,
                   registry_secret=None):
     # incompatible parameters with docker_build:
     # only
