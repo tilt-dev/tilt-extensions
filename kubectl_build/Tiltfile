@@ -4,7 +4,7 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
                   dockerfile_contents=None, live_update=[],
                   match_in_env_vars=False, ignore=[],
                   entrypoint=[], target='', ssh='', secret='',
-                  extra_tag='', cache_from=[], pull=False,
+                  extra_tag=None, cache_from=[], pull=False,
                   registry_secret=None):
     # incompatible parameters with docker_build:
     # only
@@ -12,9 +12,36 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
     # network
     if not kubectl_build_enable():
         # just run the standard docker_build
-        docker_build(ref=ref, context=context, build_args=build_args, dockerfile=dockerfile, live_update=live_update,
-                  match_in_env_vars=match_in_env_vars, ignore=ignore, entrypoint=entrypoint, target=target, ssh=ssh,
-                  secret=secret, extra_tag=extra_tag, cache_from=cache_from, pull=pull)
+        kwargs = {}
+        if ref != None:
+            kwargs["ref"] = ref
+        if context != None:
+            kwargs["context"] = context
+        if build_args != None:
+            kwargs["build_args"] = build_args
+        if dockerfile != None:
+            kwargs["dockerfile"] = dockerfile
+        if live_update != None:
+            kwargs["live_update"] = live_update
+        if match_in_env_vars != None:
+            kwargs["match_in_env_vars"] = match_in_env_vars
+        if ignore != None:
+            kwargs["ignore"] = ignore
+        if entrypoint != None:
+            kwargs["entrypoint"] = entrypoint
+        if target != None:
+            kwargs["target"] = target
+        if ssh != None:
+            kwargs["ssh"] = ssh
+        if secret != None:
+            kwargs["secret"] = secret
+        if extra_tag != None:
+            kwargs["extra_tag"] = extra_tag
+        if cache_from != None:
+            kwargs["cache_from"] = cache_from
+        if pull != None:
+            kwargs["pull"] = pull
+        docker_build(**kwargs)
         return
     pre_command = ""
 
