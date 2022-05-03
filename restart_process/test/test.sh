@@ -3,5 +3,6 @@
 set -ex
 
 cd "$(dirname "$0")"
-./test-docker.sh
-./test-custom.sh
+./test-docker-fail.sh
+./test-custom-fail.sh
+./test-custom-deploy.sh

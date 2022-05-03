@@ -21,8 +21,10 @@ This extension does NOT support process restarts for:
 - Images built with `custom_build` using any of the `skips_local_docker`, `disable_push`, or `tag` parameters.
 - Images run in Docker Compose resources (use the [`restart_container()`](https://docs.tilt.dev/api.html#api.restart_container) builtin instead)
 - Images without a shell (e.g. `scratch`, `distroless`)
-- Container commands specified as `command` in Kubernetes YAML will be overridden by this extension.
-  - However, the `args` field is still available; [reach out](https://tilt.dev/contact) if you need help navigating the interplay between Tilt and these YAML values
+- For `ContainerSpec`s that specify a `command` in the Kubernetes YAML:
+  - If the YAML is known during Tiltfile execution (i.e., isn't using `k8s\_custom\_deploy` or similar), the command will be overridden by this extension.
+    - However, the `args` field is still available; [reach out](https://tilt.dev/contact) if you need help navigating the interplay between Tilt and these YAML values
+  - If the YAML comes via `k8s\_custom\_deploy` or similar and specifies a `command` in its `ContainerSpec`, then this extension will not work.
 - CRDs
 
 If this extension doesn't work for your use case, [see our docs for alternatives](https://docs.tilt.dev/live_update_reference.html#restarting-your-process).

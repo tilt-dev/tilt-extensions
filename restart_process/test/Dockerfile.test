@@ -1,0 +1,7 @@
+FROM alpine
+
+RUN echo 0 > restart_count.txt
+
+ADD start.sh /
+
+ENTRYPOINT /start.sh
