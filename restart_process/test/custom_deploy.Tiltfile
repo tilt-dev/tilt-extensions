@@ -9,18 +9,4 @@ k8s_custom_deploy(
 )
 
 # trigger a live update and see if the process is restarted
-local_resource('test_update', '''
-touch start.sh
-# seconds
-TIMEOUT=5
-for ((i=0;i<=$TIMEOUT;++i)) do
-  tilt logs | grep -v test_update | grep -q "RESTART_COUNT: 1"
-  if [[ $? -eq 0 ]]; then
-    echo restart detected
-    exit 0
-  fi
-  echo no restart detected
-  sleep 1
-done
-exit 1
-''', resource_deps=['custom_deploy'])
+local_resource('test_update', './trigger_custom_deploy_live_update.sh', resource_deps=['custom_deploy'])
