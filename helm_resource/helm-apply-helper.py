@@ -74,22 +74,29 @@ def add_default_namespace(yaml, namespace):
   if not namespace:
     return yaml
 
-  divider = '%s---%s' % (os.linesep, os.linesep)
-  resources = yaml.split(divider)
+  resources = re.split('^---$', yaml, flags=re.MULTILINE)
 
   for i in range(len(resources)):
     r = resources[i]
 
-    # Remove empty namespace blocks.
-    r = re.sub("\n\\s+namespace:\\s*\n", "\n", r, flags=re.MULTILINE)
+    # Find the part of the yaml that has the metadata: and following indented lines.
+    meta = re.search("^(metadata:\n(\\s+.*\n)*)", r, re.MULTILINE)
+    if not meta:
+      continue
 
-    has_namespace = re.search("\n\\s+namespace: *\\w", r, re.MULTILINE)
+    metadata = meta.group(0)
+
+    # Remove empty namespace blocks.
+    metadata = re.sub("\n\\s+namespace:\\s*\n", "\n", metadata, flags=re.MULTILINE)
+
+    has_namespace = re.search("\n\\s+namespace: *\\S", metadata, re.MULTILINE)
     if not has_namespace:
-      resources[i] = r.replace(
+      metadata = metadata.replace(
         "\nmetadata:",
         "\nmetadata:\n  namespace: %s" % namespace, 1)
+      resources[i] = r[0:meta.start()] + metadata + r[meta.end():]
 
-  return divider.join(resources)
+  return '---'.join(resources)
 
 print("Running cmd: %s" % kubectl_cmd, file=sys.stderr)
 completed = subprocess.run(
