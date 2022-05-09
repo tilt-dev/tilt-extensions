@@ -19,6 +19,15 @@ helm_resource(
   labels=['helloworld'],
   flags=['--create-namespace'])
 
+# Check that our `namespace:` was preserved in configmap data
+local_resource('helloworld-check',
+               """
+               data=$(kubectl get configmap/configmap-namespace-data --namespace app -o jsonpath='{.data.properties}')
+               test "$data" = "namespace:"
+               """,
+               labels=['helloworld'],
+               resource_deps=['helloworld'])
+
 helm_resource(
   'helloregistry',
   './helloregistry',
