@@ -12,3 +12,13 @@ metadata:
   namespace:
 data:
   hi: world
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-namespace-data
+data:
+  hi: world
+  properties: |
+    namespace:
+  title: hello

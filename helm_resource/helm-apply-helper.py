@@ -74,25 +74,32 @@ def add_default_namespace(yaml, namespace):
   if not namespace:
     return yaml
 
-  divider = '%s---%s' % (os.linesep, os.linesep)
-  resources = yaml.split(divider)
+  resources = re.split('^---$', yaml, flags=re.MULTILINE)
 
   for i in range(len(resources)):
     r = resources[i]
 
+    # Find the part of the yaml that has the metadata: and following indented lines.
+    meta = re.search("^metadata:\n(\\s+.*\n)*", r, re.MULTILINE)
+    if not meta:
+      continue
+
+    metadata = meta.group(0)
+
     # Remove empty namespace blocks.
-    r = re.sub("\n\\s+namespace:\\s*\n", "\n", r, flags=re.MULTILINE)
+    metadata = re.sub("\n\\s+namespace:\\s*\n", "\n", metadata, flags=re.MULTILINE)
 
-    has_namespace = re.search("\n\\s+namespace: *\\w", r, re.MULTILINE)
+    has_namespace = re.search("\n\\s+namespace: *\\S", metadata, re.MULTILINE)
     if not has_namespace:
-      resources[i] = r.replace(
-        "\nmetadata:",
-        "\nmetadata:\n  namespace: %s" % namespace, 1)
+      metadata = re.sub("^metadata:",
+                        "metadata:\n  namespace: %s" % namespace,
+                        metadata, 1)
+      resources[i] = r[0:meta.start()] + metadata + r[meta.end():]
 
-  return divider.join(resources)
+  return '---'.join(resources)
+
+input = add_default_namespace(out, namespace).encode('utf-8')
 
 print("Running cmd: %s" % kubectl_cmd, file=sys.stderr)
-completed = subprocess.run(
-  kubectl_cmd,
-  input=add_default_namespace(out, namespace).encode('utf-8'))
+completed = subprocess.run(kubectl_cmd, input=input)
 completed.check_returncode()
