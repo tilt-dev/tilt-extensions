@@ -44,10 +44,12 @@ def pack(
       " ".join(["--env " + s for s in envs]),
     ])
 
+    isWindows = True if os.name == "nt" else False
+    expected_ref = "%EXPECTED_REF%" if isWindows else "$EXPECTED_REF"
     docker_tag_cmd = " ".join([
       "docker tag",
       caching_ref,
-      "$EXPECTED_REF",
+      expected_ref,
     ])
 
     custom_build(
