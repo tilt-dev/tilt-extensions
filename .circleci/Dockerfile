@@ -49,6 +49,12 @@ RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
 RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH=/root/.pulumi/bin:$PATH
 
+# install earthly
+ENV EARTHLY_VERSION=0.6.14
+RUN wget https://github.com/earthly/earthly/releases/download/v$EARTHLY_VERSION/earthly-linux-amd64 -O /usr/local/bin/earthly \
+      chmod +x /usr/local/bin/earthly \
+      earthly bootstrap
+
 # ensure any dependencies from manual dpkg installs are ok
 RUN apt update \
   && apt install -f \
