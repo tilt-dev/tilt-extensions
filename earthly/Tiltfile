@@ -1,24 +1,25 @@
-# -*- mode: Python -*-
-
+# vim: set syntax=python:
 
 def earthly_build(
-  target, ref, image_arg, deps, ignore=None, extra_flags=None, extra_args=None, live_update=[]
+  context, target, ref, image_arg, deps=None, ignore=None, extra_flags=None, extra_args=None, live_update=[]
 ):
   """Use [Earthly](https://earthly.dev/) to build images for Tilt.
   Args:
+    context: The dir where the earthly command will be executed relative to the Tiltfile.
     target: The name of the earthly target to build.
         Note that Earthly targets start with '+' but also can refer to targets
         in another dir or remote locations (see https://docs.earthly.dev/docs/guides/target-ref).
     ref: The name of the image that earthly will build (e.g. ‘myproj/backend’ or ‘myregistry/myproj/backend’).
         If this image will be used in a k8s resource(s), this ref must match the spec.container.image param for that resource(s).
     image_arg: the name of the earthly ARG that is responsible for setting the resulting image full name (name + tag)
-    deps: Changes to the given files or directories that will trigger rebuilds.
+    deps: Changes to the given files or directories that will trigger rebuilds. Relative to the Tiltfile. Defaults to context.
     ignore: Changes to the given files or directories do not trigger rebuilds.
-    extra_flags: Extra flags to pass to earthy. Expressed as an argv-style array, ex. `['--strict']`.
-    extra_args: Extra ARG key-pairs to pass to earthy. Expressed as an argv-style array, ex. `['--PORT=8000']`.
+    extra_flags: Extra flags to pass to earthly. Expressed as an argv-style array, ex. `['--strict']`.
+    extra_args: Extra ARG key-pairs to pass to earthly. Expressed as an argv-style array, ex. `['--PORT=8000']`.
     live_update: Set of steps for updating a running container
         (see https://docs.tilt.dev/live_update_reference.html)
   """
+  deps = deps or [context]
   extra_flags = extra_flags or []
   extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
   extra_args = extra_args or []
@@ -27,8 +28,8 @@ def earthly_build(
   custom_build(
     ref=ref,
     command=(
-      "earthly --allow-privileged %s %s --%s=$EXPECTED_REF %s"
-    ) % (extra_flags_str, shlex.quote(target), shlex.quote(image_arg), extra_args_str),
+      "cd %s && earthly --allow-privileged %s %s --%s=$EXPECTED_REF %s"
+    ) % (shlex.quote(context), extra_flags_str, shlex.quote(target), shlex.quote(image_arg), extra_args_str),
     ignore=ignore,
     deps=deps,
     live_update=live_update,
