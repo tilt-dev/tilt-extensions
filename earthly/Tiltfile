@@ -28,7 +28,7 @@ def earthly_build(
   custom_build(
     ref=ref,
     command=(
-      "cd %s && earthly --allow-privileged %s %s --%s=$EXPECTED_REF %s"
+      "cd %s && earthly %s %s --%s=$EXPECTED_REF %s"
     ) % (shlex.quote(context), extra_flags_str, shlex.quote(target), shlex.quote(image_arg), extra_args_str),
     ignore=ignore,
     deps=deps,
