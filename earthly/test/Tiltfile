@@ -1,12 +1,12 @@
-# -*- mode: Python -*-
+# vim: set syntax=python:
 
 load('../Tiltfile', 'earthly_build')
 
 earthly_build(
+    context='.',
     target='+hello',
     ref='helloimage',
     image_arg='IMAGE_NAME',
-    deps='.',
     ignore='./test.sh',
     extra_flags=['--strict'],
     extra_args=['--PORT=8000'])
