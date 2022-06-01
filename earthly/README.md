@@ -15,8 +15,9 @@ Use [Earthly](https://earthly.dev/) to build images for Tilt.
 - **ref**: The name of the image that earthly will build (e.g. ‘myproj/backend’ or ‘myregistry/myproj/backend’).
   If this image will be used in a k8s resource(s), this ref must match the spec.container.image param for that resource(s).
 - **image_arg**: the name of the earthly ARG that is responsible for setting the resulting image full name (name + tag)
-- **deps**: Changes to the given files or directories that will trigger rebuilds. Relative to the Tiltfile. Defaults to `context`.
-- **ignore**: Changes to the given files or directories do not trigger rebuilds.
+- **deps**: Changes to the given files or directories that will trigger rebuilds. Relative to the Tiltfile. Defaults to `context`. Only accepts real paths, not file globs.
+- **ignore**: set of file patterns that will be ignored. Ignored files will not trigger builds. Follows the dockerignore syntax.
+  Patterns/filepaths will be evaluated relative to each dep (e.g. if you specify deps=['dep1', 'dep2'] and ignores=['foobar'] , Tilt will ignore both deps1/foobar and dep2/foobar ).
 - **extra_flags**: Extra flags to pass to earthly. Expressed as an argv-style array, ex. `['--strict']`.
 - **extra_args**: Extra ARG key-pairs to pass to earthly. Expressed as an argv-style array, ex. `['--PORT=8000']`.
 - **live_update**: Set of steps for updating a running container
