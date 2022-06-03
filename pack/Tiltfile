@@ -25,7 +25,7 @@ def pack(
     name = name.split(":")[0]
 
     envs = list(env_vars)
-    if 'BP_LIVE_RELOAD_ENABLED=true' not in envs:
+    if not bool([e for e in envs if ('BP_LIVE_RELOAD_ENABLED' in e)]):
         envs.append('BP_LIVE_RELOAD_ENABLED=true')
 
     deps_copy = list(deps)
