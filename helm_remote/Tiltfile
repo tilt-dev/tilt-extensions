@@ -54,7 +54,7 @@ metadata:
 #   =====================================
 
 
-def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password='', allow_duplicates=False, create_namespace=False):
+def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password='', allow_duplicates=False, create_namespace=False, labels=[]):
     # ======== Helper methods
     def get_local_repo(repo_name, repo_url):
         # if no repos are present, helm exit code is >0 and stderr output buffered
@@ -181,6 +181,9 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
         k8s_yaml(yaml, allow_duplicates=allow_duplicates)
     else:
         k8s_yaml(yaml)
+
+    if len(labels) > 0:
+        k8s_resource(workload=release_name,  labels=labels)
 
     return yaml
 
