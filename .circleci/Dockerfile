@@ -1,4 +1,4 @@
-FROM tiltdev/tilt:latest
+FROM docker/tilt:latest
 
 # Utils for our CI
 RUN apt update \
