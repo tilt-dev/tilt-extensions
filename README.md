@@ -19,6 +19,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`docker_build_sub`](/docker_build_sub): Specify extra Dockerfile directives in your Tiltfile beyond [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build).
 - [`docker_build_with_restart`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update
 - [`dotenv`](/dotenv): Load environment variables from `.env` or another file.
+- [`earthly`](/earthly): Build container images using [earthly](https://earthly.dev)
 - [`file_sync_only`](/file_sync_only): No-build, no-push, file sync-only development. Useful when you want to live-reload a single config file into an existing public image, like nginx.
 - [`git_resource`](/git_resource): Deploy a dockerfile from a remote repository -- or specify the path to a local checkout for local development.
 - [`hasura`](/hasura): Deploys [Hasura GraphQL Engine](https://hasura.io/) and monitors metadata/migrations changes locally.

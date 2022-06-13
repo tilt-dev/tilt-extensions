@@ -1,0 +1,38 @@
+# vim: set syntax=python:
+
+def earthly_build(
+  context, target, ref, image_arg, deps=None, ignore=None, extra_flags=None, extra_args=None, live_update=[]
+):
+  """Use [Earthly](https://earthly.dev/) to build images for Tilt.
+  Args:
+    context: The dir where the earthly command will be executed relative to the Tiltfile.
+    target: The name of the earthly target to build.
+        Note that Earthly targets start with '+' but also can refer to targets
+        in another dir or remote locations (see https://docs.earthly.dev/docs/guides/target-ref).
+    ref: The name of the image that earthly will build (e.g. ‘myproj/backend’ or ‘myregistry/myproj/backend’).
+        If this image will be used in a k8s resource(s), this ref must match the spec.container.image param for that resource(s).
+    image_arg: the name of the earthly ARG that is responsible for setting the resulting image full name (name + tag)
+    deps: Changes to the given files or directories that will trigger rebuilds. Relative to the Tiltfile. Defaults to `context`. Only accepts real paths, not file globs.
+    ignore: set of file patterns that will be ignored. Ignored files will not trigger builds. Follows the dockerignore syntax.
+        Patterns/filepaths will be evaluated relative to each dep (e.g. if you specify deps=['dep1', 'dep2'] and ignores=['foobar'] , Tilt will ignore both deps1/foobar and dep2/foobar ).
+    extra_flags: Extra flags to pass to earthly. Expressed as an argv-style array, ex. `['--strict']`.
+    extra_args: Extra ARG key-pairs to pass to earthly. Expressed as an argv-style array, ex. `['--PORT=8000']`.
+    live_update: Set of steps for updating a running container
+        (see https://docs.tilt.dev/live_update_reference.html)
+  """
+  deps = deps or [context]
+  extra_flags = extra_flags or []
+  extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
+  extra_args = extra_args or []
+  extra_args_str = ' '.join([shlex.quote(f) for f in extra_args])
+
+  custom_build(
+    ref=ref,
+    command=(
+      "cd %s && earthly %s %s --%s=$EXPECTED_REF %s"
+    ) % (shlex.quote(context), extra_flags_str, shlex.quote(target), shlex.quote(image_arg), extra_args_str),
+    ignore=ignore,
+    deps=deps,
+    live_update=live_update,
+    skips_local_docker=False,
+  )

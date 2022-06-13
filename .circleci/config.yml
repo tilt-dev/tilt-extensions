@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:ce6b74afb479e6ed5fe4b7aa499e68766fc2d069ff28309363b4e9e6a64509d8
+      - image: docker/tilt-extensions-ci@sha256:ebf32ec06a7c8a19e521344aa5f88837b9f03c08d74dacb77b3955c68a6d8b29
 
     steps:
       - checkout
@@ -11,7 +11,7 @@ jobs:
 
   shellcheck:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:ce6b74afb479e6ed5fe4b7aa499e68766fc2d069ff28309363b4e9e6a64509d8
+      - image: docker/tilt-extensions-ci@sha256:ebf32ec06a7c8a19e521344aa5f88837b9f03c08d74dacb77b3955c68a6d8b29
 
     steps:
       - checkout
@@ -22,7 +22,7 @@ jobs:
     # spaces in paths, which is common on macOS (/Application Support/)
     working_directory: ~/tilt extensions
     docker:
-      - image: docker/tilt-extensions-ci@sha256:ce6b74afb479e6ed5fe4b7aa499e68766fc2d069ff28309363b4e9e6a64509d8
+      - image: docker/tilt-extensions-ci@sha256:ebf32ec06a7c8a19e521344aa5f88837b9f03c08d74dacb77b3955c68a6d8b29
 
     steps:
       - setup_remote_docker:

@@ -1,0 +1,13 @@
+VERSION 0.6
+
+hello:
+    FROM busybox
+    WORKDIR /app
+    COPY main.sh .
+    COPY index.html .
+    ENTRYPOINT ./main.sh
+
+    ARG --required IMAGE_NAME
+    ARG PORT
+    ENV PORT=$PORT
+    SAVE IMAGE --push $IMAGE_NAME

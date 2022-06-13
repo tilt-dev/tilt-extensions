@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-earthly
+  labels:
+    app: example-earthly
+spec:
+  selector:
+    matchLabels:
+      app: example-earthly
+  template:
+    metadata:
+      labels:
+        app: example-earthly
+    spec:
+      containers:
+      - name: example-earthly
+        image: helloimage
+        ports:
+        - containerPort: 8000
