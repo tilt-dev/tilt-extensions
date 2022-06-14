@@ -17,7 +17,8 @@ names="$(tilt get configmap -l tilt.dev/managed-by=tilt-extensions.ngrok -o name
 auth=""
 if [[ "$auth_env" != "" ]]; then
     auth="
-    auth: \"$auth_env\""
+    basic_auth:
+      - \"$auth_env\""
 fi
 
 for name in $names;
@@ -33,13 +34,15 @@ do
             tunnel="  \"$location:$port\":
     proto: http
     addr: $port
-    bind_tls: false$auth"
+    schemes:
+      - http$auth"
             tunnels+=("$tunnel")
         done
     fi
 done
 
-new_config="tunnels:"
+new_config="version: \"2\"
+tunnels:"
 # https://stackoverflow.com/a/7577209
 for tunnel in ${tunnels[@]+"${tunnels[@]}"}
 do
