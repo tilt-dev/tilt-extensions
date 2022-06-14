@@ -7,7 +7,7 @@ Create public URLs for your local services with [`ngrok`](https://ngrok.com/)
 ## Requirements
 
 - `bash`
-- `ngrok v3`
+- `ngrok`
 - GNU core utils (`tr`, `sort`) - `brew install coreutils`
 
 ## Usage
@@ -23,7 +23,8 @@ open tunnels at http://localhost:4040/.
 ## Flags
 
 `--auth=my-user:my-password`: Adds a basic auth prompt to all tunnels.
-`--default_config_file=~/.config/ngrok/my-default-config.yml`: Sets the path to the default configuration file for Ngrok.
+`--default_config_file=~/.config/ngrok/my-default-config.yml`: Sets the path to the default configuration file for Ngrok. Default `~/.config/ngrok/ngrok.yml`.
+`--ngrok_config_version`: Sets the ngrok config version, use `1` for Ngrok Agent < v3, use `2` for Ngrok agent > v3. Default `2`.
 
 ## Examples
 
