@@ -7,6 +7,7 @@
 # 3) Check to make sure the ngrok config is what we expect.
 
 auth_env="$TILT_NGROK_AUTH"
+config_version_env="$TILT_NGROK_CONFIG_VERSION"
 
 set -euo pipefail
 
@@ -16,8 +17,21 @@ tunnels=()
 names="$(tilt get configmap -l tilt.dev/managed-by=tilt-extensions.ngrok -o name | sort -u)"
 auth=""
 if [[ "$auth_env" != "" ]]; then
-    auth="
-    auth: \"$auth_env\""
+  # Default v2 config
+  auth="basic_auth:
+      - \"$auth_env\""
+
+  if [[ "$config_version_env" == "1" ]]; then
+    auth="auth: \"$auth_env\""
+  fi
+fi
+
+# Default v2 config
+tls_settings="schemes:
+      - http"
+
+if [[ "$config_version_env" == "1" ]]; then
+  tls_settings="bind_tls: false"
 fi
 
 for name in $names;
@@ -33,13 +47,15 @@ do
             tunnel="  \"$location:$port\":
     proto: http
     addr: $port
-    bind_tls: false$auth"
+    $tls_settings
+    $auth"
             tunnels+=("$tunnel")
         done
     fi
 done
 
-new_config="tunnels:"
+new_config="version: \"$config_version_env\"
+tunnels:"
 # https://stackoverflow.com/a/7577209
 for tunnel in ${tunnels[@]+"${tunnels[@]}"}
 do

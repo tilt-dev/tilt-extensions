@@ -6,17 +6,18 @@ set -euo pipefail
 
 args=("start")
 config_file="$1"
-default_config_file="$HOME/.ngrok2/ngrok.yml"
+default_config_file="${TILT_NGROK_DEFAULT_CONFIG_FILE:-$HOME/.config/ngrok/ngrok.yml}"
+
 if [[ -f "$default_config_file" ]]; then
     args+=("--config" "$default_config_file")
 fi
 
 args+=("--config" "$config_file")
 
-if [[ "$(wc -l "$config_file" | awk '{print $1}')" == "0" ]]; then
-    args+=("--none")
-else
+if grep -q "addr" "$config_file"; then
     args+=("--all")
+else
+    args+=("--none")
 fi
 
 set -ex

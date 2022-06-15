@@ -23,6 +23,8 @@ open tunnels at http://localhost:4040/.
 ## Flags
 
 `--auth=my-user:my-password`: Adds a basic auth prompt to all tunnels.
+`--default_config_file=~/.config/ngrok/my-default-config.yml`: Sets the path to the default configuration file for Ngrok. Default `~/.config/ngrok/ngrok.yml`.
+`--ngrok_config_version`: Sets the ngrok config version, use `1` for Ngrok Agent < v3, use `2` for Ngrok agent > v3. Default `2`.
 
 ## Examples
 
@@ -38,9 +40,9 @@ With auth:
 ```python
 v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
 v1alpha1.extension(
-  name='ngrok:config', 
-  repo_name='default', 
-  repo_path='ngrok', 
+  name='ngrok:config',
+  repo_name='default',
+  repo_path='ngrok',
   args=['--auth=my-user:my-password'])
 ```
 
@@ -50,9 +52,9 @@ With auth from a file:
 password = str(read_file(os.path.join(os.getenv('HOME'), '.ngrok-password'))).strip()
 v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
 v1alpha1.extension(
-  name='ngrok:config', 
-  repo_name='default', 
-  repo_path='ngrok', 
+  name='ngrok:config',
+  repo_name='default',
+  repo_path='ngrok',
   args=['--auth=my-user:%s' % password])
 ```
 
