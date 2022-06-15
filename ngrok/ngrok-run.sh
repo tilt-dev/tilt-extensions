@@ -14,10 +14,10 @@ fi
 
 args+=("--config" "$config_file")
 
-if [[ "$(wc -l "$config_file" | awk '{print $1}')" == "0" ]]; then
-    args+=("--none")
-else
+if grep -q "addr" "$config_file"; then
     args+=("--all")
+else
+    args+=("--none")
 fi
 
 set -ex
