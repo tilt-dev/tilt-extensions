@@ -41,6 +41,22 @@ Returns YAML for a secret from a dictionary.
 * `inputs` ( dict) - A dict of keys and values to use. Nesting is not supported
 
 
+### secret_yaml_registry
+
+```
+secret_yaml_registry(name: str, namespace: str = "", flags_dict: dict = None)
+```
+
+Returns YAML for a `docker-registry` type secret. Equivelent to: 
+
+```
+kubectl create secret docker-registry artifact-registry \
+ --docker-server=host.somedomain \
+ --docker-username=_json_key \
+ --docker-password="$(cat service-account.json)" \
+ --docker-email=email@email.com
+```
+
 ### secret_yaml_tls
 
 ```
@@ -84,6 +100,16 @@ secret_create_generic('gcp-key', from_file='key.json=./gcp-creds.json')
 load('ext://secret', 'secret_from_dict')
 k8s_yaml(secret_from_dict("secrets", inputs = {
     'SOME_TOKEN' : os.getenv('SOME_TOKEN')
+}))
+```
+
+### For a docker-registry secret
+```
+k8s_yaml(registry_secret("artifact-registry", flags_dict = {
+    'docker-server': 'registry_hostname',
+    'docker-username': '_json_key',
+    'docker-email': 'test@test.com,
+    'docker-password': read_file(service-account.json')
 }))
 ```
 
