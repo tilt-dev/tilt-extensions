@@ -57,6 +57,7 @@ namespace = os.environ.get('NAMESPACE', '')
 if namespace:
   install_cmd.extend(['--namespace', namespace])
   get_cmd.extend(['--namespace', namespace])
+  kubectl_cmd.extend(['--namespace', namespace])
 
 install_cmd.extend([release_name, chart])
 get_cmd.extend([release_name])
