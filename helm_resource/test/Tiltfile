@@ -28,6 +28,15 @@ local_resource('helloworld-check',
                labels=['helloworld'],
                resource_deps=['helloworld'])
 
+# Make sure helm charts that install to multiple namespaces work.
+local_resource('helloworld-check-multi-namespace',
+               """
+               data=$(kubectl get configmap/helloworld-systemconfig --namespace kube-public -o jsonpath='{.data.hello}')
+               test "$data" = "world"
+               """,
+               labels=['helloworld'],
+               resource_deps=['helloworld'])
+
 helm_resource(
   'helloregistry',
   './helloregistry',

@@ -1,0 +1,9 @@
+# Make sure the helm chart still works when installing
+# to multiple namespaces.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helloworld-systemconfig
+  namespace: kube-public
+data:
+  hello: world

@@ -30,9 +30,9 @@ for i in range(image_count):
   image_parts = _parse_image_string(image)
   key0 = os.environ.get('TILT_IMAGE_KEY_REGISTRY_%s' % i, '')
   key1 = os.environ.get('TILT_IMAGE_KEY_REPO_%s' % i, '')
-  key2 = os.environ.get('TILT_IMAGE_KEY_TAG_%s' % i, '') 
+  key2 = os.environ.get('TILT_IMAGE_KEY_TAG_%s' % i, '')
 
-  if image_parts['registry']: 
+  if image_parts['registry']:
     if key0 != '':
       # Image has a registry AND a specific helm key for the registry
       flags.extend(['--set', '%s=%s' % (key0, image_parts["registry"]),
