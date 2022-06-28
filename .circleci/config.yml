@@ -36,6 +36,4 @@ workflows:
     jobs:
       - validate
       - shellcheck
-      - test:
-          context:
-            - Tilt Pulumi Context
+      - test
