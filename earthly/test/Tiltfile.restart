@@ -1,0 +1,23 @@
+# vim: set syntax=python:
+
+load('../Tiltfile', 'earthly_build_with_restart')
+
+earthly_build_with_restart(
+    entrypoint='./main.sh',
+    context='.',
+    target='+hello',
+    ref='helloimage',
+    image_arg='IMAGE_NAME',
+    ignore='./test.sh',
+    extra_flags=['--strict'],
+    extra_args=['--PORT=8000'],
+    live_update=[run("echo 'updating!'")])
+
+k8s_yaml('deployment.yaml')
+
+k8s_resource(
+    'example-earthly',
+    port_forwards='8000',
+    labels=['web']
+)
+
