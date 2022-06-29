@@ -31,6 +31,9 @@ def earthly_build(
     command=(
       "cd %s && earthly %s %s --%s=$EXPECTED_REF %s"
     ) % (shlex.quote(context), extra_flags_str, shlex.quote(target), shlex.quote(image_arg), extra_args_str),
+    command_bat=(
+      "cd %s && earthly %s %s --%s=%%EXPECTED_REF%% %s"
+    ) % (shlex.quote(context), extra_flags_str, shlex.quote(target), shlex.quote(image_arg), extra_args_str),
     ignore=ignore,
     deps=deps,
     live_update=live_update,
