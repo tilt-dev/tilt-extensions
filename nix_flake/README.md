@@ -30,4 +30,3 @@ build_flake_image("some-container", ".", "container")
 build_flake_image("some-other-container", "git+ssh://git@github.example.com/org/some-other-project", "container")
 build_flake_image("yet-another-container", "~/some_other_project", "container")
 ```
-
