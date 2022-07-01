@@ -1,0 +1,4 @@
+load("../Tiltfile", "build_flake_image")
+
+k8s_yaml("deployment.yaml")
+build_flake_image("hello-world-image", "./flake/", "container")
