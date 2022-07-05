@@ -2,6 +2,10 @@
 
 load('../Tiltfile', 'helm_resource', 'helm_repo')
 
+local_resource(
+  name='unittest',
+  cmd=["python3", "../namespacing_test.py"])
+
 docker_build(
   'helloworld-image',
   './src',
