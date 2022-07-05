@@ -31,6 +31,7 @@ SKIPPED_TESTS=set([
 
   # TODO(nick): Get nix working inside circleci
   "nix/test/test.sh",
+  "nix_flake/test/test.sh"
 ])
 
 directory_whitelist = set([])
