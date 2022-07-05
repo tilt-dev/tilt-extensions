@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 from typing import Dict
+from namespacing import add_default_namespace
 
 def _parse_image_string(image: str) -> Dict:
   if '.' in image or 'localhost' in image or image.count(":") > 1:
@@ -68,35 +69,6 @@ subprocess.check_call(install_cmd, stdout=sys.stderr)
 print("Running cmd: %s" % get_cmd, file=sys.stderr)
 out = subprocess.check_output(get_cmd).decode('utf-8')
 
-# We have to do namespace defaulting ourselves :(
-# See: https://github.com/tilt-dev/tilt-extensions/issues/374
-def add_default_namespace(yaml, namespace):
-  if not namespace:
-    return yaml
-
-  resources = re.split('^---$', yaml, flags=re.MULTILINE)
-
-  for i in range(len(resources)):
-    r = resources[i]
-
-    # Find the part of the yaml that has the metadata: and following indented lines.
-    meta = re.search("^metadata:\n(\\s+.*\n)*", r, re.MULTILINE)
-    if not meta:
-      continue
-
-    metadata = meta.group(0)
-
-    # Remove empty namespace blocks.
-    metadata = re.sub("\n\\s+namespace:\\s*\n", "\n", metadata, flags=re.MULTILINE)
-
-    has_namespace = re.search("\n\\s+namespace: *\\S", metadata, re.MULTILINE)
-    if not has_namespace:
-      metadata = re.sub("^metadata:",
-                        "metadata:\n  namespace: %s" % namespace,
-                        metadata, 1)
-      resources[i] = r[0:meta.start()] + metadata + r[meta.end():]
-
-  return '---'.join(resources)
 
 input = add_default_namespace(out, namespace).encode('utf-8')
 
