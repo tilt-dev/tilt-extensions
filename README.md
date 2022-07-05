@@ -40,6 +40,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`min_tilt_version`](/min_tilt_version): Require a minimum Tilt version to run this Tiltfile.
 - [`namespace`](/namespace): Functions for interacting with namespaces.
 - [`nix`](/nix): Use [nix](https://nixos.org/guides/install-nix.html) to build nix-based container images.
+- [`nix_flake`](/nix_flake): Use [nix flake](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html) to build images for Tilt from one or more flakes.
 - [`ngrok`](/ngrok): Expose public URLs for your services with [`ngrok`](https://ngrok.com/).
 - [`pack`](/pack): Build container images using [pack](https://buildpacks.io/docs/install-pack/) and [buildpacks](https://buildpacks.io/).
 - [`podman`](/podman): Build container images using [podman](https://podman.io)
