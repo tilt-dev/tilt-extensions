@@ -23,6 +23,7 @@ for resource in resources:
   o = resource.get('outputs', [])
   kind = o.get('kind', '').lower()
   name = o.get('metadata', {}).get('name', '')
+  namespace = o.get('metadata', {}).get('namespace', '')
   if kind and name:
-    print(subprocess.check_output(['kubectl', 'get', kind, name, '-o=yaml']).decode('utf-8'))
+    print(subprocess.check_output(['kubectl', 'get', '-n', namespace, kind, name, '-o=yaml']).decode('utf-8'))
     print('---')
