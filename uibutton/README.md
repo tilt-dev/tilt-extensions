@@ -55,21 +55,25 @@ cmd_button(
     icon_name=None,
     icon_svg=None,
     inputs=[],
+    disabled=False,
+    requires_confirmation=False,
 )
 ```
 
 Creates a button for a resource that runs the given command when clicked.
 
-| Argument    | Type                                         | Description                                                                                                                               |
-|-------------|----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| `name`      | `str`                                        | Unique ID for button                                                                                                                      |
-| `resource`  | `str`                                        | Resource to associate button with (required if `location=location.RESOURCE`)                                                              |
-| `argv`      | `List[str]`                                  | Local command to run when button is clicked                                                                                               |
-| `text`      | `str`                                        | Text to display on button (optional: defaults to `name`)                                                                                  |
-| `location`  | `str` (enum)                                 | Button placement in UI (see `location` section below)                                                                                     |
-| `icon_name` | `str`                                        | Name of [Material Icons font ligature][material-icons-font] to use as icon (at most one of `icon_name` or `icon_svg` should be specified) |
-| `icon_svg`  | `str` or `Blob`                              | `<svg>` to use as icon; should have 24x24px viewport (at most one of `icon_name` or `icon_svg` should be specified)                       |
-| `inputs`    | `List[typing.Union[text_input, bool_input]]` | Form inputs for butdown (optional)                                                                                                        |
+| Argument                | Type                                         | Description                                                                                                                               |
+|-------------------------|----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`                  | `str`                                        | Unique ID for button                                                                                                                      |
+| `resource`              | `str`                                        | Resource to associate button with (required if `location=location.RESOURCE`)                                                              |
+| `argv`                  | `List[str]`                                  | Local command to run when button is clicked                                                                                               |
+| `text`                  | `str`                                        | Text to display on button (optional: defaults to `name`)                                                                                  |
+| `location`              | `str` (enum)                                 | Button placement in UI (see `location` section below)                                                                                     |
+| `icon_name`             | `str`                                        | Name of [Material Icons font ligature][material-icons-font] to use as icon (at most one of `icon_name` or `icon_svg` should be specified) |
+| `icon_svg`              | `str` or `Blob`                              | `<svg>` to use as icon; should have 24x24px viewport (at most one of `icon_name` or `icon_svg` should be specified)                       |
+| `inputs`                | `List[typing.Union[text_input, bool_input]]` | Form inputs for butdown (optional)                                                                                                        |
+| `disabled`              | `bool`                                       | Whether the button is disabled (optional, default to `False`)                                                                             |
+| `requires_confirmation` | `bool`                                       | Whether the button requires a second click to activate (optional, default to `False`)                                                     |
 
 ### `location`
 To specify button location, you can bind the `location` helper type or pass a string, e.g. `location=location.NAV` and `location='nav'` are equivalent.

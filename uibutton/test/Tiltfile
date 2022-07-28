@@ -17,3 +17,8 @@ cmd_button('nav-button-std', argv=["echo", "Hello from nav"],
 cmd_button('nav-button-hello', argv=["sh", "-c", "echo Hello, $NAME"],
            location=location.NAV, icon_name='front_hand', text='Hello',
            inputs=[text_input('NAME')])
+cmd_button('nav-button-disabled', argv=["echo", "Hello from nav"],
+           location=location.NAV, icon_name='calendar_today', disabled=True)
+cmd_button('nav-button-confirm', argv=["echo", "Hello from nav"],
+           location=location.NAV, icon_name='calendar_today', requires_confirmation=True)
+

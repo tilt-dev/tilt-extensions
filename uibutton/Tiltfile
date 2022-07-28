@@ -8,7 +8,7 @@ location = struct(
 
 valid_subcommands = ['up', 'ci']
 
-def _button(name, location, text='', icon=None, annotations={}, inputs=[]):
+def _button(name, location, text='', icon=None, annotations={}, inputs=[], disabled=False, requires_confirmation=False):
     text = text or name
     btn = {
         "apiVersion": "tilt.dev/v1alpha1",
@@ -19,6 +19,8 @@ def _button(name, location, text='', icon=None, annotations={}, inputs=[]):
         },
         "spec": {
             "text": text,
+            "disabled": disabled,
+            "requiresConfirmation": requires_confirmation,
             "location": {
                 "componentType": location.type,
                 "componentID": location.id,
@@ -61,7 +63,7 @@ def _start_after():
 
 def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
-               inputs=[]):
+               inputs=[], disabled=False, requires_confirmation=False):
     if config.tilt_subcommand not in valid_subcommands:
         return
 
@@ -99,6 +101,8 @@ def cmd_button(name, resource='', argv=[], text=None,
         icon=struct(name=icon_name, svg=icon_svg),
         annotations=btn_annotations,
         inputs=inputs,
+        disabled=disabled,
+        requires_confirmation=requires_confirmation,
     )
     cmd = {
         "apiVersion": "tilt.dev/v1alpha1",
