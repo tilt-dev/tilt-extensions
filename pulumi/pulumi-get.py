@@ -38,23 +38,24 @@ for resource in resources:
   is_k8s = isinstance(t, str) and t.find('kubernetes:') == 0
   if not is_k8s:
     continue
+  
+  o = resource.get('outputs', {})
 
   if t.find('kubernetes:helm.sh/') == 0:
     if t == 'kubernetes:helm.sh/v3:Release':
-      helmResources = resource.get('resourceNames', {})
+      helmResources = o.get('resourceNames', {})
       for helmResourceKind in helmResources:
         if helmResourceKind in helmResourceKindMap:
           kind = helmResourceKindMap[helmResourceKind]
-          for helmResource in helmResourceKind:
-            ns = isinstance(resource.get('namespace', '')) and resource.get('namespace', '')
+          for helmResource in helmResources[helmResourceKind]:
+            ns = isinstance(o.get('namespace', ''), str) and o.get('namespace', '')
             name = helmResource
             if helmResource.find('/') > 0:
               ns = helmResource[0:helmResource.find('/')]
-              name = helmResource[helmResource.find('/') + 1:]
+              name = helmResource[helmResource.find('/') + 1:len(helmResource)]
             
             dumpResource(ns, kind, name)
   else:
-    o = resource.get('outputs', {})
     if not o.get('kind', ''):
       continue
 
