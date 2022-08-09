@@ -35,6 +35,16 @@ kubectl_build('gcr.io/foo/bar', '.', registry_secret='my-secret')
 
 You may also set the `KUBECTL_BUILD_REGISTRY_SECRET` environment variable with the secret name.
 
+## Pushing image to a registry
+
+`kubectl_build` can push the image to a registry by supplying the `push=True` argument.
+
+Similar to pulling an image from a private repository, you can specify the `registry_secret` argument to authenticate.
+
+```python
+kubectl_build('gcr.io/foo/bar', '.', push=True, registry_secret='my-secret')
+```
+
 ## Limitations
 
 `kubectl_build` supports almost all the [`docker_build`][docker_build] arguments, except:
