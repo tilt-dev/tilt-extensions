@@ -5,7 +5,7 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
                   match_in_env_vars=False, ignore=[],
                   entrypoint=[], target=None, ssh=None, secret=None,
                   extra_tag=None, cache_from=[], pull=False,
-                  registry_secret=None):
+                  registry_secret=None, push=False):
     # incompatible parameters with docker_build:
     # only
     # container_args
@@ -74,6 +74,8 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
                 command += ['-t', t]
     if pull:
         command += ['--pull']
+    if push:
+        command += ['--push']
     for c in cache_from:
         command += ['--cache-from', c]
     if ssh:
