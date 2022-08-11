@@ -4,7 +4,6 @@
 # python3 helm-apply-helper.py ... [image config keys in order]
 
 import os
-import re
 import subprocess
 import sys
 from typing import Dict
@@ -68,8 +67,8 @@ subprocess.check_call(install_cmd, stdout=sys.stderr)
 
 print("Running cmd: %s" % get_cmd, file=sys.stderr)
 out = subprocess.check_output(get_cmd).decode('utf-8')
-is_windows = True if os.name == "nt" else False
-out_with_right_line_endings = out.replace(os.linesep, "\n") if is_windows else out
+is_windows = True if os.name == 'nt' else False
+out_with_right_line_endings = out.replace(os.linesep, '\n') if is_windows else out
 
 input = add_default_namespace(out_with_right_line_endings, namespace).encode('utf-8')
 

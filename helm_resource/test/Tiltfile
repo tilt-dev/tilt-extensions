@@ -7,7 +7,7 @@ python_cmd = ['py', '-3'] if is_windows else ['python3']
 
 local_resource(
   name='unittest',
-  cmd=python_cmd + ["../namespacing_test.py"])
+  cmd=python_cmd + ['../namespacing_test.py'])
 
 docker_build(
   'helloworld-image',
@@ -26,16 +26,18 @@ helm_resource(
   labels=['helloworld'],
   flags=['--create-namespace'])
 
-python_check="; ".join((
-             "import subprocess",
-             "output=subprocess.run('{}'.split(), capture_output=True, text=True)",
-             "assert output.stdout.replace('\\n','').replace('\\r','')=={}"))
-python_test_wrap="\'\\'{}\\'\'"
+python_check = '; '.join((
+               'import subprocess',
+               'import re',
+               'output = subprocess.run("{}".split(), capture_output=True, text=True)',
+               'output_txt = re.sub("[\\n|\\r]", "", output.stdout)',
+               'assert output_txt == {}, f"actual output: {{output_txt}}"'))
+python_test_wrap = "\'\\'{}\\'\'"
 
 # Check that our `namespace:` was preserved in configmap data
-helloworld_check_kubectl = " ".join(("kubectl get",
-                                     "configmap/configmap-namespace-data", 
-                                     "--namespace app",
+helloworld_check_kubectl = " ".join(('kubectl get',
+                                     'configmap/configmap-namespace-data',
+                                     '--namespace app',
                                      "-o jsonpath=\\'{.data.properties}\\'"))
 helloworld_test = python_test_wrap.format('namespace:')
 
@@ -46,9 +48,9 @@ local_resource(
   resource_deps=['helloworld'])
 
 # Make sure helm charts that install to multiple namespaces work.
-check_multi_namespace_kubectl = " ".join(("kubectl get",
-                                          "configmap/helloworld-systemconfig", 
-                                          "--namespace kube-public",
+check_multi_namespace_kubectl = " ".join(('kubectl get',
+                                          'configmap/helloworld-systemconfig',
+                                          '--namespace kube-public',
                                           "-o jsonpath=\\'{.data.hello}\\'"))
 multi_namespace_test = python_test_wrap.format('world')
 
