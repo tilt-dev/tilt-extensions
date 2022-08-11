@@ -50,7 +50,7 @@ RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH=/root/.pulumi/bin:$PATH
 
 # install earthly
-RUN wget https://github.com/earthly/earthly/releases/download/v0.6.14/earthly-linux-amd64 -O /usr/local/bin/earthly \
+RUN wget https://github.com/earthly/earthly/releases/download/v0.6.14/earthly-linux-amd64 -O /usr/local/bin/earthly
 
 # ensure any dependencies from manual dpkg installs are ok
 RUN apt update \
