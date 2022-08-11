@@ -2,9 +2,12 @@
 
 load('../Tiltfile', 'helm_resource', 'helm_repo')
 
+is_windows = True if os.name == "nt" else False
+python_cmd = ['py', '-3'] if is_windows else ['python3']
+
 local_resource(
   name='unittest',
-  cmd=["python3", "../namespacing_test.py"])
+  cmd=python_cmd + ['../namespacing_test.py'])
 
 docker_build(
   'helloworld-image',
@@ -23,23 +26,39 @@ helm_resource(
   labels=['helloworld'],
   flags=['--create-namespace'])
 
+python_check = '; '.join((
+               'import subprocess',
+               'import re',
+               'output = subprocess.run("{}".split(), capture_output=True, text=True)',
+               'output_txt = re.sub("[\\n|\\r]", "", output.stdout)',
+               'assert output_txt == {}, f"actual output: {{output_txt}}"'))
+python_test_wrap = "\'\\'{}\\'\'"
+
 # Check that our `namespace:` was preserved in configmap data
-local_resource('helloworld-check',
-               """
-               data=$(kubectl get configmap/configmap-namespace-data --namespace app -o jsonpath='{.data.properties}')
-               test "$data" = "namespace:"
-               """,
-               labels=['helloworld'],
-               resource_deps=['helloworld'])
+helloworld_check_kubectl = " ".join(('kubectl get',
+                                     'configmap/configmap-namespace-data',
+                                     '--namespace app',
+                                     "-o jsonpath=\\'{.data.properties}\\'"))
+helloworld_test = python_test_wrap.format('namespace:')
+
+local_resource(
+  'helloworld-check', 
+  python_cmd + ["-c", python_check.format(helloworld_check_kubectl, helloworld_test)],
+  labels=['helloworld'],
+  resource_deps=['helloworld'])
 
 # Make sure helm charts that install to multiple namespaces work.
-local_resource('helloworld-check-multi-namespace',
-               """
-               data=$(kubectl get configmap/helloworld-systemconfig --namespace kube-public -o jsonpath='{.data.hello}')
-               test "$data" = "world"
-               """,
-               labels=['helloworld'],
-               resource_deps=['helloworld'])
+check_multi_namespace_kubectl = " ".join(('kubectl get',
+                                          'configmap/helloworld-systemconfig',
+                                          '--namespace kube-public',
+                                          "-o jsonpath=\\'{.data.hello}\\'"))
+multi_namespace_test = python_test_wrap.format('world')
+
+local_resource(
+  'helloworld-check-multi-namespace', 
+  python_cmd + ["-c", python_check.format(check_multi_namespace_kubectl, multi_namespace_test)], 
+  labels=['helloworld'],
+  resource_deps=['helloworld'])
 
 helm_resource(
   'helloregistry',
