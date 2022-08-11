@@ -68,9 +68,10 @@ subprocess.check_call(install_cmd, stdout=sys.stderr)
 
 print("Running cmd: %s" % get_cmd, file=sys.stderr)
 out = subprocess.check_output(get_cmd).decode('utf-8')
+is_windows = True if os.name == "nt" else False
+out_with_right_line_endings = out.replace(os.linesep, "\n") if is_windows else out
 
-
-input = add_default_namespace(out, namespace).encode('utf-8')
+input = add_default_namespace(out_with_right_line_endings, namespace).encode('utf-8')
 
 print("Running cmd: %s" % kubectl_cmd, file=sys.stderr)
 completed = subprocess.run(kubectl_cmd, input=input)
