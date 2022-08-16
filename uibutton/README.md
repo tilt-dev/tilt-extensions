@@ -113,6 +113,21 @@ checkbox's state. By default, the variable will be set to the string `"true"` or
 | `true_string`  | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "true". |
 | `false_string` | `str`  | If not None, when the checkbox is checked, the environment variable will be set to this string instead of "false". |
 
+### `choice_input`
+```python
+(name, label='', choices=[])
+```
+Specifies that the button's UI will include a dropdown box of choices for this value.
+When the command is run, an environment variable will be set based on the dropdown's state.
+By default, the variable will be set to the first choice.
+
+| Argument       | Type        | Description                                                                                     |
+|----------------|-------------|-------------------------------------------------------------------------------------------------|
+| `name`         | `str`       | The input's name. Also the name of the environment variable to be set when running the command. |
+| `label`        | `str`       | Text to display next to the input in the UI.                                                    |
+| `choices`      | `List[str]` | List of valid values for this field. The first choice is the default choice.                    |
+
+
 ## Button Placement
 Currently, you can create buttons for a specific resource, which will be shown with other resource contextual actions such as "Copy Pod ID" or as part of the global nav next to the help and account buttons.
 
