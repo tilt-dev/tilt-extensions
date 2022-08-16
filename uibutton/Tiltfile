@@ -8,6 +8,7 @@ location = struct(
 
 valid_subcommands = ['up', 'ci']
 
+
 def _button(name, location, text='', icon=None, annotations={}, inputs=[], disabled=False, requires_confirmation=False):
     text = text or name
     btn = {
@@ -45,6 +46,7 @@ load('ext://global_vars', 'get_global', 'set_global')
 _cached_start_after_key = 'UI_BUTTON_CACHED_START_AFTER'
 set_global(_cached_start_after_key, '')
 
+
 def _start_after():
     ts = get_global(_cached_start_after_key)
     if ts == '':
@@ -61,9 +63,9 @@ def _start_after():
         set_global(_cached_start_after_key, ts)
     return ts
 
-def cmd_button(name, resource='', argv=[], env=[], text=None,
+def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
-               inputs=[], disabled=False, requires_confirmation=False):
+               inputs=[], disabled=False, requires_confirmation=False, env=[]):
     if config.tilt_subcommand not in valid_subcommands:
         return
 
@@ -133,6 +135,7 @@ def cmd_button(name, resource='', argv=[], env=[], text=None,
         env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
         echo_off=True)
 
+
 def text_input(name, label='', default='', placeholder=''):
     return {
         "name": name,
@@ -158,4 +161,15 @@ def bool_input(name, label='', default=False, true_string=None,
     if false_string != None:
         result["bool"]["falseString"] = false_string
 
+    return result
+
+
+def choice_input(name, label='', choices=[]):
+    result = {
+        "name": name,
+        "label": label,
+        "choice": {
+            "choices": choices
+        }
+    }
     return result
