@@ -63,10 +63,9 @@ def _start_after():
         set_global(_cached_start_after_key, ts)
     return ts
 
-
 def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
-               inputs=[], disabled=False, requires_confirmation=False):
+               inputs=[], disabled=False, requires_confirmation=False, env=[]):
     if config.tilt_subcommand not in valid_subcommands:
         return
 
@@ -120,6 +119,7 @@ def cmd_button(name, resource='', argv=[], text=None,
         "spec": {
             "args": argv,
             "dir": config.main_dir,
+            "env": env,
             "startOn": {
                 "startAfter": _start_after(),
                 "uiButtons": [name],
