@@ -5,7 +5,8 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
                   match_in_env_vars=False, ignore=[],
                   entrypoint=[], target=None, ssh=None, secret=None,
                   extra_tag=None, cache_from=[], pull=False,
-                  registry_secret=None, push=False):
+                  registry_secret=None, push=False,
+                  namespace=None, builder=None):
     # incompatible parameters with docker_build:
     # only
     # container_args
@@ -62,6 +63,10 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
     command += ['-f', dockerfile_path]
     if registry_secret:
         command += ['--registry-secret', registry_secret]
+    if namespace:
+        command += ['--namespace', namespace]
+    if builder:
+        command += ['--builder', builder]
     for arg, value in build_args.items():
         command += ['--build-arg', arg + '=' + value]
     if target:
