@@ -1,4 +1,4 @@
-load('../Tiltfile', 'cmd_button', 'location', 'text_input', 'choice_input')
+load('../Tiltfile', 'cmd_button', 'location', 'text_input', 'bool_input', 'choice_input')
 
 local_resource('vigoda', cmd='echo "Hello from resource"')
 
@@ -26,3 +26,6 @@ cmd_button('nav-button-env', argv=['sh', '-s', 'echo "Hello $name"'],
 cmd_button('nav-button-choice', argv=["sh", "-c", "echo Hello, $NAME"],
            location=location.NAV, icon_name='front_hand', text='Hello choice',
            inputs=[choice_input('NAME', choices=["Alice", "Bob"])])
+cmd_button('nav-button-bool', argv=["sh", "-c", "echo Hello, $NAME"],
+           location=location.NAV, icon_name='front_hand', text='Hello bool',
+           inputs=[bool_input('NAME', default=True, label='Alice?', true_string='Alice', false_string='Not Alice')])
