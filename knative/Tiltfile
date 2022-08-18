@@ -38,7 +38,7 @@ kubectl wait --for=condition=Established crd -l=knative.dev/crd-install=true 1>&
   # TODO(nick): Once the registry is in the Tilt API,
   # we should read that here and use it to set knative configuration.
   patch_registry_cmd="""
-REGISTRY=$(kubectl get configmap -n kube-public local-registry-hosting -o=jsonpath='{.data.localRegistryHosting\\.v1}' | grep "host:" | sed 's/ *host: *//')
+REGISTRY=$(kubectl get configmap -n kube-public local-registry-hosting -o=jsonpath='{.data.localRegistryHosting\\.v1}' | grep "host:" | sed 's/ *host: *//' | tr -d '"')
 if [ "$REGISTRY" != "" ]; then
   kubectl patch configmap/config-deployment \
     --namespace knative-serving \
