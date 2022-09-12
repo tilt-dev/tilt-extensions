@@ -9,60 +9,6 @@ location = struct(
 valid_subcommands = ['up', 'ci']
 
 
-def _button(name, location, text='', icon=None, annotations={}, inputs=[], disabled=False, requires_confirmation=False):
-    text = text or name
-    btn = {
-        "apiVersion": "tilt.dev/v1alpha1",
-        "kind": "UIButton",
-        "metadata": {
-            "name": name,
-            "annotations": annotations
-        },
-        "spec": {
-            "text": text,
-            "disabled": disabled,
-            "requiresConfirmation": requires_confirmation,
-            "location": {
-                "componentType": location.type,
-                "componentID": location.id,
-            }
-        }
-    }
-
-    if len(inputs):
-        btn["spec"]["inputs"] = inputs
-
-    if icon:
-        if icon.svg:
-            # convert to str to handle str + Blob
-            btn['spec']['iconSVG'] = str(icon.svg)
-        elif icon.name:
-            btn['spec']['iconName'] = icon.name
-
-    return btn
-
-# shelling out to get the timestamp can be slow on windows, and we don't need *that* much precision, so cache it once per Tiltfile execution
-load('ext://global_vars', 'get_global', 'set_global')
-_cached_start_after_key = 'UI_BUTTON_CACHED_START_AFTER'
-set_global(_cached_start_after_key, '')
-
-
-def _start_after():
-    ts = get_global(_cached_start_after_key)
-    if ts == '':
-        ts = str(local(
-            # this is portable across coreutils/busybox/BSD
-            # note: it's missing fractional seconds because that's not available
-            # from strftime
-            command='date -u +"%Y-%m-%dT%H:%M:%S.000000Z"',
-            command_bat="powershell Get-Date (Get-Date).ToUniversalTime()\
-                -UFormat '+%Y-%m-%dT%H:%M:%S.000000Z'",
-            echo_off=True,
-            quiet=True)
-        ).rstrip('\r\n')
-        set_global(_cached_start_after_key, ts)
-    return ts
-
 def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
                inputs=[], disabled=False, requires_confirmation=False, env=[]):
@@ -96,80 +42,39 @@ def cmd_button(name, resource='', argv=[], text=None,
             fail('Unsupported location {}'.format(location))
         location = struct(type=loc_type, id=loc_id)
 
-    button = _button(
+    text = text or name
+
+    v1alpha1.ui_button(
         name=name,
-        location=location,
+        location={
+            "component_type": location.type,
+            "component_id": location.id,
+        },
         text=text,
-        icon=struct(name=icon_name, svg=icon_svg),
+        icon_name=icon_name or '',
+        icon_svg=str(icon_svg) if icon_svg else '',
         annotations=btn_annotations,
         inputs=inputs,
         disabled=disabled,
         requires_confirmation=requires_confirmation,
     )
-    cmd = {
-        "apiVersion": "tilt.dev/v1alpha1",
-        "kind": "Cmd",
-        "metadata": {
-            "name": "btn-" + name,
-            "annotations": {
-                "tilt.dev/resource": resource,
-                "tilt.dev/log-span-id": 'cmd:' + name,
-            }
-        },
-        "spec": {
-            "args": argv,
-            "dir": config.main_dir,
-            "env": env,
-            "startOn": {
-                "startAfter": _start_after(),
-                "uiButtons": [name],
-            },
-        }
-    }
-
-    local(
-        command='echo "${TILT_APPLY_YAML}"\
-           | %s apply -f -' % (sys.executable,),
-        command_bat='(cmd /v:on /c echo !TILT_APPLY_YAML!)\
-           | %s apply -f -' % (sys.executable,),
-        env={'TILT_APPLY_YAML': str(encode_yaml_stream([button, cmd]))},
-        echo_off=True)
+    v1alpha1.cmd(name="btn-" + name, annotations={
+        "tilt.dev/resource": resource,
+        "tilt.dev/log-span-id": 'cmd:' + name,
+    }, args=argv, dir=config.main_dir, env=env, start_on=v1alpha1.start_on_spec(ui_buttons=[name]))
 
 
 def text_input(name, label='', default='', placeholder=''):
-    return {
-        "name": name,
-        "label": label,
-        "text": {
-            "defaultValue": default,
-            "placeholder": placeholder,
-        }
-    }
+    return v1alpha1.ui_input_spec(name=name, label=label,
+                                  text=v1alpha1.ui_text_input_spec(default_value=default, placeholder=placeholder))
 
 
 def bool_input(name, label='', default=False, true_string=None,
                false_string=None):
-    result = {
-        "name": name,
-        "label": label,
-        "bool": {
-            "defaultValue": default,
-        },
-    }
-    if true_string != None:
-        result["bool"]["trueString"] = true_string
-    if false_string != None:
-        result["bool"]["falseString"] = false_string
-
-    return result
+    return v1alpha1.ui_input_spec(name=name, label=label,
+                                  bool=v1alpha1.ui_bool_input_spec(default_value=default, true_string=true_string, false_string=false_string))
 
 
 def choice_input(name, label='', choices=[]):
-    result = {
-        "name": name,
-        "label": label,
-        "choice": {
-            "choices": choices
-        }
-    }
-    return result
+    return v1alpha1.ui_input_spec(name=name, label=label,
+                                  choice=v1alpha1.ui_choice_input_spec(choices=choices))
