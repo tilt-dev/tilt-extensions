@@ -144,7 +144,7 @@ def setup_monitoring():
         for crd in resource.pop('crdResources', []):
             resource['objects'].extend(crdResources.pop(crd, []))
 
-        k8s_resource(*args, resource_deps=['prometheus-crds'], **resource)
+        k8s_resource(resource_deps=['prometheus-crds'], *args, **resource)
 
     remainingCrdResources = []
     for res in crdResources.values():
