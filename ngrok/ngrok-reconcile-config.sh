@@ -8,6 +8,7 @@
 
 auth_env="$TILT_NGROK_AUTH"
 config_version_env="$TILT_NGROK_CONFIG_VERSION"
+config_tls_scheme="$TILT_NGROK_CONFIG_TLS_SCHEME"
 
 set -euo pipefail
 
@@ -28,7 +29,7 @@ fi
 
 # Default v2 config
 tls_settings="schemes:
-      - http"
+      - $config_tls_scheme"
 
 if [[ "$config_version_env" == "1" ]]; then
   tls_settings="bind_tls: false"
