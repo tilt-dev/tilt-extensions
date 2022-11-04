@@ -17,7 +17,7 @@ RUN apt update \
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # Install Go toolchain
-COPY --from=golang:1.18-bullseye /usr/local/go /usr/local/go
+COPY --from=golang:1.19-bullseye /usr/local/go /usr/local/go
 ENV PATH=/root/go/bin:/usr/local/go/bin:$PATH
 
 # install Ko
@@ -28,11 +28,13 @@ RUN mkdir -p /root/go/bin && \
   which ko
 
 # install kubectl build
-RUN curl -sSL https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/releases/download/v0.1.4/kubectl-buildkit_0.1.4_amd64.deb -o kubectl-buildkit.deb && \
+ARG KUBECTL_BUILD_VERSION=0.1.6
+RUN curl -sSL https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/releases/download/v${KUBECTL_BUILD_VERSION}/kubectl-buildkit_${KUBECTL_BUILD_VERSION}_amd64.deb -o kubectl-buildkit.deb && \
   dpkg -i kubectl-buildkit.deb
 
 # install buildpack CLI
-RUN curl -sSL "https://github.com/buildpacks/pack/releases/download/v0.21.1/pack-v0.21.1-linux.tgz" | \
+ARG PACK_VERSION=v0.27.0
+RUN curl -sSL "https://github.com/buildpacks/pack/releases/download/${PACK_VERSION}/pack-${PACK_VERSION}-linux.tgz" | \
   tar -C /usr/local/bin/ --no-same-owner -xzv pack
 
 # install nodejs + yarn
@@ -50,7 +52,8 @@ RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH=/root/.pulumi/bin:$PATH
 
 # install earthly
-RUN wget https://github.com/earthly/earthly/releases/download/v0.6.14/earthly-linux-amd64 -O /usr/local/bin/earthly
+ARG EARTHLY_VERSION=v0.6.28
+RUN wget https://github.com/earthly/earthly/releases/download/${EARTHLY_VERSION}/earthly-linux-amd64 -O /usr/local/bin/earthly
 
 # ensure any dependencies from manual dpkg installs are ok
 RUN apt update \

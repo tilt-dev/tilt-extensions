@@ -9,4 +9,4 @@ publish-ci-image:
 
 shellcheck:
 	find . -type f -name '*.sh' -not -path "*/node_modules/*" -not -path "*/.git-sources/*" -not -path "*/.git/*" -exec \
-    docker run --rm -it -e SHELLCHECK_OPTS="-e SC2001" -v $$(pwd):/mnt nlknguyen/alpine-shellcheck {} \;
+	    docker run --rm -it -e SHELLCHECK_OPTS="-e SC2001" -v $$(pwd):/mnt nlknguyen/alpine-shellcheck {} \;
