@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:cc21299275d569e508d7770faf345fc1149d445fdaf93a9e959312e79f6f0b51
+      - image: docker/tilt-extensions-ci@sha256:ed9a3745bf0d7ed17e74053e878c298e206dcb11efb03da8dd9c7dd25d074ad6
 
     steps:
       - checkout
@@ -11,7 +11,7 @@ jobs:
 
   shellcheck:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:cc21299275d569e508d7770faf345fc1149d445fdaf93a9e959312e79f6f0b51
+      - image: docker/tilt-extensions-ci@sha256:ed9a3745bf0d7ed17e74053e878c298e206dcb11efb03da8dd9c7dd25d074ad6
 
     steps:
       - checkout
@@ -22,12 +22,17 @@ jobs:
     # spaces in paths, which is common on macOS (/Application Support/)
     working_directory: ~/tilt extensions
     docker:
-      - image: docker/tilt-extensions-ci@sha256:cc21299275d569e508d7770faf345fc1149d445fdaf93a9e959312e79f6f0b51
+      - image: docker/tilt-extensions-ci@sha256:ed9a3745bf0d7ed17e74053e878c298e206dcb11efb03da8dd9c7dd25d074ad6
 
     steps:
       - setup_remote_docker:
           version: '20.10.11'
       - checkout
+      # Install latest Tilt
+      - run: |
+          TILT_VERSION=$(curl -si https://github.com/tilt-dev/tilt/releases/latest | sed -ne '/location:/ {s,.*/v,,;s/\r//;p}')
+          curl -sL https://github.com/tilt-dev/tilt/releases/download/v$TILT_VERSION/tilt.$TILT_VERSION.linux.x86_64.tar.gz | \
+            tar -C /usr/local/bin -zxf - tilt
       - run: ctlptl create cluster kind --registry=ctlptl-registry && timeout -v -k 60s 20m ./test.py --changed
 
 workflows:
