@@ -6,7 +6,7 @@ load('../Tiltfile', 'knative_install', 'knative_yaml')
 # sometimes
 update_settings(k8s_upsert_timeout_secs=60 * 7)
 
-knative_install()
+knative_install('v1.8.0')
 
 knative_yaml('service.yaml')
 k8s_resource('example-html',
