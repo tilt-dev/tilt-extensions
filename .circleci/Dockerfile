@@ -53,7 +53,7 @@ ENV PATH=/root/.pulumi/bin:$PATH
 
 # install earthly
 ARG EARTHLY_VERSION=v0.6.28
-RUN wget https://github.com/earthly/earthly/releases/download/${EARTHLY_VERSION}/earthly-linux-amd64 -O /usr/local/bin/earthly
+RUN wget https://github.com/earthly/earthly/releases/download/${EARTHLY_VERSION}/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod a+x /usr/local/bin/earthly
 
 # ensure any dependencies from manual dpkg installs are ok
 RUN apt update \
