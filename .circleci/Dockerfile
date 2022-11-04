@@ -1,4 +1,4 @@
-FROM docker/tilt:latest
+FROM docker/tilt-ctlptl:latest
 
 # Utils for our CI
 RUN apt update \
