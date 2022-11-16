@@ -2,12 +2,14 @@
 config.define_string("auth")
 config.define_string("default_config_file")
 config.define_string("ngrok_config_version")
+config.define_string("ngrok_config_tls_scheme")
 cfg = config.parse()
 
 auth = cfg.get('auth', '')
 default_config_file = cfg.get('default_config_file', '')
 ngrok_config_version = cfg.get('ngrok_config_version', '2')
 config_file = str(local('mktemp "${TMPDIR:-/tmp}/tilt-ngrok.XXXXXXXXX"')).strip()
+ngrok_config_tls_scheme = cfg.get('ngrok_config_tls_scheme', 'http')
 
 local_resource(
   name='ngrok:status',
@@ -19,5 +21,5 @@ local_resource(
 local_resource(
   name='ngrok:operator',
   serve_cmd=['./ngrok-operator.sh', config_file],
-  serve_env={'TILT_NGROK_AUTH': auth, 'TILT_NGROK_CONFIG_VERSION': ngrok_config_version},
+  serve_env={'TILT_NGROK_AUTH': auth, 'TILT_NGROK_CONFIG_VERSION': ngrok_config_version, 'TILT_NGROK_CONFIG_TLS_SCHEME': ngrok_config_tls_scheme},
   deps=['./ngrok-operator.sh'])
