@@ -10,5 +10,5 @@ spec:
       containers:
       - name: namespace-test-verify
         image: curlimages/curl
-        command: ["curl",  "--retry", "5", "-fsSL", "http://namespace-test-busybox:8000/"]
+        command: ["curl", "--connect-timeout", "2", "--retry", "3", "--retry-all-errors", "-vfL", "http://namespace-test-busybox:8000/"]
       restartPolicy: Never
