@@ -1,4 +1,4 @@
-def execute_in_pod(pod_name, command, container=None, execute=True, quiet=True, echo_off=False):
+def execute_in_pod(pod_name, command, container=None, quiet=True, echo_off=False):
     k8_discoveries = decode_json(local('tilt get kd -o json', quiet=quiet, echo_off=echo_off))
     available_names = []
     for item in k8_discoveries['items']:
@@ -34,7 +34,4 @@ def execute_in_pod(pod_name, command, container=None, execute=True, quiet=True, 
         cmd += ' -c %s' % container
     cmd += ' -- %s' % command
 
-    if execute:
-        local(cmd, quiet=quiet, echo_off=echo_off)
-    else:
-        return cmd
+    return cmd
