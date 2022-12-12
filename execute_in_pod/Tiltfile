@@ -1,37 +1,40 @@
 def execute_in_pod(pod_name, command, container=None, quiet=True, echo_off=False):
-    k8_discoveries = decode_json(local('tilt get kd -o json', quiet=quiet, echo_off=echo_off))
-    available_names = []
-    for item in k8_discoveries['items']:
-        if item['kind'] == 'KubernetesDiscovery':
-            available_names.append(item['metadata']['name'])
+    # k8_discoveries = decode_json(local('tilt get kd -o json', quiet=quiet, echo_off=echo_off))
+    # available_names = []
+    # for item in k8_discoveries['items']:
+    #     if item['kind'] == 'KubernetesDiscovery':
+    #         available_names.append(item['metadata']['name'])
 
-    if pod_name not in available_names:
-        fail('%s not found. Available pods: %s' % (pod_name, available_names))
+    # if pod_name not in available_names:
+    #     fail('%s not found. Available pods: %s' % (pod_name, available_names))
 
-    pods_json = decode_json(local('tilt get kd %s -ojsonpath="{.status.pods}"' % pod_name, quiet=quiet, echo_off=echo_off))
-    pods_names = []
-    for pod in pods_json:
-        pods_names.append(pod['name'])
+    # pods_json = decode_json(local('tilt get kd %s -ojsonpath="{.status.pods}"' % pod_name, quiet=quiet, echo_off=echo_off))
+    # pods_names = []
+    # for pod in pods_json:
+    #     pods_names.append(pod['name'])
 
-    pod_to_execute = pods_names[0]
+    # pod_to_execute = pods_names[0]
 
-    if len(pods_names) > 1:
-        # use print to avoid annoying with the yellow signaling in tilt
-        print('WARNING: %s multiple found. Executing in %s' % (pods_names, pod_to_execute))
+    # if len(pods_names) > 1:
+    #     # use print to avoid annoying with the yellow signaling in tilt
+    #     print('WARNING: %s multiple found. Executing in %s' % (pods_names, pod_to_execute))
 
-    containers = []
-    for pod in pods_json:
-        if pod['name'] == pod_to_execute:
-            for container_ in pod['containers']:
-                containers.append(container_['name'])
-            break
+    # containers = []
+    # for pod in pods_json:
+    #     if pod['name'] == pod_to_execute:
+    #         for container_ in pod['containers']:
+    #             containers.append(container_['name'])
+    #         break
 
-    if container and container not in containers:
-        fail('%s not found in: %s' % (container, containers))
+    # if container and container not in containers:
+    #     fail('%s not found in: %s' % (container, containers))
 
-    cmd = 'kubectl exec %s' % pod_to_execute
-    if container:
-        cmd += ' -c %s' % container
-    cmd += ' -- %s' % command
+    # cmd = 'kubectl exec %s' % pod_to_execute
+    # if container:
+    #     cmd += ' -c %s' % container
+    # cmd += ' -- %s' % command
 
-    return cmd
+    # return cmd
+
+    cmd = 'kubectl exec "$(tilt get kd %s -ojsonpath=\'{.status.pods[0].name}\')" -- %s'
+    return cmd % (pod_name, command)

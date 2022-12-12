@@ -45,6 +45,8 @@ local_resource(
 
 ##### Parameters
 
+**NOTE**: currently in work as there are some issues, so only thee `pod_name` & `command` parameters will work.
+
 ```python
 execute_in_pod(pod_name, command, container=None, quiet=True, echo_off=False)
 ```
