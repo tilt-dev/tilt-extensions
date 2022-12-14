@@ -1,5 +1,8 @@
-def dotenv(fn='.env'):
-	f = read_file(fn)
+def dotenv(fn='.env', required=True):
+	default = None
+	if not required:
+		default = ""
+	f = read_file(fn, default)
 	lines = str(f).splitlines()
 	for line in lines:
 		v = line.split('=', 1)
