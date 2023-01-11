@@ -81,6 +81,7 @@ def _set_k8s_yaml_namespace(o, ns):
     fail('Cannot inject namespace. Object does not have an object field named metadata:\n%s' % encode_yaml(o))
 
   _set_template_namespace(o, ns)
+  _set_rolebinding_namespace(o, ns)
   return o
 
 def _set_template_namespace(o, ns):
@@ -93,3 +94,11 @@ def _set_template_namespace(o, ns):
   elif type(o) == 'list':
     for v in o:
       _set_template_namespace(v, ns)
+
+def _set_rolebinding_namespace(o, ns):
+  if type(o) == 'dict':
+    for k,v in o.items():
+      if k == 'subjects' and type(v) == 'list':
+        for s in v:
+          if type(s) == 'dict' and s.get('kind', None) == "ServiceAccount":
+            s['namespace'] = ns
