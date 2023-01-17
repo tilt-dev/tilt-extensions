@@ -24,6 +24,7 @@ The `pack` function can take a few arguments:
 - `pull_policy`: pull policy used by pack, defaults to `if-not-present`
 - `path`: path to application directory, defaults to the current working directory
 - `builder`: builder image, defaults to gcr.io/paketo-buildpacks/builder:base
+- `pack_args`: a list of ordered flags and arguments for `pack build` command
 - `deps`: a list of dependencies, defaults to `path`
 - `buildpacks`: a list of buildpacks to use. (list[str])
 - `env_vars`: a list of environment variables, defaults to `BP_LIVE_RELOAD_ENABLED=true` (list[str])
