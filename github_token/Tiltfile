@@ -1,0 +1,44 @@
+def github_token(check_npm_packages=[]):
+    """
+    Return a GitHub personal access token (PAT), or fail. Attempts to use the
+    GitHub CLI if no token is provided in the environment. Also sets
+    $GITHUB_TOKEN inside the Tilt process.
+
+    Args:
+        check_npm_packages[List]: if provided, a list of scoped NPM packages (@org/pkg) to test access with the token.
+    """
+    token = os.getenv('GITHUB_TOKEN')
+    if token:
+        return token
+
+    auth_cmd = "run `gh auth login` to authenticate with GitHub"
+    if len(check_npm_packages) > 0:
+        auth_cmd = "run `gh auth login -s read:packages` to get a PAT with the correct scopes"
+
+    if not str(local(command='which gh || true',
+                     command_bat=['powershell', '-command', '& {get-command gh -erroraction silentlycontinue | format-list name}'],
+                     quiet=True)).strip():
+        fail("No $GITHUB_TOKEN found and GH CLI not installed;\n" +
+             "Please set $GITHUB_TOKEN with your PAT or\n" +
+             "install the GH CLI and %s" % auth_cmd)
+
+    token_line = str(local(command="gh auth status -t 2>&1 | grep Token:",
+                           command_bat=['powershell', '-command', '& {gh auth status -t 2>&1 | select-string -pattern "Token:" }'],
+                           quiet=True)).strip()
+    ind = token_line.find('Token:')
+    if ind == -1:
+        fail("Found GH CLI but not authorized with Github;\nPlease %s" % auth_cmd)
+    ind = ind + len('Token:')
+    token = token_line[ind:].strip()
+    os.putenv('GITHUB_TOKEN', token)
+
+    for pkg in check_npm_packages:
+        (org, slash, name) = pkg.partition("/")
+        if slash == "":
+            continue
+        org = org.removeprefix("@")
+        api_result = str(local(['gh', 'api', '/orgs/%s/packages/npm/%s' % (org, name), '--template', '{{.name}}'], quiet=True)).strip()
+        if api_result != name:
+            fail("GH CLI PAT is not authorized to read %s package;\nPlease %s" % (pkg, auth_cmd))
+
+    return token
