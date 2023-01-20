@@ -32,7 +32,8 @@ def helm_resource(
     live_update=None,
     resource_deps=None,
     labels=None,
-    port_forwards=[]):
+    port_forwards=[],
+    auto_init=True):
   ...
 ```
 
@@ -84,6 +85,8 @@ chart. Must be the same length as `image_deps`.  There are two common patterns.
 `labels`: Labels for categorizing the resource.
 
 `port_forwards`: Host port to connect to the pod. Takes the same form as `port_forwards` in [the `k8s_resource` command](https://docs.tilt.dev/api.html#api.k8s_resource).
+
+`auto_init`: Whether this resource runs on `tilt up`. Defaults to `True`. For more info, see the [Manual Update Control docs](https://docs.tilt.dev/manual_update_control.html).
 
 ### helm_repo
 
