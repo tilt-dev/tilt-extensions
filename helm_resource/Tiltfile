@@ -19,7 +19,8 @@ def helm_resource(
     live_update=None,
     resource_deps=None,
     labels=None,
-    port_forwards=[]):
+    port_forwards=[],
+    auto_init=True):
   """Installs a helm chart to a cluster.
 
   Args:
@@ -56,6 +57,7 @@ def helm_resource(
       adding a dependency on a helm repo install.
     labels: Labels for categorizing the resource.
     port_forwards: Host port to connect to the pod.
+    auto_init: Whether this resource runs on `tilt up`. Defaults to `True`.
   """
 
   if not release_name:
@@ -119,6 +121,9 @@ def helm_resource(
 
   if len(port_forwards):
     k8s_resource(name, port_forwards=port_forwards)
+
+  if not auto_init:
+    k8s_resource(name, auto_init=auto_init)
 
 
 def helm_repo(
