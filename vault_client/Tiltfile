@@ -1,0 +1,6 @@
+def vault_read_secret(path, field):
+    return local("vault read -field={} {}".format(field, path), quiet=True)
+
+def vault_set_env_vars(vault_addr, vault_token):
+    os.putenv('VAULT_ADDR', vault_addr)
+    os.putenv('VAULT_TOKEN', vault_token)
