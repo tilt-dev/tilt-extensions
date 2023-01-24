@@ -30,4 +30,3 @@ vault_set_env_vars('https://localhost:8200','mytoken')
 my_foo = vault_read_secret('path/myfoo', 'value')
 my_bar = vault_read_secret('path/mybar', 'foobar')
 ```
-
