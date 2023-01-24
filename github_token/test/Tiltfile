@@ -1,0 +1,31 @@
+# Note: there is intentionally no test.sh here; not attempting to configure and
+# use the GH CLI in CI. Run this manually with `tilt ci` when you have gh
+# installed and logged in.
+
+load('../Tiltfile', 'github_token')
+
+os.putenv('GITHUB_TOKEN', 'abc123')
+
+if github_token() != 'abc123':
+    fail("github_token() did not return existing token")
+
+os.unsetenv('GITHUB_TOKEN')
+
+token = github_token()
+if not token:
+    fail("github_token() did not return a token")
+if not os.getenv('GITHUB_TOKEN'):
+    fail("github_token() did not set $GITHUB_TOKEN")
+
+os.unsetenv('GITHUB_TOKEN')
+
+# Published public packages in GHPR are scarce. Here's one from GitHub that any
+# developer should be able to access.
+# https://github.com/github/template-parts/pkgs/npm/template-parts
+token = github_token(check_npm_packages=['@github/template-parts'])
+if not token:
+    fail("github_token() did not return a token")
+if not os.getenv('GITHUB_TOKEN'):
+    fail("github_token() did not set $GITHUB_TOKEN")
+
+local_resource('successful-test', 'true')
