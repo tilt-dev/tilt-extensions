@@ -22,8 +22,8 @@ def github_token(check_npm_packages=[]):
              "Please set $GITHUB_TOKEN with your PAT or\n" +
              "install the GH CLI and %s" % auth_cmd)
 
-    token_line = str(local(command="gh auth status -t 2>&1 | grep Token:",
-                           command_bat=['powershell', '-command', '& {gh auth status -t 2>&1 | select-string -pattern "Token:" }'],
+    token_line = str(local(command="gh auth status -t 2>&1 | grep Token: || true",
+                           command_bat=['powershell', '-command', '& { try { gh auth status -t 2>&1 | select-string -pattern "Token:" } catch { } }'],
                            quiet=True)).strip()
     ind = token_line.find('Token:')
     if ind == -1:
@@ -37,7 +37,10 @@ def github_token(check_npm_packages=[]):
         if slash == "":
             continue
         org = org.removeprefix("@")
-        api_result = str(local(['gh', 'api', '/orgs/%s/packages/npm/%s' % (org, name), '--template', '{{.name}}'], quiet=True)).strip()
+        cmd = 'gh api /orgs/%s/packages/npm/%s --template "{{.name}}"' % (org, name)
+        api_result = str(local(command="%s || true" % cmd,
+                               command_bat=['powershell', '-command', '& { %s }' % cmd],
+                               quiet=True)).strip()
         if api_result != name:
             fail("GH CLI PAT is not authorized to read %s package;\nPlease %s" % (pkg, auth_cmd))
 
