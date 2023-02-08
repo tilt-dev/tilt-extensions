@@ -15,8 +15,6 @@ fi
 mkdir -p /tmp/rsync.tilt
 mkdir -p /tmp/rsync.tilt.krsync
 
-rsync_tilt_path=/bin/rsync.tilt
-
 krsync_callback_path="/tmp/rsync.tilt.krsync/krsync-callback.sh" 
 cp "$(dirname "$0")/krsync-callback.sh" "$krsync_callback_path"
 
@@ -30,18 +28,18 @@ install_rsync_tilt() {
     set +e # disable exit on error
     # $K8S_OBJECT is intentionally not quoted here so -n/-c flags can be
     # parsed by kubectl
-    kubectl exec $K8S_OBJECT -- ls "$rsync_tilt_path" > /dev/null 2>&1
+    kubectl exec $K8S_OBJECT -- ls "$RSYNC_TILT_PATH" > /dev/null 2>&1
     exit_code="$?"
     set -e
     if [[ "$exit_code" != "0" ]]; then
         # shellcheck disable=SC2002
         echo "installing tilt's rsync"
-        cat "$KRSYNC_TAR_PATH" | kubectl exec -i $K8S_OBJECT -- tar -xf - -C $(dirname $rsync_tilt_path)
+        cat "$KRSYNC_TAR_PATH" | kubectl exec -i $K8S_OBJECT -- tar -xf - -C $(dirname $RSYNC_TILT_PATH)
     fi
 }
 
 find_rsync_path() {
-    local rsync_path=--rsync-path=$rsync_tilt_path
+    local rsync_path=--rsync-path=$RSYNC_TILT_PATH
     # see if we already have a compatible rsync on the container
     rsync_output=$(kubectl exec $K8S_OBJECT -- rsync --version 2> /dev/null)
     if [ $? -eq 0 ]; then
@@ -56,7 +54,9 @@ find_rsync_path() {
 # Quote/set to the entire first argument, which could contain
 # '-n namespace'/'-c container' flags
 export K8S_OBJECT="$1"
+export RSYNC_TILT_PATH="$2"
 export KRSYNC_TAR_PATH="${0%/*}/rsync.tilt.tar"
+shift
 shift
 export RSYNC_PATH=$(find_rsync_path)
 install_rsync_tilt
