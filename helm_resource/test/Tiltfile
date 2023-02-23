@@ -90,3 +90,10 @@ helm_resource(
   'bitnami/memcached',
   labels=['memcached'],
   resource_deps=['helm-repo-bitnami'])
+
+helm_resource(
+  'memcached-no-init',
+  'bitnami/memcached',
+  labels=['memcached'],
+  resource_deps=['helm-repo-bitnami'],
+  auto_init=False)
