@@ -29,6 +29,11 @@ SKIPPED_TESTS=set([
   # on a machine with podman installed.
   "podman/test/test.sh",
 
+  # TODO(nicks): Knative has a race condition where the webhooks
+  # aren't ready when the deployment installs.
+  # To turn this on, we'd need to add some way to wait for the webhooks to be ready.
+  "knative/test/test.sh",
+
   # TODO(nick): Get nix working inside circleci
   "nix/test/test.sh",
   "nix_flake/test/test.sh"
