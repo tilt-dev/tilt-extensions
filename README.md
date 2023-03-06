@@ -48,6 +48,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
 - [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
 - [`pulumi`](/pulumi): Install Kubernetes resources with [Pulumi](https://www.pulumi.com/).
+- [`remote_development`](/remote_development): Develop, live update and debug against applications that were already deployed to Kubernetes from CI.
 - [`restart_process`](/restart_process): Wrap a `docker_build` or `custom_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
