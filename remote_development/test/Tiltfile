@@ -1,0 +1,16 @@
+load('../Tiltfile', 'remote_development')
+
+# Actual testing
+remote_development(
+  obj='deployment/example-nodejs',
+  container_selector='my-container',
+  dockerfile='Dockerfile.dev',
+  disable_probes=True,
+  live_update=[
+    sync('./app', '/app'),
+  ],
+  port_forwards=[
+    "8080:8080",
+    "9229:9229"
+  ]
+)
