@@ -1,10 +1,3 @@
-def join(arr, delimeter):
-  str=""
-  for element in arr:
-    str=("%s%s%s" % (str, delimeter, element))
-  
-  return str
-
 def get_container(decoded_yaml, container_selector):
   containers=decoded_yaml["spec"]["template"]["spec"]["containers"]
   found_containers=[]
@@ -14,7 +7,6 @@ def get_container(decoded_yaml, container_selector):
       return container
     
     fail("failed to find container %s in the manifest %s" % (container_selector, containers))
-  
 
 def get_registry(container):
   return container["image"].rsplit(":", 1)[0]
@@ -28,12 +20,14 @@ def expose_ports(container, port_forwards):
     if type(port) == "string":
       port=port.rsplit(":", 1)[1]
     
-    shouldAdd=True
-    for containerPort in container["ports"]:
-      if containerPort["containerPort"] == port:
-        shouldAdd=False
-    if shouldAdd:
+    if not port_exists(container, port):
       container["ports"].append({"containerPort": int(port)})
+
+def port_exists(container, port):
+  for containerPort in container["ports"]:
+    if containerPort["containerPort"] == port:
+      return True
+  return False
 
 def remote_development(obj, container_selector, namespace = None, port_forwards = None, disable_probes = False, live_update = None, dockerfile = None, context = "."):
   """
