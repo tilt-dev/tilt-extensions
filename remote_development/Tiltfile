@@ -15,20 +15,6 @@ def remove_probe(container, probe):
   if container.get(probe):
     container.pop(probe)  
 
-def expose_ports(container, port_forwards):
-  for port in port_forwards:
-    if type(port) == "string":
-      port=port.rsplit(":", 1)[1]
-    
-    if not port_exists(container, port):
-      container["ports"].append({"containerPort": int(port)})
-
-def port_exists(container, port):
-  for containerPort in container["ports"]:
-    if containerPort["containerPort"] == port:
-      return True
-  return False
-
 def remote_development(obj, container_selector, namespace = None, port_forwards = None, disable_probes = False, live_update = None, dockerfile = None, context = "."):
   """
   Enable remote developement and debugging environment on an exiting deployment.
