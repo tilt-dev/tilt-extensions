@@ -53,9 +53,7 @@ def remote_development(obj, container_selector, namespace = None, port_forwards 
     remove_probe(container, "readinessProbe")
     
   # enable port forwarding to the pod
-  if len(port_forwards) > 0:
-    expose_ports(container, port_forwards)
-    
+  if len(port_forwards) > 0:   
     # deploy the updated deployment
     k8s_yaml(encode_yaml(decoded_yaml))
     k8s_resource(
