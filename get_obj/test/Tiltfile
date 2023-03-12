@@ -1,6 +1,6 @@
 load('../Tiltfile', 'get_obj')
 
-details=get_obj(
+obj=get_obj(
   name='example-nodejs',
   kind='deployment',
   container_selector='my-container',
