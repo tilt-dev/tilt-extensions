@@ -40,6 +40,7 @@ def get_obj(name, kind, container_selector = None, namespace = None, disable_pro
     registry=image.rsplit(":", 1)[0]
   else:
     image=None
+    registry=None
 
   # disable probes
   if container_selector and disable_probes:
