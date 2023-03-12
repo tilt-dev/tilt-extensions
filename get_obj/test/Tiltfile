@@ -9,6 +9,7 @@ obj=get_obj(
 )
 
 docker_build(obj.registry, '.',
+  dockerfile='Dockerfile.dev',
   live_update=[
     sync('./app', '/app'),
   ]
