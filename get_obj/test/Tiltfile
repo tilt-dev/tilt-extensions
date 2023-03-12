@@ -5,7 +5,6 @@ obj=get_obj(
   name=name,
   kind='deployment',
   container_selector='my-container',
-  namespace='apps',
   disable_probes=True
 )
 
