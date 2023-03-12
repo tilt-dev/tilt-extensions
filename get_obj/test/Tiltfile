@@ -1,7 +1,8 @@
 load('../Tiltfile', 'get_obj')
 
+name='example-nodejs'
 obj=get_obj(
-  name='example-nodejs',
+  name=name,
   kind='deployment',
   container_selector='my-container',
   namespace='apps',
