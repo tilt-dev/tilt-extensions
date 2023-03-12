@@ -3,6 +3,7 @@ WORKDIR /app
 
 COPY ./app ./
 RUN npm ci
+RUN echo "new image"
 
 CMD [ \
   "npx", "nodemon", \
