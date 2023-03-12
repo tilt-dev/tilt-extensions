@@ -8,8 +8,8 @@ def get_container(decoded_yaml, container_selector):
     
     fail("failed to find container %s in the manifest %s" % (container_selector, containers))
 
-def get_registry(container):
-  return container["image"].rsplit(":", 1)[0]
+def get_image(container):
+  return container["image"]
 
 def remove_probe(container, probe):
   if container.get(probe):
@@ -36,7 +36,8 @@ def get_obj(name, kind, container_selector = None, namespace = None, disable_pro
 
   if container_selector:
     container=get_container(decoded_yaml, container_selector)
-    image=get_registry(container)
+    image=get_image(container)
+    registry=image.rsplit(":", 1)[0]
   else:
     image=None
 
@@ -46,4 +47,4 @@ def get_obj(name, kind, container_selector = None, namespace = None, disable_pro
     remove_probe(container, "readinessProbe")
     yaml=encode_yaml(decoded_yaml)
 
-  return struct(yaml=yaml, image=image)
+  return struct(yaml=yaml, image=image, registry=registry)

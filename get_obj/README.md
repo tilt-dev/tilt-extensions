@@ -35,6 +35,8 @@ CMD [ \
 ```
 # Tiltfile
 load('ext://get_obj', 'get_obj')
+
+# obj=struct(yaml, image, registry)
 obj=get_obj(
   name='example-nodejs',
   kind='deployment',
@@ -42,7 +44,7 @@ obj=get_obj(
   disable_probes=True
 )
 
-docker_build(obj.image, '.',
+docker_build(obj.registry, '.',
   live_update=[
     sync('./app', '/app'),
   ],
