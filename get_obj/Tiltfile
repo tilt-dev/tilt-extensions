@@ -15,52 +15,35 @@ def remove_probe(container, probe):
   if container.get(probe):
     container.pop(probe)  
 
-def remote_development(obj, container_selector, namespace = None, port_forwards = None, disable_probes = False, live_update = None, dockerfile = None, context = "."):
+def get_obj(name, kind, container_selector = None, namespace = None, disable_probes = False):
   """
   Enable remote developement and debugging environment on an exiting deployment.
   It will redeploy the app using the given development Dockerfile, enable port-forwarding and disable healthcheck in order to enable remote debugging.
   Both docker image build and port-forwarding can be replaced by your own docker_build and k8s_resource
   Args:
-    obj: An object name in the form "kind/name", as you would express it to kubectl. e.g. deployment/my-deployment.
+    name: The object's name as you would express it to kubectl. e.g my-deployment.
+    kind: The object's kind. e.g 'deployment' or 'statefulset'
     container_selector: The container name in the pod that will be used for remote development.
     namespace?: The namespace of the object. If not specified, uses the current namespace.
-    dockerfile?: The dockerfile that would be used for building a development image suitable for live-update.
-    Set up hot-reloading so the app can restart when the source files are changed and use a non-restricted user like 'nobody'.
-    context?: Context to use for docker_build. Default: "."
-    live_update?: Live-update rules to copy files and run commands in the server whenever they change locally. Default: None.
-    port_forwards?: Used to enable port-forwarding to the app running in the pod including exposing these ports in the pod if required. Default: None.
     disable_probes?: Disable liveness and readiness probes by removing them from the deployment, which is useful when debugging node applications. Default: False.
   """
-  args = ["kubectl", "get", "-o=yaml", obj]
+  args = ["kubectl", "get", "-o=yaml", '{}/{}'.format(kind, name)]
   if namespace:
     args.extend(["-n", namespace])
 
   yaml=local(args, quiet=True)
   decoded_yaml=decode_yaml(yaml)
-  container=get_container(decoded_yaml, container_selector)
 
-  # build
-  if dockerfile:
+  if container_selector:
+    container=get_container(decoded_yaml, container_selector)
     image=get_registry(container)
-    docker_build(image, context,
-      dockerfile=dockerfile,
-      live_update=live_update
-    )
+  else:
+    image=None
 
   # disable probes
-  if disable_probes:
+  if container_selector and disable_probes:
     remove_probe(container, "livenessProbe")
     remove_probe(container, "readinessProbe")
-    
-  # enable port forwarding to the pod
-  if len(port_forwards) > 0:   
-    # deploy the updated deployment
-    k8s_yaml(encode_yaml(decoded_yaml))
-    k8s_resource(
-      obj.split("/")[1],
-      new_name=container_selector,
-      port_forwards=port_forwards
-    )
-  else:
-    # deploy the updated deployment
-    k8s_yaml(encode_yaml(decoded_yaml))
+    yaml=encode_yaml(decoded_yaml)
+
+  return struct(yaml=yaml, image=image)

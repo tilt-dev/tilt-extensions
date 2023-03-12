@@ -1,0 +1,25 @@
+load('../Tiltfile', 'get_obj')
+
+details=get_obj(
+  name='example-nodejs',
+  kind='deployment',
+  container_selector='my-container',
+  namespace='apps',
+  disable_probes=True
+)
+
+docker_build(obj.image, '.',
+  live_update=[
+    sync('./app', '/app'),
+  ]
+)
+
+k8s_yaml(yaml)
+
+k8s_resource(
+  name,
+  port_forwards=[
+    "8080:8080",
+    "9229:9229"
+  ]
+)

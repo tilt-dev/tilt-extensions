@@ -22,6 +22,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`earthly`](/earthly): Build container images using [earthly](https://earthly.dev)
 - [`execute_in_pod`](/execute_in_pod): Execute a command on a pod container.
 - [`file_sync_only`](/file_sync_only): No-build, no-push, file sync-only development. Useful when you want to live-reload a single config file into an existing public image, like nginx.
+- [`get_obj`](/get_obj): Get object yaml and image from an existing k8s resource such as deployment or statefulset
 - [`git_resource`](/git_resource): Deploy a dockerfile from a remote repository -- or specify the path to a local checkout for local development.
 - [`hasura`](/hasura): Deploys [Hasura GraphQL Engine](https://hasura.io/) and monitors metadata/migrations changes locally.
 - [`hello_world`](/hello_world): Print "Hello world!". Used in [Extensions](https://docs.tilt.dev/extensions.html).
@@ -48,7 +49,6 @@ All extensions have been vetted and approved by the Tilt team.
 - [`print_tiltfile_dir`](/print_tiltfile_dir): Print all files in the Tiltfile directory. If recursive is set to True, also prints files in all recursive subdirectories.
 - [`procfile`](/procfile): Create Tilt resources from a foreman Procfile.
 - [`pulumi`](/pulumi): Install Kubernetes resources with [Pulumi](https://www.pulumi.com/).
-- [`remote_development`](/remote_development): Develop, live update and debug against applications that were already deployed to Kubernetes from CI.
 - [`restart_process`](/restart_process): Wrap a `docker_build` or `custom_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
