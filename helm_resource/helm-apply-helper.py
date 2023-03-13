@@ -52,7 +52,7 @@ get_cmd = ['helm', 'get', 'manifest']
 kubectl_cmd = ['kubectl', 'get']
 
 release_name = os.environ['RELEASE_NAME']
-chart_version = os.environ.get['VERSION', '']
+chart_version = os.environ.get('VERSION', '')
 if chart_version:
   install_cmd.extend(['--version', chart_version])
 
