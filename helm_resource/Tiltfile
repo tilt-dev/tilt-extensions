@@ -82,6 +82,7 @@ def helm_resource(
     'RELEASE_NAME': release_name,
     'NAMESPACE': namespace or '',
     'TILT_IMAGE_COUNT': str(len(image_keys)),
+    'VERSION': version or '',
   }
 
   if flags:
