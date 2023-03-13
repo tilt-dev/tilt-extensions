@@ -23,6 +23,7 @@ def helm_resource(
     chart,
     deps=[],
     release_name='',
+    version=None,
     namespace=None,
     image_deps=None,
     image_keys=None,
@@ -50,6 +51,8 @@ reference.
 `deps`: A list of file dependencies that should trigger a deployment.
 
 `release_name`: The name of the release. If not specified, defaults to the Tilt UI resource name.
+
+`version`: Specify a version constraint for the chart version to use. This constraint can be a specific tag (e.g. 1.1.1) or it may reference a valid range (e.g. ^2.0.0). If this is not specified, the latest version is used.
 
 `namespace`: Install into the specified namespace.
 
