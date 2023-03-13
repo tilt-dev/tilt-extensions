@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-nodejs
+  labels:
+    app: example-nodejs
+spec:
+  selector:
+    matchLabels:
+      app: example-nodejs
+  template:
+    metadata:
+      labels:
+        app: example-nodejs
+    spec:
+      containers:
+      - name: my-container
+        image: remote-dev-test-image
+        ports:
+        - containerPort: 9229
+          name: debug
+        readinessProbe:
+          exec:
+            command:
+              - echo
+        livenessProbe:
+          exec:
+            command:
+              - echo

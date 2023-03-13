@@ -1,0 +1,51 @@
+def get_container(decoded_yaml, container_selector):
+  containers=decoded_yaml["spec"]["template"]["spec"]["containers"]
+  found_containers=[]
+
+  for container in containers:
+    if container["name"] == container_selector:
+      return container
+    
+    fail("failed to find container %s in the manifest %s" % (container_selector, containers))
+
+def get_image(container):
+  return container["image"]
+
+def remove_probe(container, probe):
+  if container.get(probe):
+    container.pop(probe)  
+
+def get_obj(name, kind, container_selector = None, namespace = None, disable_probes = False):
+  """
+  Enable remote developement and debugging environment on an exiting deployment.
+  It will redeploy the app using the given development Dockerfile, enable port-forwarding and disable healthcheck in order to enable remote debugging.
+  Both docker image build and port-forwarding can be replaced by your own docker_build and k8s_resource
+  Args:
+    name: The object's name as you would express it to kubectl. e.g my-deployment.
+    kind: The object's kind. e.g 'deployment' or 'statefulset'
+    container_selector: The container name in the pod that will be used for remote development.
+    namespace?: The namespace of the object. If not specified, uses the current namespace.
+    disable_probes?: Disable liveness and readiness probes by removing them from the deployment, which is useful when debugging node applications. Default: False.
+  """
+  args = ["kubectl", "get", "-o=yaml", '{}/{}'.format(kind, name)]
+  if namespace:
+    args.extend(["-n", namespace])
+
+  yaml=local(args, quiet=True)
+  decoded_yaml=decode_yaml(yaml)
+
+  if container_selector:
+    container=get_container(decoded_yaml, container_selector)
+    image=get_image(container)
+    registry=image.rsplit(":", 1)[0]
+  else:
+    image=None
+    registry=None
+
+  # disable probes
+  if container_selector and disable_probes:
+    remove_probe(container, "livenessProbe")
+    remove_probe(container, "readinessProbe")
+    yaml=encode_yaml(decoded_yaml)
+
+  return struct(yaml=yaml, image=image, registry=registry)
