@@ -1,6 +1,6 @@
 load('ext://restart_process', 'docker_build_with_restart')
 
-def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'):
+def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;', DISABLE_SECURITY_CONTEXT=True):
 
     DOCKERFILE = '''FROM golang:alpine
     WORKDIR /
@@ -9,7 +9,21 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLE
     '''
 
     def yaml():
-        return local('cd config/manager; kustomize edit set image controller=' + IMG + '; cd ../..; kustomize build config/default')
+        data = local('cd config/manager; kustomize edit set image controller=' + IMG + '; cd ../..; kustomize build config/default')
+        if DISABLE_SECURITY_CONTEXT:
+            decoded = decode_yaml_stream(data)
+            if decoded:
+                for d in decoded:
+                    # Live update conflicts with SecurityContext, until a better solution, just remove it
+                    if d["kind"] == "Deployment":
+                        if "securityContext" in d['spec']['template']['spec']:
+                            d['spec']['template']['spec'].pop('securityContext')
+                        for c in d['spec']['template']['spec']['containers']:
+                            if "securityContext" in c:
+                                c.pop('securityContext')
+
+            return encode_yaml_stream(decoded)
+        return data
     
     def manifests():
         return 'controller-gen ' + CONTROLLERGEN
