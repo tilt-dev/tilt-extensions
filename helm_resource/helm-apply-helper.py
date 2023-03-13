@@ -57,7 +57,7 @@ if version:
   install_cmd.extend(['--version', version])
 
 chart = os.environ['CHART']
-namespace = os.environ.get('NAMESPACE', '')
+namespace = os.environ.get['NAMESPACE', '']
 if namespace:
   install_cmd.extend(['--namespace', namespace])
   get_cmd.extend(['--namespace', namespace])
