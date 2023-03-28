@@ -53,7 +53,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
         if not os.path.exists(checkout_dir):  # needs clone
             clone_cmd = ['git','clone', repository_url, '--recurse-submodules', '--shallow-submodules']
             if is_branch or is_tag:
-                clone_cmd.extend(['--depth', '1'])
+                clone_cmd.extend(['--depth', '1', '--no-single-branch'])
                 if tree:
                     clone_cmd.extend(['--branch', tree])
                 clone_cmd.append(checkout_dir)
