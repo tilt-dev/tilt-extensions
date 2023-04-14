@@ -42,7 +42,7 @@ helloworld_check_kubectl = " ".join(('kubectl get',
 helloworld_test = python_test_wrap.format('namespace:')
 
 local_resource(
-  'helloworld-check', 
+  'helloworld-check',
   python_cmd + ["-c", python_check.format(helloworld_check_kubectl, helloworld_test)],
   labels=['helloworld'],
   resource_deps=['helloworld'])
@@ -55,8 +55,8 @@ check_multi_namespace_kubectl = " ".join(('kubectl get',
 multi_namespace_test = python_test_wrap.format('world')
 
 local_resource(
-  'helloworld-check-multi-namespace', 
-  python_cmd + ["-c", python_check.format(check_multi_namespace_kubectl, multi_namespace_test)], 
+  'helloworld-check-multi-namespace',
+  python_cmd + ["-c", python_check.format(check_multi_namespace_kubectl, multi_namespace_test)],
   labels=['helloworld'],
   resource_deps=['helloworld'])
 
@@ -89,6 +89,7 @@ helm_resource(
   'memcached',
   'bitnami/memcached',
   labels=['memcached'],
+  flags=['--version=6.3.14'],
   resource_deps=['helm-repo-bitnami'])
 
 helm_resource(

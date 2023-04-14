@@ -69,7 +69,11 @@ chart. Must be the same length as `image_deps`.  There are two common patterns.
   as a tuple ('image.registry', 'image.repository', 'image.tag'). This is another common pattern used
   by many charts.
 
-`flags`: Additional flags to pass to `helm install` (e.g., `['--set', 'key=value']`)
+`flags`: Additional flags to pass to `helm install`. For example:
+
+- Pass values as `flags=['--set=key=value']`.
+
+- Pass a version as `flags=['--version=1.0.0']`.
 
 `image_selector`: Image reference to determine containers eligible for Live Update.
   Only applicable if there are no images in `image_deps`.
