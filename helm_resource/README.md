@@ -75,6 +75,8 @@ chart. Must be the same length as `image_deps`.  There are two common patterns.
 
 - Pass a version as `flags=['--version=1.0.0']`.
 
+- Pass a values file as `flags=['--values=./path/to/values.yaml']`.
+
 `image_selector`: Image reference to determine containers eligible for Live Update.
   Only applicable if there are no images in `image_deps`.
   
