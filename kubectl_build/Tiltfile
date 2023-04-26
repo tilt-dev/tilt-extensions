@@ -6,7 +6,7 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
                   entrypoint=[], target=None, ssh=None, secret=None,
                   extra_tag=None, cache_from=[], pull=False,
                   registry_secret=None, push=False,
-                  namespace=None, builder=None):
+                  namespace=None, builder=None, platform=None):
     # incompatible parameters with docker_build:
     # only
     # container_args
@@ -42,6 +42,8 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
             kwargs["cache_from"] = cache_from
         if pull != None:
             kwargs["pull"] = pull
+        if platform != None:
+            kwargs["platform"] = platform
         docker_build(**kwargs)
         return
     pre_command = ""
@@ -95,6 +97,8 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
         else:
             for s in secret:
                 command += ['--secret', s]
+    if platform:
+        command += ['--platform', platform]
     command = [shlex.quote(c) for c in command]
     command += ['-t', '$EXPECTED_REF']
     command += [shlex.quote(context)]
