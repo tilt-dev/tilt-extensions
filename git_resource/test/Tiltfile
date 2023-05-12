@@ -39,6 +39,10 @@ url_test_cases = [
         url='https://user@example.com/path/repo.git',
         repo='repo',
         tree='@myRevisionSha'),
+  _case(input='git@example.com/path/to/repo.git#my#octothorpe',
+        url="git@example.com/path/to/repo.git",
+        repo="repo",
+        tree="#my#octothorpe"),
 ]
 
 if os.name == 'nt':
@@ -63,7 +67,7 @@ for case in url_test_cases:
   if expected != actual:
     fail('_parse_repository_url("%s"). Expected: %s. Actual: %s' % (url, expected, actual))
 
-repo_dir = git_checkout('https://github.com/tilt-dev/tilt-example-html')
+repo_dir = git_checkout('https://github.com/tilt-dev/tilt-example-html#nicks/test-#octothorpe')
 example_dir = os.path.join(repo_dir, '0-base')
 deploy_from_dir('example-html', example_dir)
 

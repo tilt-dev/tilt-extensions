@@ -85,7 +85,7 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
                         if not is_tag and not is_revision:
                             checkout_branch = 'origin/%s' % tree
 
-                        checkout_cmd = 'git checkout -f %s' % checkout_branch
+                        checkout_cmd = ['git', 'checkout', '-f', checkout_branch]
 
                     local('git fetch -a origin', dir=checkout_dir, quiet=True)
                     if checkout_cmd:
@@ -124,23 +124,23 @@ def _parse_repository_url(url):
     if is_ssh:
         url = url[4:]
 
-    splitter = None
+    tree = ''
     if '#' in url:
-        splitter = '#'
-    elif '@' in url:
-        splitter = '@'
+        # grab everything after the first '#'
+        parts = url.split('#')
+        tree = '#' + '#'.join(parts[1:])
+        url = parts[0]
 
-    if splitter == None:
-        tree = ''
-    else:
-        parts = url.split(splitter)
-        tree = splitter + parts[-1]  # last item
+    elif '@' in url:
+        # grab everything after the last @
+        parts = url.split('@')
+        tree = '@' + parts[-1]
 
         # Make sure we didn't peel of a scheme://user@host/ url
-        if splitter == '@' and '/' in tree:
+        if '/' in tree:
             tree = ''
         else:
-            url = splitter.join(parts[:-1])  # everything else
+            url = '@'.join(parts[:-1])
 
     if is_ssh:
         url = 'git@' + url
