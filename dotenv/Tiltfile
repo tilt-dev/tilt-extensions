@@ -1,8 +1,46 @@
-def dotenv(fn='.env'):
-	f = read_file(fn)
-	lines = str(f).splitlines()
-	for line in lines:
-		v = line.split('=', 1)
-		if len(v) < 2:
-			continue # skip empty lines
-		os.putenv(v[0], v[1])
+def dotenv(fn=".env"):
+
+    # Check if file exists
+    if not os.path.exists(fn):
+        warn("Environment variables file not found: '%s'" % fn)
+        return
+
+    print("Loading environment variables from file: '%s'" % fn)
+
+    # Read file
+    f = read_file(fn)
+
+    # Split lines
+    lines = str(f).splitlines()
+
+    # Parse lines
+    for lineNumber in range(len(lines)):
+
+        # Set line by line number
+        line = lines[lineNumber]
+
+        # Skip comments
+        if line.startswith("#"):
+            continue # skip comments
+            # TODO: add support for comments at the end of the line
+
+        # Split key and value
+        v = line.split(
+            "=",    # sep (separator)
+            1       # maxsplit (maximum number of splits to do)
+        )
+
+        # Check if key and value are present
+        if len(v) < 2:
+            if len(line) > 0:
+                fail("Invalid format for dotenv file: '%s' in '%s:%s'" % (line, fn, lineNumber+1))
+            continue # skip empty lines
+
+        # Print if key is valid
+        print("Loading environment variable '%s'" % v[0])
+
+        # Set environment variable
+        os.putenv(
+            v[0].strip().strip('"').strip("'"),
+            v[1].strip().strip('"').strip("'")
+        )

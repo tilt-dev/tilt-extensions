@@ -9,4 +9,7 @@ if os.getenv('TESTVAR') != 'success':
 if os.getenv('THIRD') != 'a = b':
     fail('env variable not set')
 
+if os.getenv(key="#COMMENTED_VARNAME") != None:
+    fail('env variable "#COMMENTED_VARNAME" is set but should not be')
+
 exit()
