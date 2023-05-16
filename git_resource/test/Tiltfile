@@ -27,6 +27,10 @@ url_test_cases = [
         url="git@example.com/path/to/repo.git",
         repo="repo",
         tree="#myBranchNameHere"),
+  _case(input='git@example.com/path/to/repo.git#myBranch%23Name%40Here',
+        url="git@example.com/path/to/repo.git",
+        repo="repo",
+        tree="#myBranch#Name@Here"),
   _case(input='https://user@example.com/path/repo.git',
         url='https://user@example.com/path/repo.git',
         repo='repo',
@@ -39,6 +43,10 @@ url_test_cases = [
         url='https://user@example.com/path/repo.git',
         repo='repo',
         tree='@myRevisionSha'),
+  _case(input='https://user@example.com/path/repo.git@my%23Revision%40Sha',
+        url='https://user@example.com/path/repo.git',
+        repo='repo',
+        tree='@my#Revision@Sha'),
 ]
 
 if os.name == 'nt':
