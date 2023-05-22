@@ -9,13 +9,24 @@ Helper functions for creating Kubernetes secrets.
 ### secret_yaml_generic
 
 ```
-secret_yaml_generic(name: str, namespace: str = "", from_file: Union[str, List] = None, secret_type: str = None): Blob
+secret_yaml_generic(
+    name: str,
+    namespace: str = "",
+    from_file: str | list[str] = None,
+    secret_type: str = None,
+    from_env_file: str = None
+) -> Blob
 ```
 
 Returns YAML for a generic secret.
 
-* `from_file` ( str ) – equivalent to `kubectl create secret --from-file`
-* `secret_type` ( str ) - equivalent to `kubectl create secret --type`
+Equivalent to [`kubectl create secret generic -o=yaml --dry-run=client`](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-secret-generic-em-)
+
+* `name` ( str ) - Secret name.
+* `namespace` ( str ) - Secret namespace.
+* `from_file` ( str | list[str] ) – Populate secret from a file path or multiple file paths.
+* `secret_type` ( str ) - The type of secret to create.
+* `from_env_file` ( str ) – Specify the path to a file to read lines of `key=val` pairs to create a secret.
 
 ### secret_create_generic
 
