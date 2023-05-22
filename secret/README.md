@@ -52,12 +52,18 @@ Arguments are the same as [`secret_yaml_generic`](#secret_yaml_generic).
 ### secret_from_dict
 
 ```
-secret_from_dict(name: str, namespace: str = "", inputs = None): blob
+secret_from_dict(
+    name: str,
+    namespace: str = "",
+    inputs: dict[str, Any] = {}
+) -> Blob
 ```
 
-Returns YAML for a secret from a dictionary.
+Returns YAML for a secret from a dictionary. Equivalent to [`kubectl create secret generic --from-literal=key=value`](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-secret-generic-em-)
 
-* `inputs` ( dict) - A dict of keys and values to use. Nesting is not supported
+* `name` ( str ) - Secret name.
+* `namespace` ( str ) - Secret namespace.
+* `inputs` ( dict ) - A dictionary of keys and values to use. Nesting is not supported.
 
 
 ### secret_yaml_registry
