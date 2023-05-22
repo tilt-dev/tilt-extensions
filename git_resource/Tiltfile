@@ -147,7 +147,11 @@ def _parse_repository_url(url):
 
     repository_name = os.path.basename(url).rstrip('.git')
 
-    return url, repository_name, tree
+    return url, repository_name, simple_url_decode(tree)
+
+# in case the branch name contains '#' or '@', these need to be escaped
+def simple_url_decode(tree):
+    return tree.replace('%23', '#').replace('%40', '@')
 
 
 def _get_default_checkout_target(repository_url):

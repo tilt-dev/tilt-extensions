@@ -26,7 +26,8 @@ git_resource(resource_name, path_or_repo, dockerfile='Dockerfile', namespace='de
 
 * `resource_name` ( str ) – the name to use for this resource
 * `path_or_repo` ( str ) – either the URL to the remote git repo, or the path to your local checkout.  
-If passing a repo url, a branch may be specified with a hash delimiter (i.e. `git@example.com/path/to/repo.git#myBranchNameHere`).  
+If passing a repo url, a branch may be specified with a hash delimiter (i.e. `git@example.com/path/to/repo.git#myBranchNameHere`).
+In case the branch name contains a `#` or a `@` you can escape them with the according URL encodings `%23` and `%40`, respectively.
 To use a tag, prefix the tag name with `tags/` (i.e. `git@example.com/path/to/repo.git#tags/v1.0.01`)  
 To use a specific revision/sha, prefix the sha with `@` (i.e. `git@example.com/path/to/repo.git@myRevisionSha`).  
 If no branch or revision is specified, defaults to `master`  
