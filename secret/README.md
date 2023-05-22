@@ -2,7 +2,7 @@
 
 Author: [Nick Santos](https://github.com/nicks)
 
-Helper functions for creating Kubernetes secrets.
+Helper functions for creating [Kubernetes secrets](https://kubernetes.io/docs/concepts/configuration/secret/).
 
 ## Functions
 
