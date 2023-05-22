@@ -102,15 +102,22 @@ Returns YAML for a TLS secret. Equivalent to [`kubectl create secret tls`](https
 ### secret_create_tls
 
 ```
-secret_create_tls(name: str, cert: str, key: str, namespace: str = "")
+secret_create_tls(
+    name: str,
+    cert: str,
+    key: str,
+    namespace: str = ""
+) -> None
 ```
 
-Deploys a secret to the cluster. Equivalent to
+Deploys a TLS secret to the cluster. Equivalent to
 
 ```
 load('ext://secret', 'secret_yaml_tls')
-k8s_yaml(secret_yaml_tls('name', cert=..., key=...))
+k8s_yaml(secret_yaml_tls(...))
 ```
+
+Arguments are the same as [`secret_yaml_tls`](#secret_yaml_tls).
 
 ## Example Usage
 
