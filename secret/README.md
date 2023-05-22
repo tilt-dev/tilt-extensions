@@ -31,15 +31,23 @@ Equivalent to [`kubectl create secret generic -o=yaml --dry-run=client`](https:/
 ### secret_create_generic
 
 ```
-secret_create_generic(name: str, namespace: str = "", from_file: Union[str, List] = None, secret_type: str = None)
+secret_create_generic(
+    name: str,
+    namespace: str = "",
+    from_file: str | list[str] = None,
+    secret_type: str = None,
+    from_env_file: str = None
+) -> None
 ```
 
-Deploys a secret to the cluster. Equivalent to
+Deploys a secret to the cluster. Equivalent to:
 
 ```
 load('ext://secret', 'secret_yaml_generic')
-k8s_yaml(secret_yaml_generic('name', from_file=[...]))
+k8s_yaml(secret_yaml_generic(...))
 ```
+
+Arguments are the same as [`secret_yaml_generic`](#secret_yaml_generic).
 
 ### secret_from_dict
 
