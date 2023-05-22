@@ -65,22 +65,21 @@ Returns YAML for a secret from a dictionary. Equivalent to [`kubectl create secr
 * `namespace` ( str ) - Secret namespace.
 * `inputs` ( dict ) - A dictionary of keys and values to use. Nesting is not supported.
 
-
 ### secret_yaml_registry
 
 ```
-secret_yaml_registry(name: str, namespace: str = "", flags_dict: dict = None)
+secret_yaml_registry(
+    name: str,
+    namespace: str = "",
+    flags_dict: dict = {}
+) -> Blob
 ```
 
-Returns YAML for a `docker-registry` type secret. Equivelent to: 
+Returns YAML for a `docker-registry` type secret. Equivelent to [`kubectl create secret docker-registry`](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-secret-docker-registry-em-).
 
-```
-kubectl create secret docker-registry artifact-registry \
- --docker-server=host.somedomain \
- --docker-username=_json_key \
- --docker-password="$(cat service-account.json)" \
- --docker-email=email@email.com
-```
+* `name` ( str ) - Secret name.
+* `namespace` ( str ) - Secret namespace.
+* `flags_dict` ( dict ) - A dictionary of keys and values to be passed to the command as flags (`--key=value`).
 
 ### secret_yaml_tls
 
