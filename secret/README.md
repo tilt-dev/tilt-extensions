@@ -84,10 +84,20 @@ Returns YAML for a `docker-registry` type secret. Equivelent to [`kubectl create
 ### secret_yaml_tls
 
 ```
-secret_yaml_tls(name: str, cert: str, key: str, namespace: str = ""): Blob
+secret_yaml_tls(
+    name: str,
+    cert: str,
+    key: str,
+    namespace: str = ""
+) -> Blob
 ```
 
-Returns YAML for a TLS secret. Equivalent to `kubectl create secret tls --cert=... --key=...`.
+Returns YAML for a TLS secret. Equivalent to [`kubectl create secret tls`](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-secret-tls-em-).
+
+* `name` ( str ) - Secret name.
+* `cert` ( str ) - Path to PEM encoded public key certificate.
+* `key` ( str ) - Path to private key associated with given certificate.
+* `namespace` ( str ) - Secret namespace.
 
 ### secret_create_tls
 
