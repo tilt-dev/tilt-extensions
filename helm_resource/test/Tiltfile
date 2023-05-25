@@ -98,3 +98,10 @@ helm_resource(
   labels=['memcached'],
   resource_deps=['helm-repo-bitnami'],
   auto_init=False)
+
+helm_repo(name='vm-charts',
+          url='https://victoriametrics.github.io/helm-charts')
+helm_repo(name='grafana-charts',
+          url='https://grafana.github.io/helm-charts')
+helm_resource(name='grafana',
+              chart='grafana-charts/grafana')

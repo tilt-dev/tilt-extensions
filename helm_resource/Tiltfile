@@ -155,4 +155,4 @@ def helm_repo(
   if password:
     args.extend(['--password', password])
 
-  local_resource(resource_name, args, allow_parallel=True, **kwargs)
+  local_resource(resource_name, args, allow_parallel=False, **kwargs)
