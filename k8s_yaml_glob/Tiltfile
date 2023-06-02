@@ -1,0 +1,16 @@
+# -*- mode: Python -*-
+
+def k8s_yaml_glob(*glob_patterns, **kwargs):
+    """
+    Create/apply list of Kubernetes YAML files matching the given glob patterns.
+    """
+
+    is_windows = True if os.name == "nt" else False
+    python_cmd = 'py -3' if is_windows else 'python3'
+
+    for glob_pattern in glob_patterns:
+        script = 'import glob; print("|".join( p for p in glob.glob(\"' + glob_pattern + '")))'
+        cmd = python_cmd + " -c '" + script + "'"
+        val = str(local(command=python_cmd + " -c '" + script + "'", quiet=False)).strip()
+        yaml_paths = val.split("|")
+        k8s_yaml(yaml_paths, **kwargs)
