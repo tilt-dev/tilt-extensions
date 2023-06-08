@@ -16,7 +16,7 @@ helm_remote('myChartName')
 ##### Additional Parameters
 
 ```
-helm_remote(chart, repo_url='', repo_name='', release_name='', namespace='', version='', username='', password='', values=[], set=[])
+helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password='', allow_duplicates=False, create_namespace=False, validate=False)
 ```
 
 * `chart` ( str ) – the name of the chart to install  
@@ -31,6 +31,7 @@ helm_remote(chart, repo_url='', repo_name='', release_name='', namespace='', ver
 * `password` ( str ) – repository authentication password, if needed (equivalent to helm's `--password` flag)
 * `values` ( Union [ str , List [ str ]]) – Specify one or more values files (in addition to the values.yaml file in the chart). Equivalent to the helm's `--values` or `-f` flags
 * `set` ( Union [ str , List [ str ]]) – Directly specify one or more values (equivalent to helm's `--set` flag)
+* `validate` - Validates Kubernetes version of the server (equivalent to helm's `--validate` flag)
 * `allow_duplicates` ( bool ) - Allow duplicate resources. Usually duplicate resources indicate a programmer error.
    But some charts specify resources twice.
 * `create_namespace` ( bool ) - Create the namespace specified in `namespace` ( equivalent to helm's `--create_namespace` flag)
