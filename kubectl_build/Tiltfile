@@ -40,8 +40,6 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
             kwargs["extra_tag"] = extra_tag
         if cache_from != None:
             kwargs["cache_from"] = cache_from
-        if cache_to != None:
-            kwargs["cache_to"] = cache_to
         if pull != None:
             kwargs["pull"] = pull
         if platform != None:
