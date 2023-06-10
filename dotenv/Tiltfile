@@ -1,11 +1,12 @@
-def dotenv(fn=".env"):
+def dotenv(fn=".env", verbose=False, showValues=False):
 
     # Check if file exists
     if not os.path.exists(fn):
         warn("Environment variables file not found: '%s'" % fn)
         return
 
-    print("Loading environment variables from file: '%s'" % fn)
+    if verbose:
+        print("Loading environment variables from file: '%s'" % fn)
 
     # Read file
     f = read_file(fn)
@@ -36,11 +37,24 @@ def dotenv(fn=".env"):
                 fail("Invalid format for dotenv file: '%s' in '%s:%s'" % (line, fn, lineNumber+1))
             continue # skip empty lines
 
-        # Print if key is valid
-        print("Loading environment variable '%s'" % v[0])
+        # Remove whitespace around the varible name
+        varName = v[0].strip()
+
+        # Remove whitespace around the varible value
+        varValue = v[1].strip()
+
+        # if varValue starts and ends with quotes, remove them
+        if varValue.startswith('"') and varValue.endswith('"'):
+            varValue = varValue[1:-1]
+        elif varValue.startswith("'") and varValue.endswith("'"):
+            varValue = varValue[1:-1]
+
+        if verbose:
+            # Print if key is valid
+            if showValues:
+                print("Loading environment variable: %s=%s" % (varName, varValue))
+            else:
+                print("Loading environment variable: %s" % (varName))
 
         # Set environment variable
-        os.putenv(
-            v[0].strip().strip('"').strip("'"),
-            v[1].strip().strip('"').strip("'")
-        )
+        os.putenv(varName, varValue)

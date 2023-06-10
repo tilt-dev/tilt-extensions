@@ -3,13 +3,25 @@ load('../Tiltfile', 'dotenv')
 dotenv(fn='.env')
 os.putenv('COMPOSE_PROJECT_NAME', 'redmine-api-dev')
 
-if os.getenv('TESTVAR') != 'success':
-    fail('env variable not set')
+expected_variables = {
+    'TESTVAR': 'success',
+    'THIRD': 'a = b',
+    "ENV_VAR_WITH_QUOTES_1": " quotes 'and' spaces       ",
+    "ENV_VAR_WITH_QUOTES_2": ' quotes "and" spaces       ',
+    "ENV_VAR_WITH_QUOTES_3": " mixed 'quotes' \"and\" spaces       ",
+    "ENV_VAR_WITH_QUOTES_4": "\" value with non-matching quote characters and trailing spaces   '"
+}
 
-if os.getenv('THIRD') != 'a = b':
-    fail('env variable not set')
+unexpected_variables = [
+    "#COMMENTED_VARNAME",
+]
 
-if os.getenv(key="#COMMENTED_VARNAME") != None:
-    fail('env variable "#COMMENTED_VARNAME" is set but should not be')
+for key, value in expected_variables.items():
+    if os.getenv(key) != value:
+        fail("env variable '%s' with unexpected value. Expected '%s'" % (key, value))
+
+for key in unexpected_variables:
+    if os.getenv(key) != None:
+        fail("env variable '%s' is set, but it shouldn't" % key)
 
 exit()
