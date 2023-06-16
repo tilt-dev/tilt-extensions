@@ -98,3 +98,15 @@ helm_resource(
   labels=['memcached'],
   resource_deps=['helm-repo-bitnami'],
   auto_init=False)
+
+helm_repo('csi-secrets-store-provider-azure', 'https://azure.github.io/secrets-store-csi-driver-provider-azure/charts')
+
+helm_resource(
+  'csi',
+  'csi-secrets-store-provider-azure/csi-secrets-store-provider-azure',
+  resource_deps=['csi-secrets-store-provider-azure'])
+k8s_resource(
+  objects=['my-secretproviderclass:secretproviderclass'],
+  new_name='my-secret-provider-class',
+  resource_deps=['csi'] # Wait until helm has finished to apply the 'my-secretproviderclass' SecretProviderClass CRD
+)
