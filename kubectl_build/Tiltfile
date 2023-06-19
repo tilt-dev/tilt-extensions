@@ -103,7 +103,11 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
     if platform:
         command += ['--platform', platform]
     command = [shlex.quote(c) for c in command]
-    command += ['-t', '$EXPECTED_REF']
+    is_windows = True if os.name == "nt" else False
+    if is_windows:
+        command += ['-t', '%EXPECTED_REF%']
+    else:
+        command += ['-t', '$EXPECTED_REF']
     command += [shlex.quote(context)]
     command = pre_command + ' '.join(command)
 
