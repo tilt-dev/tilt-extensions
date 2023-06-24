@@ -61,7 +61,8 @@ def kubectl_build(ref, context, build_args={}, dockerfile=None,
         dockerfile_path = context + '/Dockerfile'
 
     registry_secret = registry_secret or kubectl_build_registry_secret()
-    command = ['kubectl', 'build', '--context', k8s_context()]
+    # "kubectl build" is the binary and the second "build" is the subcommand
+    command = ['kubectl', 'build', 'build', '--context', k8s_context()]
     command += ['-f', dockerfile_path]
     if registry_secret:
         command += ['--registry-secret', registry_secret]
