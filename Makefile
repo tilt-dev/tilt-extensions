@@ -4,8 +4,7 @@ test:
 	./test.sh
 
 publish-ci-image:
-	docker build --pull --platform linux/amd64 -t docker/tilt-extensions-ci -f .circleci/Dockerfile .circleci
-	docker push docker/tilt-extensions-ci
+	docker buildx build --push --pull --platform linux/amd64 -t docker/tilt-extensions-ci -f .circleci/Dockerfile .circleci
 
 shellcheck:
 	find . -type f -name '*.sh' -not -path "*/node_modules/*" -not -path "*/.git-sources/*" -not -path "*/.git/*" -exec \
