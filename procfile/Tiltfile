@@ -1,4 +1,4 @@
-def procfile_resources(procfile='Procfile', set_port=False, starting_port=5000):
+def procfile_resources(procfile='Procfile', set_port=False, starting_port=5000, **kwargs):
   """
   Creates local resources from a Procfile (e.g., as defined by Foreman: http://blog.daviddollar.org/2011/05/06/introducing-foreman.html)
 
@@ -18,5 +18,5 @@ def procfile_resources(procfile='Procfile', set_port=False, starting_port=5000):
       # show up in logs as the command being run (and then we could default
       # set_port to True)
       cmd = 'PORT=%d %s' % (port, cmd)
-    local_resource(name, serve_cmd=cmd)
+    local_resource(name, serve_cmd=cmd, **kwargs)
     port += 1
