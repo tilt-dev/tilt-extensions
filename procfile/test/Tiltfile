@@ -1,0 +1,7 @@
+load('../Tiltfile', 'procfile_resources', )
+
+# default usage
+procfile_resources()
+
+# pass args to local_resource
+procfile_resources('Procfile.two', labels=["foo", "bar"])
