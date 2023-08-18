@@ -4,6 +4,10 @@ Specify a minimum Kubenetes version to run this TiltFile
 
 If the minimum version is not met, Tilt will stop executing using the `fail` api
 
+## Requirements
+
+- kubectl v1.28+
+
 ## Usage
 
 
