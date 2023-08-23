@@ -37,6 +37,19 @@ def _get_server_version():
     #
     # The previous version used 'grep' to filter out the server version. Use a
     # native way to support systems without 'grep'.
+    kubectl_version_output = str(local('kubectl version', quiet=True))
+    for line in kubectl_version_output.split('\n'):
+        if line.startswith('Server Version'):
+            version_string = line.split(':')[1].strip()
+            if version_string.startswith('version.Info'):
+               # we are pre 1.28 kubectl, let's use the old method
+               return _get_server_version_pre_1_28_kubectl()
+            else:
+               return version_string.replace('v', '')
+            
+    return ""
+
+def _get_server_version_pre_1_28_kubectl():   
     kubectl_version_output = str(local('kubectl version --short', quiet=True))
     version_str = ''
     for line in kubectl_version_output.split('\n'):
