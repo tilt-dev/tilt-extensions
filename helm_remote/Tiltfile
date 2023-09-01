@@ -145,7 +145,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
 
     # ======== Initialize
     # -------- targets
-    pull_target = os.path.join(helm_remote_cache_dir, repo_name, version)
+    pull_target = os.path.join(helm_remote_cache_dir, repo_name.replace(':', ''), version)
     chart_target = os.path.join(pull_target, chart)
 
     cached_chart_exists = os.path.exists(chart_target)
