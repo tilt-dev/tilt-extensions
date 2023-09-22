@@ -12,7 +12,7 @@ TILT_PID=$!
 sleep 1
 
 echo "Verifying that the app has started"
-timeout 30 tail -f tilt.log  | grep -q "listening on port 8080"
+timeout 30 tail -f tilt.log | grep -q "listening on port 8080"
 RESULT=$?
 if [[ $RESULT -ne 0 ]];then
   echo "ERROR: App failed to start"
@@ -21,7 +21,7 @@ if [[ $RESULT -ne 0 ]];then
 fi
 
 echo "Verifying remote development is using the correct image built from Dockerfile.dev"
-tail tilt.log  | grep -q "nodemon"
+timeout 30 tail -f tilt.log | grep -q "nodemon"
 RESULT=$?
 if [[ $RESULT -ne 0 ]];then
   echo "ERROR: nodemon isn't running. Might be using the wrong image"
