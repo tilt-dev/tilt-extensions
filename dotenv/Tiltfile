@@ -1,8 +1,9 @@
-def dotenv(fn=".env", verbose=False, showValues=False):
+def dotenv(fn=".env", verbose=False, showValues=False, showWarningIfMissing=True):
 
     # Check if file exists
     if not os.path.exists(fn):
-        warn("Environment variables file not found: '%s'" % fn)
+        if showWarningIfMissing:
+            warn("Environment variables file not found: '%s'" % fn)
         return
 
     if verbose:
