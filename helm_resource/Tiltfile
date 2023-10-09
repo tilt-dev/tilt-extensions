@@ -21,7 +21,8 @@ def helm_resource(
     labels=None,
     port_forwards=[],
     auto_init=True,
-    pod_readiness=''):
+    pod_readiness='',
+    update_dependencies=False):
   """Installs a helm chart to a cluster.
 
   Args:
@@ -75,7 +76,7 @@ def helm_resource(
 
   if len(image_deps) != len(image_keys):
     fail('image_deps and image_keys must have the same length, so that we know how to inject images into the helm chart;')
-  
+
   is_windows = True if os.name == "nt" else False
   python_cmd = ['py', '-3'] if is_windows else ['python3']
   apply_cmd = python_cmd + [_helm_apply_path]
@@ -86,6 +87,9 @@ def helm_resource(
     'NAMESPACE': namespace or '',
     'TILT_IMAGE_COUNT': str(len(image_keys)),
   }
+
+  if update_dependencies:
+    env['TILT_HELM_RELEASE_DEPENDENCY_UPDATE'] = 'true'
 
   if flags:
     apply_cmd.extend(flags)

@@ -62,6 +62,11 @@ install_cmd.extend([release_name, chart])
 get_cmd.extend([release_name])
 kubectl_cmd.extend(['-oyaml', '-f', '-'])
 
+if os.environ.get('TILT_HELM_RELEASE_DEPENDENCY_UPDATE', False) == 'true':
+  dependency_update_cmd = ['helm', 'dependency', 'update', chart]
+  print("Running cmd: %s" % dependency_update_cmd, file=sys.stderr)
+  subprocess.check_call(dependency_update_cmd, stdout=sys.stderr)
+
 print("Running cmd: %s" % install_cmd, file=sys.stderr)
 subprocess.check_call(install_cmd, stdout=sys.stderr)
 
