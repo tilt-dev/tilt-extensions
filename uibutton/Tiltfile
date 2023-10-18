@@ -11,7 +11,8 @@ valid_subcommands = ['up', 'ci']
 
 def cmd_button(name, resource='', argv=[], text=None,
                location=LOCATION_RESOURCE, icon_name=None, icon_svg=None,
-               inputs=[], disabled=False, requires_confirmation=False, env=[]):
+               inputs=[], disabled=False, requires_confirmation=False, env=[],
+               dir=config.main_dir):
     if config.tilt_subcommand not in valid_subcommands:
         return
 
@@ -61,7 +62,7 @@ def cmd_button(name, resource='', argv=[], text=None,
     v1alpha1.cmd(name="btn-" + name, annotations={
         "tilt.dev/resource": resource,
         "tilt.dev/log-span-id": 'cmd:' + name,
-    }, args=argv, dir=config.main_dir, env=env, start_on=v1alpha1.start_on_spec(ui_buttons=[name]))
+    }, args=argv, dir=dir, env=env, start_on=v1alpha1.start_on_spec(ui_buttons=[name]))
 
 
 def text_input(name, label='', default='', placeholder=''):
