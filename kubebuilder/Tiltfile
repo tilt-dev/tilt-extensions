@@ -58,7 +58,7 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLE
     
     k8s_yaml(yaml())
     
-    deps = ['controllers', 'main.go']
+    deps = ['internal/controller', 'cmd/main.go']
     deps.append('api')
     
     local_resource('Watch&Compile', generate() + binary(), deps=deps, ignore=['*/*/zz_generated.deepcopy.go'])
