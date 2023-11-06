@@ -36,7 +36,7 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLE
     
     # build to tilt_bin beause kubebuilder has a dockerignore for bin/
     def binary():
-        return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o tilt_bin/manager main.go'
+        return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o tilt_bin/manager cmd/main.go'
 
     installed = local("which kubebuilder")
     print("kubebuilder is present:", installed)
@@ -58,7 +58,7 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLE
     
     k8s_yaml(yaml())
     
-    deps = ['controllers', 'main.go']
+    deps = ['internal/controller', 'cmd/main.go']
     deps.append('api')
     
     local_resource('Watch&Compile', generate() + binary(), deps=deps, ignore=['*/*/zz_generated.deepcopy.go'])
