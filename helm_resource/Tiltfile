@@ -71,7 +71,7 @@ def helm_resource(
 
   if len(image_deps) != len(image_keys):
     fail('image_deps and image_keys must have the same length, so that we know how to inject images into the helm chart;')
-  
+
   is_windows = True if os.name == "nt" else False
   python_cmd = ['py', '-3'] if is_windows else ['python3']
   apply_cmd = python_cmd + [_helm_apply_path]
@@ -137,7 +137,7 @@ def helm_repo(
 
   name: The name of the helm repo.
   url: The url of the helm repo.
-  resource_name: The name of the resource in the tilt UI. Defaults to `helm-[name]`.
+  resource_name: The name of the resource in the tilt UI. Defaults to `[name]`.
   username: The username for authenticating (if the helm repo is private).
   password: The password for authenticating (if the helm repo is private).
   **kwargs: Arguments to pass to the underlying resource like `labels` (for organization).
