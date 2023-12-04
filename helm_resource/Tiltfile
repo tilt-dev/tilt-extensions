@@ -148,7 +148,7 @@ def helm_repo(
 
   name: The name of the helm repo.
   url: The url of the helm repo.
-  resource_name: The name of the resource in the tilt UI. Defaults to `helm-[name]`.
+  resource_name: The name of the resource in the tilt UI. Defaults to `[name]`.
   username: The username for authenticating (if the helm repo is private).
   password: The password for authenticating (if the helm repo is private).
   **kwargs: Arguments to pass to the underlying resource like `labels` (for organization).
