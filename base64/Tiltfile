@@ -1,0 +1,9 @@
+def encode_base64(content):
+    command_value = 'echo {} | base64'.format(content)
+    command_bat_value = ['powershell', '[convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(\'{}\'))'.format(content)]
+    return str(local(command=command_value, quiet=True, command_bat=command_bat_value, echo_off=True)).strip()
+
+def decode_base64(content):
+    command_value = 'echo {} | base64 -d'.format(content)
+    command_bat_value = ['powershell', '[text.encoding]::UTF8.GetString([convert]::FromBase64String(\'{}\'))'.format(content)]
+    return str(local(command=command_value, quiet=True, command_bat=command_bat_value, echo_off=True)).strip()
