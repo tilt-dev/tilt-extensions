@@ -61,6 +61,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`vault_client`](/vault_client): Reach secrets from a Vault instance.
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
 - [`base64`](/base64): Base64 encode and decode a string.
+- [`dict_merge`](/dict_merge): Merge two dictionaries recursively.
 
 ## Contribute an Extension
 
