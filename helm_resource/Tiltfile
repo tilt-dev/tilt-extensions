@@ -64,6 +64,7 @@ def helm_resource(
       pods to be ready before the resource is considered healthy (and dependencies
       can start building). By default, Tilt will wait for pods to be ready if it
       thinks a resource has pods.
+    update_dependencies: Runs `helm dependency update` before installing the chart.
   """
   if not release_name:
     release_name=name
