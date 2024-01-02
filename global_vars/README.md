@@ -1,4 +1,4 @@
-# Git Resource
+# Global Variables
 
 Author: [Bob Jackman](https://github.com/kogi)
 
