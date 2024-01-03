@@ -1,4 +1,4 @@
-RESTART_FILE = '/tmp/.restart/proc'
+RESTART_FILE = '/tmp/.restart-proc'
 TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
 KWARGS_BLACKLIST = [
@@ -46,14 +46,12 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
     FROM tiltdev/restart-helper:2021-11-03 as restart-helper
 
     FROM {ref}
-    RUN ["mkdir", "-p", "{dir}"]
     RUN ["touch", "{file}"]
     RUN ["chmod", "666", "{file}"]
     COPY --from=restart-helper /tilt-restart-wrapper /
     COPY --from=restart-helper /entr /
     ENTRYPOINT {entry}
-    '''.format(ref=base_ref, file=restart_file, dir=os.path.dirname(restart_file),
-               entry=entrypoint_with_entr)
+    '''.format(ref=base_ref, file=restart_file, entry=entrypoint_with_entr)
 
     # last live_update step should always be to modify $restart_file, which
     # triggers the process wrapper to rerun $entrypoint
