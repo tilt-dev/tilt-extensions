@@ -51,6 +51,9 @@ def nerdctl_build(
 
     if secret:
         cmd += ['--secret', secret]
+    
+    if platform:
+        cmd += ['--platform', platform]
 
     if extra_tag:
         if type(extra_tag) == 'string':
