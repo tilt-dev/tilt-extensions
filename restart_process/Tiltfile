@@ -1,4 +1,4 @@
-RESTART_FILE = '/tmp/.restart/proc'
+RESTART_FILE = '/tmp/.restart-proc'
 TYPE_RESTART_CONTAINER_STEP = 'live_update_restart_container_step'
 
 KWARGS_BLACKLIST = [
@@ -39,13 +39,6 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
     else:
         fail("`entrypoint` must be a string or list of strings: got {}".format(type(entrypoint)))
 
-    # extract restart_file folder with rfind because `os.path.dirname` will not
-    # return linux-compatible result on Windows
-    folder='/'
-    ind=restart_file.rfind('/')
-    if ind != -1:
-        folder=restart_file[0:ind]
-
     # declare a new docker build that adds a static binary of tilt-restart-wrapper
     # (which makes use of `entr` to watch files and restart processes) to the user's image
     # we also set the image's entrypoint to give k8s_custom_deploy a chance of working: https://github.com/tilt-dev/tilt-extensions/issues/391
@@ -53,12 +46,12 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
     FROM tiltdev/restart-helper:2021-11-03 as restart-helper
 
     FROM {ref}
-    RUN mkdir -p "{folder}" && touch "{file}" && chmod 666 "{file}"
+    RUN ["touch", "{file}"]
+    RUN ["chmod", "666", "{file}"]
     COPY --from=restart-helper /tilt-restart-wrapper /
     COPY --from=restart-helper /entr /
     ENTRYPOINT {entry}
-    '''.format(ref=base_ref, file=restart_file, folder=folder,
-               entry=entrypoint_with_entr)
+    '''.format(ref=base_ref, file=restart_file, entry=entrypoint_with_entr)
 
     # last live_update step should always be to modify $restart_file, which
     # triggers the process wrapper to rerun $entrypoint
