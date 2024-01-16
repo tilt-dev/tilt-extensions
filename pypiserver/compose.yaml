@@ -1,0 +1,11 @@
+services:
+  pypiserver:
+    container_name: ${PYPI_CONTAINER_NAME}
+    image: docker.io/pypiserver/pypiserver:latest
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "${PYPISERVER_PORT}:8080"
+    volumes:
+      - ${PYPISERVER_PACKAGES_DATA_CACHE}:/data/packages
+    command: run --overwrite --authenticate . --passwords . /data/packages
