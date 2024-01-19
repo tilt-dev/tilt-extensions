@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:b1972b2d61e2eef1a1f0c7da18814f876d07eccbc54f5403779946bfcb95d6aa
+      - image: docker/tilt-extensions-ci@sha256:d015e9e5cc5a3dce9fa258b1d6b8cb593c9a42c0efef2239419ceed29f874d0f
 
     steps:
       - checkout
@@ -11,7 +11,7 @@ jobs:
 
   shellcheck:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:b1972b2d61e2eef1a1f0c7da18814f876d07eccbc54f5403779946bfcb95d6aa
+      - image: docker/tilt-extensions-ci@sha256:d015e9e5cc5a3dce9fa258b1d6b8cb593c9a42c0efef2239419ceed29f874d0f
 
     steps:
       - checkout
@@ -22,11 +22,10 @@ jobs:
     # spaces in paths, which is common on macOS (/Application Support/)
     working_directory: ~/tilt extensions
     docker:
-      - image: docker/tilt-extensions-ci@sha256:b1972b2d61e2eef1a1f0c7da18814f876d07eccbc54f5403779946bfcb95d6aa
+      - image: docker/tilt-extensions-ci@sha256:d015e9e5cc5a3dce9fa258b1d6b8cb593c9a42c0efef2239419ceed29f874d0f
 
     steps:
-      - setup_remote_docker:
-          version: '20.10.11'
+      - setup_remote_docker
       - checkout
       # Install latest Tilt
       - run: |
