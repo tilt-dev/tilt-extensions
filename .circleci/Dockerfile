@@ -8,7 +8,7 @@ RUN apt update \
       ca-certificates \
       git \
       jq \
-      netcat \
+      netcat-traditional \
       software-properties-common \
       wget \
     && rm -rf /var/lib/apt/lists/*
@@ -40,12 +40,11 @@ RUN curl -sSL "https://github.com/buildpacks/pack/releases/download/${PACK_VERSI
 # install nodejs + yarn
 RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+    curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
     apt install -y -q --no-install-recommends \
       default-jdk \
       nodejs \
-      yarn \
-    && rm -rf /var/lib/apt/lists/*
+      yarn
 
 # install Pulumi CLI
 RUN curl -fsSL https://get.pulumi.com | sh
@@ -54,6 +53,12 @@ ENV PATH=/root/.pulumi/bin:$PATH
 # install earthly
 ARG EARTHLY_VERSION=v0.6.28
 RUN wget https://github.com/earthly/earthly/releases/download/${EARTHLY_VERSION}/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod a+x /usr/local/bin/earthly
+
+ARG COMPOSE_V2_VERSION="2.24.1"
+RUN mkdir -p "${HOME}/.docker/cli-plugins" \
+    && curl -sSL "https://github.com/docker/compose/releases/download/v${COMPOSE_V2_VERSION}/docker-compose-linux-$(uname -m)" -o "${HOME}/.docker/cli-plugins/docker-compose" \
+    && chmod +x "${HOME}/.docker/cli-plugins/docker-compose" \
+    && docker compose version --short | grep -q -F "${COMPOSE_V2_VERSION}"
 
 # ensure any dependencies from manual dpkg installs are ok
 RUN apt update \
