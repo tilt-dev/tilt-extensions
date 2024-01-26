@@ -1,0 +1,17 @@
+def encode_base64(content):
+    return str(local(
+        command=['base64', '-w', '0'],
+        command_bat=['powershell', '[convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($input))'],
+        quiet=True,
+        echo_off=True,
+        stdin=content,
+    )).strip()
+
+def decode_base64(content):
+    return str(local(
+        command=['base64', '-d'],
+        command_bat=['powershell', '[Text.Encoding]::UTF8.GetString([convert]::FromBase64String($input))'],
+        quiet=True,
+        echo_off=True,
+        stdin=content,
+    ))
