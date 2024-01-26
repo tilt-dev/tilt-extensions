@@ -60,6 +60,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`uibutton`](/uibutton): Customize your Tilt dashboard with [buttons to run a command](https://blog.tilt.dev/2021/06/21/uibutton.html).
 - [`vault_client`](/vault_client): Reach secrets from a Vault instance.
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
+- [`base64`](/base64): Base64 encode or decode a string.
 
 ## Contribute an Extension
 
