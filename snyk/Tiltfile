@@ -1,4 +1,4 @@
-def snyk(target, test_type, name='snyk', test_deps='', extra_opts='', trigger='manual', mode='gate'):
+def snyk(target, test_type, name='snyk', test_deps='', extra_opts='', trigger='manual', mode='gate', labels=[]):
     """
     Args:
       name: a name for the resource. useful for labeling when running multiple tests.
@@ -9,6 +9,7 @@ def snyk(target, test_type, name='snyk', test_deps='', extra_opts='', trigger='m
           - container: this is where to insert the '--file=path/to/Dockerfile' option
       trigger: trigger mode - auto or manual
       mode: control Snyk exit code, info will always exit 0 - gate or info
+      labels: used to group resources in the Web UI.
     """
 
     if test_type == 'oss':
@@ -53,5 +54,6 @@ def snyk(target, test_type, name='snyk', test_deps='', extra_opts='', trigger='m
         deps = test_deps,
         cmd = snyk_cmd,
         auto_init = auto_bool,
-        trigger_mode = trigger_string
+        trigger_mode = trigger_string,
+        labels = labels
     )
