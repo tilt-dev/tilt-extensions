@@ -28,6 +28,7 @@ SKIPPED_TESTS=set([
   # so we've turned this off. You can still run it manually
   # on a machine with podman installed.
   "podman/test/test.sh",
+  "podman/test_restart/test.sh",
 
   # TODO(nicks): Knative has a race condition where the webhooks
   # aren't ready when the deployment installs.
