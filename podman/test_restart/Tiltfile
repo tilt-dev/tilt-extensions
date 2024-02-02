@@ -1,0 +1,13 @@
+load('../Tiltfile', 'podman_build_with_restart')
+
+podman_build_with_restart(
+    'example-podman-image',
+    '.',
+    entrypoint='/app/main.sh',
+    deps=['main.sh'],
+    live_update=[
+	   sync('./main.sh', '/app/main.sh')
+    ]
+  )
+
+k8s_yaml('deployment.yaml')

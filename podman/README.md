@@ -17,11 +17,36 @@ Use Podman (https://podman.io/) to build images for Tilt.
 - **live_update**: Set of steps for updating a running container
       (see https://docs.tilt.dev/live_update_reference.html)
 
+### `podman_build_with_restart(ref: str, context: str, entrypoint: str, extra_flags?: [str])`
+
+- **ref**: The name of the image to build. Must match the image
+   name in the Kubernetes resources you're deploying.
+- **context**: The build context of the binary to build. Expressed as a file path.
+- **entrypoint**: The command to be (re-)executed when the container starts or when a live_update is run.
+- **ignore**: Changes to the given files or directories do not trigger rebuilds.
+      Does not affect the build context.
+- **extra_flags**: Extra flags to pass to podman build.
+- **live_update**: Set of steps for updating a running container
+      (see https://docs.tilt.dev/live_update_reference.html)
+
 ## Example Usage
 
 ```
 load('ext://podman', 'podman_build')
 podman_build('hello-world-image', '.')
+```
+
+```
+load('ext://podman', 'podman_build_with_restart')
+podman_build_with_restart(
+    'example-podman-image',
+    '.',
+    entrypoint='/app/main.sh',
+    deps=['main.sh'],
+    live_update=[
+	   sync('./main.sh', '/app/main.sh')
+    ]
+  )
 ```
 
 ## Troubleshooting
@@ -44,3 +69,19 @@ to add 'localhost' under the 'registries.insecure' heading.
 [registries.insecure]
 registries = ['localhost']
 ```
+
+### GRPC error
+
+If you see this error message:
+
+```
+Build Failed: failed to dial gRPC: unable to upgrade to h2c, received 404
+```
+
+Be sure to set environment variable `DOCKER_BUILDKIT="0"` before running tilt e.g.
+```
+export DOCKER_BUILDKIT="0"
+tilt up
+```
+
+(see https://github.com/tilt-dev/tilt/issues/5758 for more details)
