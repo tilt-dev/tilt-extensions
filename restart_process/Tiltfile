@@ -17,6 +17,8 @@ _CUSTOM_BUILD_KWARGS_BLACKLIST = [
     'command_bat',
     'outputs_image_ref_to',
     'disable_push',
+    'dir',
+    'env',
 ]
 
 _ext_dir = os.getcwd()
