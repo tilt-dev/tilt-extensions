@@ -1,6 +1,6 @@
 # -*- mode: Python -*-
 
-# Setting up a yarn/npm project on the test container would be a PITA, so instead
+# Setting up a yarn/npm/pnpm project on the test container would be a PITA, so instead
 # just use `tilt alpha tiltfile-result` to ensure that we're getting reasonable Tiltfile
 # results from this extension.
 #
