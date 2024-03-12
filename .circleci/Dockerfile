@@ -7,6 +7,7 @@ RUN apt update \
       build-essential \
       ca-certificates \
       git \
+      gnupg-agent \
       jq \
       netcat-traditional \
       software-properties-common \
@@ -17,7 +18,7 @@ RUN apt update \
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # Install Go toolchain
-COPY --from=golang:1.20-bullseye /usr/local/go /usr/local/go
+COPY --from=golang:1.21-bullseye /usr/local/go /usr/local/go
 ENV PATH=/root/go/bin:/usr/local/go/bin:$PATH
 
 # install Ko
@@ -40,9 +41,10 @@ RUN curl -sSL "https://github.com/buildpacks/pack/releases/download/${PACK_VERSI
 # install nodejs + yarn
 RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list && \
+    apt update && \
     apt install -y -q --no-install-recommends \
-      default-jdk \
       nodejs \
       yarn
 
