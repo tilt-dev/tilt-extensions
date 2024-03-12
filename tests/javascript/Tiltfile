@@ -59,6 +59,16 @@ def test_jest_yarn(name, dir, deps=None, only_changed=True, with_install=False, 
              extra_args=extra_args,
              **kwargs)
 
+def test_jest_pnpm(name, dir, deps=None, only_changed=True, with_install=False, project_root='', ignore=None, extra_args=None, **kwargs):
+    _test_js(name, 'pnpm', dir,
+             deps=deps,
+             only_changed=only_changed,
+             with_install=with_install,
+             project_root=project_root,
+             ignore=ignore,
+             extra_args=extra_args,
+             **kwargs)
+
 
 def verify_dep(f):
     if not os.path.exists(f):
@@ -74,6 +84,8 @@ def deps_for_package_manager(pkmanager, project_root):
         install_deps.append(os.path.join(project_root, 'package-lock.json'))
     elif pkmanager == 'yarn':
         install_deps.append(os.path.join(project_root, 'yarn.lock'))
+    elif pkmanager == 'pnpm':
+        install_deps.append(os.path.join(project_root, 'pnpm-lock.yaml'))
     else:
         fail('unrecognized js package manager: {}'.format(pkmanager))
 
