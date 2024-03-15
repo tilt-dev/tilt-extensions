@@ -25,7 +25,7 @@ Under the hood, it is doing te command `vault read -field=$fiel $path"`
 ## Example Usage
 
 ```
-load('ext://vault_cli', 'vault_read_secret', 'vault_set_env_vars')
+load('ext://vault_client', 'vault_read_secret', 'vault_set_env_vars')
 vault_set_env_vars('https://localhost:8200','mytoken')
 my_foo = vault_read_secret('path/myfoo', 'value')
 my_bar = vault_read_secret('path/mybar', 'foobar')
