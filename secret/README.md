@@ -119,6 +119,69 @@ k8s_yaml(secret_yaml_tls(...))
 
 Arguments are the same as [`secret_yaml_tls`](#secret_yaml_tls).
 
+### secret_yaml_docker_registry
+
+```
+secret_yaml_docker_registry(
+    name: str,
+    username: str,
+    password: str,
+    server: str = "",
+    namespace: str = ""
+) -> Blob
+```
+
+
+Returns YAML for a Docker Registry secret.
+
+### secret_create_docker_registry
+
+```
+secret_create_docker_registry(
+    name: str,
+    username: str,
+    password: str,
+    server: str = "",
+    namespace: str = ""
+) -> Blob
+```
+
+
+Deploys a Docker Registry secret to the cluster.
+
+### secret_yaml_docker_registry_ecr
+
+```
+secret_yaml_docker_registry_ecr(
+    name: str,
+    account_id: str = "",
+    region: str = "",
+    namespace: str = ""
+) -> Blob
+```
+
+Returns YAML for an ECR Docker Registry secret.
+
+Auto-detects the default AWS account and region
+when not specified.
+
+### secret_create_docker_registry_ecr
+
+```
+secret_create_docker_registry_ecr(
+    name: str,
+    account_id: str = "",
+    region: str = "",
+    namespace: str = ""
+) -> Blob
+```
+
+
+Deploys an ECR Docker Registry secret to the cluster.
+
+Auto-detects the default AWS account and region
+when not specified.
+
 ## Example Usage
 
 ### For a Postgres password:
