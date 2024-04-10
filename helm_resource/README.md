@@ -59,17 +59,21 @@ reference.
 how to build one of these images, this will be an error.
 
 `image_keys`: A list of specifications for how to inject images into the
-chart. Must be the same length as `image_deps`.  There are two common patterns.
+chart. Must be the same length as `image_deps`. Examples of accepted values:
 
-- If your chart accepts an image as a single tagged image reference, specify the key as a string.
+- `'image'`: A chart that accepts a single tagged image reference, passed as a
+  string.
 
-- If your chart accepts an image as a 'repository' and a 'tag', spectify the key
-  as a tuple ('image.repository', 'image.tag'). This is how charts created with
-  `helm create` are structured.
-
-- If your chart accepts an image as a 'registry', 'repository' and a 'tag', specify the key
-  as a tuple ('image.registry', 'image.repository', 'image.tag'). This is another common pattern used
-  by many charts.
+- `('image.repository', 'image.tag')`: A chart that accepts an image as a
+  separate repository and tag, passed as a 2-element tuple. This is how charts
+  created with `helm create` are structured.
+  
+- `('image.registry', 'image.repository', 'image.tag')`: A chart that accepts
+  an image as a 'registry', 'repository' and a 'tag', passed as a 3-element tuple.
+  This is another common pattern used by many charts.
+  
+- `[('image.repository', 'image.tag'), ('initImage.repository', 'initImage.tag')]`:
+  A chart that uses the same image in two different values. Passed as a list.
 
 `flags`: Additional flags to pass to `helm install`. For example:
 
