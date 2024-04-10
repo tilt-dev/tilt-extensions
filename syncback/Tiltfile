@@ -14,7 +14,7 @@ local([verify_rsync_path, MIN_LOCAL_RSYNC_VERSION])
 
 DEFAULT_EXCLUDES = ['.git', '.gitignore', '.dockerignore', 'Dockerfile', '.tiltignore', 'Tiltfile', 'tilt_modules']
 
-def syncback_command_args(k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False, rsync_path=rsync_path):
+def syncback_command_args(k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False, rsync_path=rsync_path, rsync_options=None):
     """
     Generate a list of command arguments to run that will sync the specified files from the given k8s object to the local filesystem.
     :param k8s_object (str): a Kubernetes object identifier (e.g. deploy/my-deploy, job/my-job, or a pod ID) that Tilt
@@ -34,6 +34,7 @@ def syncback_command_args(k8s_object, src_dir, ignore=None, delete=False, paths=
     :param namespace (str, optiona): namespace of the desired k8s_object, if not `default`.
     :param verbose (bool, optional): if true, print additional rsync information.
     :param rsync_path (str, optional): A path where the remote containers `rsync` executable is located. Defaults to `/bin/rsync.tilt`.
+    :param rsync_options (List[str], optional): additional options passed to the `rsync` command.
     """
     # Verify inputs
     if not src_dir.endswith('/'):
@@ -95,20 +96,24 @@ def syncback_command_args(k8s_object, src_dir, ignore=None, delete=False, paths=
         argv.append('--delete')
     argv.append('-T=/tmp/rsync.tilt')
     argv.extend(filters)
+
+    if rsync_options:
+        argv.extend(rsync_options)
+
     argv.append(remote_name + ':' + src_dir)
     argv.append(target_dir)
     return argv
 
 
-def syncback_command(k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False, rsync_path=rsync_path):
+def syncback_command(k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False, rsync_path=rsync_path, rsync_options=None):
     """
     Generate a properly-quoted shell command string that will sync the specified files from the given k8s object to the local filesystem.
     """
-    argv = syncback_command_args(k8s_object, src_dir, ignore, delete, paths, target_dir, container, namespace, verbose, rsync_path)
+    argv = syncback_command_args(k8s_object, src_dir, ignore, delete, paths, target_dir, container, namespace, verbose, rsync_path, rsync_options)
     return ' '.join([shlex.quote(arg) for arg in argv])
 
 
-def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False, labels=[], resource_deps=[], rsync_path=rsync_path):
+def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, target_dir='.', container='', namespace='', verbose=False, labels=[], resource_deps=[], rsync_path=rsync_path, rsync_options=None):
     """
     Create a local resource that will (via rsync) sync the specified files
     from the specified k8s object to the local filesystem.
@@ -133,6 +138,7 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
     :param labels (Union[str, List[str]], optional): Used to group resources in the Web UI.
     :param resource_deps (Union[str, List[str]], optional): Used to declare dependencies on other resources.
     :param rsync_path (str, optional): A path where the remote containers `rsync` executable is located. Defaults to `/bin/rsync.tilt`.
+    :param rsync_options (List[str], optional): additional options passed to the `rsync` command.
     """
     # Ensure extra kwargs are only passed to local_resource if specified to
     # provide backward compatibility with older version of tilt.
@@ -141,7 +147,7 @@ def syncback(name, k8s_object, src_dir, ignore=None, delete=False, paths=None, t
                                ignore=ignore, delete=delete, paths=paths,
                                target_dir=target_dir,
                                container=container, namespace=namespace,
-                               verbose=verbose, rsync_path=rsync_path)
+                               verbose=verbose, rsync_path=rsync_path, rsync_options=rsync_options)
     extra_args = {}
 
     if labels:
