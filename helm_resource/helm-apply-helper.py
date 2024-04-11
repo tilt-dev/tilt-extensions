@@ -22,28 +22,31 @@ flags = sys.argv[1:]
 image_count = int(os.environ['TILT_IMAGE_COUNT'])
 for i in range(image_count):
   image = os.environ['TILT_IMAGE_%s' % i]
-  key = os.environ.get('TILT_IMAGE_KEY_%s' % i, '')
-  if key:
-    flags.extend(['--set', '%s=%s' % (key, image)])
-    continue
+  count = int(os.environ['TILT_IMAGE_KEY_COUNT_%s' % i])
+  for j in range(count):
+    suffix = '%s_%s' % (i, j)
+    key = os.environ.get('TILT_IMAGE_KEY_%s' % suffix, '')
+    if key:
+      flags.extend(['--set', '%s=%s' % (key, image)])
+      continue
 
-  image_parts = _parse_image_string(image)
-  key0 = os.environ.get('TILT_IMAGE_KEY_REGISTRY_%s' % i, '')
-  key1 = os.environ.get('TILT_IMAGE_KEY_REPO_%s' % i, '')
-  key2 = os.environ.get('TILT_IMAGE_KEY_TAG_%s' % i, '')
+    image_parts = _parse_image_string(image)
+    key0 = os.environ.get('TILT_IMAGE_KEY_REGISTRY_%s' % suffix, '')
+    key1 = os.environ.get('TILT_IMAGE_KEY_REPO_%s' % suffix, '')
+    key2 = os.environ.get('TILT_IMAGE_KEY_TAG_%s' % suffix, '')
 
-  if image_parts['registry']:
-    if key0 != '':
-      # Image has a registry AND a specific helm key for the registry
-      flags.extend(['--set', '%s=%s' % (key0, image_parts["registry"]),
-                    '--set', '%s=%s' % (key1, image_parts["repository"])])
+    if image_parts['registry']:
+      if key0 != '':
+        # Image has a registry AND a specific helm key for the registry
+        flags.extend(['--set', '%s=%s' % (key0, image_parts["registry"]),
+                      '--set', '%s=%s' % (key1, image_parts["repository"])])
+      else:
+        # Image has a registry but does not have a specific helm key for registry
+        flags.extend(['--set', '%s=%s/%s' % (key1, image_parts["registry"], image_parts["repository"])])
     else:
-      # Image has a registry but does not have a specific helm key for registry
-      flags.extend(['--set', '%s=%s/%s' % (key1, image_parts["registry"], image_parts["repository"])])
-  else:
-    # Image does NOT have a registry component
-    flags.extend(['--set', '%s=%s' % (key1, image_parts["repository"])])
-  flags.extend(['--set', '%s=%s' % (key2, image_parts["tag"])])
+      # Image does NOT have a registry component
+      flags.extend(['--set', '%s=%s' % (key1, image_parts["repository"])])
+    flags.extend(['--set', '%s=%s' % (key2, image_parts["tag"])])
 
 install_cmd = ['helm', 'upgrade', '--install']
 install_cmd.extend(flags)

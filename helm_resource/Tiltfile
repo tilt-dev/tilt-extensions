@@ -95,20 +95,15 @@ def helm_resource(
   if flags:
     apply_cmd.extend(flags)
 
+  dupe_deps = {}
   for i in range(len(image_deps)):
+    if image_deps[i] in dupe_deps:
+      fail(('helm_resource: image_deps should be unique. Found duplicate: %s\n' % image_deps[i]) +
+           ('  If you need to inject an image twice, the corresponding element of image_keys can be a list of values'))
+    dupe_deps[image_deps[i]] = True
+
     key = image_keys[i]
-    if type(key) == 'string':
-      env['TILT_IMAGE_KEY_%s' % i] = key
-    elif type(key) == 'tuple':
-      if len(key) == 2:
-        env['TILT_IMAGE_KEY_REPO_%s' % i] = key[0]
-        env['TILT_IMAGE_KEY_TAG_%s' % i] = key[1]
-      if len(key) == 3:
-        env['TILT_IMAGE_KEY_REGISTRY_%s' % i] = key[0]
-        env['TILT_IMAGE_KEY_REPO_%s' % i] = key[1]
-        env['TILT_IMAGE_KEY_TAG_%s' % i] = key[2]
-    else:
-      fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
+    _set_image_env_helper_list(env, key, i)
 
   k8s_custom_deploy(
     name,
@@ -168,3 +163,28 @@ def helm_repo(
     args.extend(['--password', password])
 
   local_resource(resource_name, args, allow_parallel=True, **kwargs)
+
+# Helper functions for setting env variables for images.
+def _set_image_env_helper_list(env, key, i):
+  if type(key) == 'list':
+    env['TILT_IMAGE_KEY_COUNT_%s' % i] = '%s' % len(key)
+    for j in range(len(key)):
+      _set_image_env_helper_item(env, key[j], i, '%s_%s' % (i, j))
+  else:
+    env['TILT_IMAGE_KEY_COUNT_%s' % i] = '1'
+    _set_image_env_helper_item(env, key, i, '%s_0' % i)
+
+# Helper functions for setting env variables for images.
+def _set_image_env_helper_item(env, key, i, suffix):
+  if type(key) == 'string':
+    env['TILT_IMAGE_KEY_%s' % suffix] = key
+  elif type(key) == 'tuple':
+    if len(key) == 2:
+      env['TILT_IMAGE_KEY_REPO_%s' % suffix] = key[0]
+      env['TILT_IMAGE_KEY_TAG_%s' % suffix] = key[1]
+    if len(key) == 3:
+      env['TILT_IMAGE_KEY_REGISTRY_%s' % suffix] = key[0]
+      env['TILT_IMAGE_KEY_REPO_%s' % suffix] = key[1]
+      env['TILT_IMAGE_KEY_TAG_%s' % suffix] = key[2]
+  else:
+    fail("invalid argument to image_keys at %s: %s" % (i, type(key)))
