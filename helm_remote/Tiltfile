@@ -19,13 +19,15 @@ if _get_skip() == None:
 def _find_root_tiltfile_dir():
     # Find top-level Tilt path
     current = os.path.abspath('./')
-    while current != '/':
+    while True:
         if os.path.exists(os.path.join(current, 'tilt_modules')):
             return current
 
-        current = os.path.dirname(current)
+        next_dir = os.path.dirname(current)
+        if next_dir == current:
+            fail('Could not find root Tiltfile')
 
-    fail('Could not find root Tiltfile')
+        current = next_dir
 
 def _find_cache_dir():
     from_env = os.getenv('TILT_HELM_REMOTE_CACHE_DIR', '')
