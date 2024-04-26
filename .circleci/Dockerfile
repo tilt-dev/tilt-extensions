@@ -18,7 +18,7 @@ RUN apt update \
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # Install Go toolchain
-COPY --from=golang:1.21-bullseye /usr/local/go /usr/local/go
+COPY --from=golang:1.22-bullseye /usr/local/go /usr/local/go
 ENV PATH=/root/go/bin:/usr/local/go/bin:$PATH
 
 # install Ko
