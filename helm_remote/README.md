@@ -6,11 +6,18 @@ Install a remotely hosted Helm chart in a way that it will be properly uninstall
 
 ## Usage
 
-#### Install a Remote Chart
+#### Install an HTTPS Chart
 
 ```py
 load('ext://helm_remote', 'helm_remote')
-helm_remote('myChartName')
+helm_remote('memcached', repo_url='https://charts.bitnami.com/bitnami')
+```
+
+#### Install an OCI Chart
+
+```py
+load('ext://helm_remote', 'helm_remote')
+helm_remote('demo', repo_name='oci://registry-1.docker.io/docker', version='0.1.0')
 ```
 
 ##### Additional Parameters
