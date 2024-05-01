@@ -15,9 +15,9 @@ def _get_skip_name():
 if _get_skip() == None:
     _set_skip('False')  # Gets set to true after the first update, preventing further updates within the same build/instance/up
 
-
-def _find_root_tiltfile_dir():
-    # Find top-level Tilt path
+# Find the directory where Tilt loaded modules.
+# This is usually the XDG data directory for tilt data.
+def _find_tilt_modules_load_dir():
     current = os.path.abspath('./')
     while True:
         if os.path.exists(os.path.join(current, 'tilt_modules')):
@@ -33,7 +33,7 @@ def _find_cache_dir():
     from_env = os.getenv('TILT_HELM_REMOTE_CACHE_DIR', '')
     if from_env != '':
         return from_env
-    return os.path.join(_find_root_tiltfile_dir(), '.helm')
+    return os.path.join(_find_tilt_modules_load_dir(), '.helm')
 
 # this is the root directory into which remote helm charts will be pulled/cloned/untar'd
 # use `os.putenv('TILT_HELM_REMOTE_CACHE_DIR', new_dir)` to change

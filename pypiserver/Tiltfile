@@ -8,8 +8,9 @@ PYPISERVER_DATA_CACHE_DIR = 'pypiserver'
 
 PYTHON_CMD = 'python3'
 
-def _find_root_tiltfile_dir():
-    # Find top-level Tilt path
+# Find the directory where Tilt loaded modules.
+# This is usually the XDG data directory for tilt data.
+def _find_tilt_modules_load_dir():
     current = os.path.abspath('./')
     while True:
         if os.path.exists(os.path.join(current, 'tilt_modules')):
@@ -25,7 +26,7 @@ def _find_cache_dir():
     from_env = os.getenv('TILT_PYPISERVER_CACHE_DIR', '')
     if from_env != '':
         return from_env
-    return os.path.join(_find_root_tiltfile_dir(), PYPISERVER_DATA_CACHE_DIR)
+    return os.path.join(_find_tilt_modules_load_dir(), PYPISERVER_DATA_CACHE_DIR)
 
 # this is the root directory into which remote state will be downloaded
 # use `os.putenv('TILT_PYPISERVER_CACHE_DIR', new_dir)` to change
