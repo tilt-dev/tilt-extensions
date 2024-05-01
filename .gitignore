@@ -1,4 +1,5 @@
 */test/.helm
+*/test/.pypiserver
 */test/.git-sources
 */test/.tilt-cache
 */test/.build

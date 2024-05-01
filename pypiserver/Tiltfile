@@ -1,7 +1,6 @@
 EXT_PATH = os.getcwd()
 PYPI_PORT_VAR_NAME = 'PYPISERVER_PORT' # docker compose purposes
 DEFAULT_PYPI_PORT_VALUE = '8222'
-DEFAULT_CACHE_DIR = '.tilt-cache'
 DEFAULT_PYPI_CONTAINER_NAME = 'tilt-pypiserver'
 PYPI_CONTAINER_VAR_NAME = 'PYPI_CONTAINER_NAME' # docker compose purpose
 PYPISERVER_DATA_CACHE_DIR_VAR_NAME = 'PYPISERVER_PACKAGES_DATA_CACHE' # docker compose purposes
@@ -12,28 +11,33 @@ PYTHON_CMD = 'python3'
 def _find_root_tiltfile_dir():
     # Find top-level Tilt path
     current = os.path.abspath('./')
-    while current != '/':
-        if os.path.exists(os.path.join(current, 'Tiltfile')):
+    while True:
+        if os.path.exists(os.path.join(current, 'tilt_modules')):
             return current
-        current = os.path.dirname(current)
-    fail('Could not find root Tiltfile')
 
-def _cache_dir():
-    cachedir = os.getenv('TILT_CACHE_DIR', '')
-    if cachedir == '':
-        cachedir = os.path.join(_find_root_tiltfile_dir(), DEFAULT_CACHE_DIR)
-    if not os.path.exists(cachedir):
-        local('mkdir -p %s' % shlex.quote(cachedir), echo_off=True)
-    os.putenv('TILT_CACHE_DIR', cachedir)
-    return cachedir
-    
+        next_dir = os.path.dirname(current)
+        if next_dir == current:
+            fail('Could not find root Tiltfile')
+
+        current = next_dir
+
+def _find_cache_dir():
+    from_env = os.getenv('TILT_PYPISERVER_CACHE_DIR', '')
+    if from_env != '':
+        return from_env
+    return os.path.join(_find_root_tiltfile_dir(), PYPISERVER_DATA_CACHE_DIR)
+
+# this is the root directory into which remote state will be downloaded
+# use `os.putenv('TILT_PYPISERVER_CACHE_DIR', new_dir)` to change
+_pypiserver_cache_dir = _find_cache_dir()
+
 def run_pypiserver_container():
     if str(local([PYTHON_CMD, '%s/src/is_port_used.py' % EXT_PATH, DEFAULT_PYPI_PORT_VALUE], quiet=True, echo_off=True)).rstrip('\n') == 'false':
         port = DEFAULT_PYPI_PORT_VALUE
     else:
         port = str(local([PYTHON_CMD, '%s/src/find_free_port.py' % EXT_PATH], quiet=True, echo_off=True)).rstrip('\n')
     os.putenv(PYPI_PORT_VAR_NAME, port)
-    packages_dir = os.path.join(_cache_dir(), PYPISERVER_DATA_CACHE_DIR, 'packages')
+    packages_dir = os.path.join(_pypiserver_cache_dir, 'packages')
     if not os.path.exists(packages_dir):
         local('mkdir -p %s' % shlex.quote(packages_dir), echo_off=True)
     os.putenv(PYPI_CONTAINER_VAR_NAME, DEFAULT_PYPI_CONTAINER_NAME)
@@ -42,8 +46,7 @@ def run_pypiserver_container():
     return 'http://localhost:%s' % port
 
 def build_package(path, name=None, upload=True, labels=None):
-    cachedir = _cache_dir()
-    packages_dir = os.path.join(cachedir, 'python_packages')
+    packages_dir = os.path.join(_pypiserver_cache_dir, 'python_packages')
     package_name = str(local([PYTHON_CMD, 'setup.py', '--name'], dir=path, quiet=True, echo_off=True)).rstrip('\n')
     package_fullname = str(local([PYTHON_CMD, 'setup.py', '--fullname'], dir=path, quiet=True, echo_off=True)).rstrip('\n')
 
