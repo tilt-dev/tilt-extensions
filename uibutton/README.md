@@ -73,7 +73,7 @@ Creates a button for a resource that runs the given command when clicked.
 | `location`              | `str` (enum)                                 | Button placement in UI (see `location` section below)                                                                                     |
 | `icon_name`             | `str`                                        | Name of [Material Icons font ligature][material-icons-font] to use as icon (at most one of `icon_name` or `icon_svg` should be specified) |
 | `icon_svg`              | `str` or `Blob`                              | `<svg>` to use as icon; should have 24x24px viewport (at most one of `icon_name` or `icon_svg` should be specified)                       |
-| `inputs`                | `List[typing.Union[text_input, bool_input]]` | Form inputs for butdown (optional)                                                                                                        |
+| `inputs`                | `List[typing.Union[text_input, bool_input]]` | Form inputs for button (optional)                                                                                                        |
 | `disabled`              | `bool`                                       | Whether the button is disabled (optional, default to `False`)                                                                             |
 | `requires_confirmation` | `bool`                                       | Whether the button requires a second click to activate (optional, default to `False`)                                                     |
 
