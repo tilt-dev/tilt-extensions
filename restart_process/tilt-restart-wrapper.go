@@ -35,6 +35,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
 	"syscall"
 )
@@ -51,6 +52,18 @@ func main() {
 	cmd.Args = append(cmd.Args, flag.Args()...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	// Set up a signal forwarding handler
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs)
+	go func() {
+		for {
+			sig := <-sigs
+			if cmd.Process != nil {
+				cmd.Process.Signal(sig)
+			}
+		}
+	}()
 
 	if err := cmd.Run(); err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {

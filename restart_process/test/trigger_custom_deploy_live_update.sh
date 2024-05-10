@@ -7,7 +7,7 @@ set -u
 
 touch start.sh
 # seconds
-TIMEOUT=5
+TIMEOUT=10
 for ((i=0;i<=$TIMEOUT;++i)) do
   tilt logs | grep -v test_update | grep -q "RESTART_COUNT: 1"
   if [[ $? -eq 0 ]]; then
@@ -15,6 +15,7 @@ for ((i=0;i<=$TIMEOUT;++i)) do
     exit 0
   fi
   echo no restart detected
+  touch start.sh
   sleep 1
 done
 exit 1
