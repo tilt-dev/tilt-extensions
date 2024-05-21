@@ -2,14 +2,12 @@ load('ext://local_output', 'local_output')
 
 def encode_base64(content):
     base64_cmd = ['base64']
-    # the base64 binary on macOS has no "-w" cli option. there is an alternative "-b" which has "0" as default, so we pass "-w 0" only if we are NOT on macOS
+    # the bsd base64 binary has no "-w" cli option. there is an alternative "-b" which has "0" as default, so we pass "-w 0" only if we use a gnu base64 binary
     # see https://stackoverflow.com/a/46464081
-    # we have to check the value from "sys.platform" because "os.name" returns "posix" for linux AND macOS operating systems
+    # windows is not affected
     is_windows = True if os.name == 'nt' else False
-    os_check_cmd = ['py', '-3'] if is_windows else ['python3']
-    os_check_cmd.extend(['-c', 'import sys; print(sys.platform)'])
-    is_mac_os = True if local_output(os_check_cmd, quiet=True, echo_off=True) == 'darwin' else False
-    if not is_mac_os:
+    is_gnu_base64 = True if not is_windows and 'gnu coreutils' in local_output('base64 --version', quiet=True, echo_off=True).lower() else False
+    if is_gnu_base64:
         base64_cmd.extend(['-w', '0'])
     return local_output(
         command=base64_cmd,
