@@ -173,11 +173,10 @@ When specified as a `command` in Kubernetes or Docker Compose YAML (this is how 
 ```
 Any `args` specified in Kubernetes/Docker Compose are attached to the end of this call, and therefore in this case would apply TO THE `/bin/sh -c` CALL, rather than to the actual command run by `entr`; that is, any `args` specified by the user would be effectively ignored.
 
-In order to make `entr` usable without a shell, this extension uses [a simple binary](/restart_process/tilt-restart-wrapper.go) that invokes `entr` and writes to its stdin.
+In order to make `entr` usable without a shell, this extension uses [a simple binary](tilt-restart-wrapper.go) that invokes `entr` and writes to its stdin.
 
 Note: ideally `entr` could accept files-to-watch via flag instead of stdin, but (for a number of good reasons) this feature isn't likely to be added any time soon (see [entr#33](https://github.com/eradman/entr/issues/33)).
 
-## For Maintainers: Releasing
-If you have push access to the `tiltdev` repository on DockerHub, you can release a new version of the binaries used by this extension like so:
-1. run `release.sh` (builds `tilt-restart-wrapper` from source, builds and pushes a Docker image with the new binary and a fresh binary of `entr` also installed from source)
-2. update the image tag in the [Tiltfile](/restart_process/Tiltfile) with the tag you just pushed (you'll find the image referenced in the Dockerfile contents of the child image--look for "FROM tiltdev/restart-helper")
+## Contributing
+
+[Update instructions](CONTRIBUTING.md)

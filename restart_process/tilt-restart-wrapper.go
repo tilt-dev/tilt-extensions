@@ -35,6 +35,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
 	"syscall"
 )
@@ -42,6 +43,7 @@ import (
 var watchFile = flag.String("watch_file", "/.restart-proc", "File that entr will watch for changes; changes to this file trigger `entr` to rerun the command(s) passed")
 var entrPath = flag.String("entr_path", "/entr", "Path to `entr` executable")
 var entrFlags = flag.String("entr_flags", "-rz", "Command line flags to pass to `entr` executable")
+var verboseSignals = flag.Bool("verbose_signals", false, "Print signals received by `tilt-restart-wrapper`")
 
 func main() {
 	flag.Parse()
@@ -52,7 +54,25 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Start(); err != nil {
+		log.Fatalf("error starting command: %v", err)
+	}
+
+	// Set up a signal forwarding handler
+	sigs := make(chan os.Signal, 10)
+	signal.Notify(sigs)
+	go func() {
+		for sig := range sigs {
+			if *verboseSignals {
+				log.Printf("Received signal: %s (%d), forwarding to pid %d", sig, sig.(syscall.Signal), cmd.Process.Pid)
+			}
+			if err := cmd.Process.Signal(sig); err != nil {
+				log.Println("Error forwarding signal:", err)
+			}
+		}
+	}()
+
+	if err := cmd.Wait(); err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			// The program has exited with an exit code != 0
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
