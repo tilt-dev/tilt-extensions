@@ -1,17 +1,27 @@
+load('ext://local_output', 'local_output')
+
 def encode_base64(content):
-    return str(local(
-        command=['base64', '-w', '0'],
+    base64_cmd = ['base64']
+    # the bsd base64 binary has no "-w" cli option. there is an alternative "-b" which has "0" as default, so we pass "-w 0" only if we use a gnu base64 binary
+    # see https://stackoverflow.com/a/46464081
+    # windows is not affected
+    is_windows = True if os.name == 'nt' else False
+    is_gnu_base64 = True if not is_windows and 'gnu coreutils' in local_output('base64 --version', quiet=True, echo_off=True).lower() else False
+    if is_gnu_base64:
+        base64_cmd.extend(['-w', '0'])
+    return local_output(
+        command=base64_cmd,
         command_bat=['powershell', '[convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($input))'],
         quiet=True,
         echo_off=True,
         stdin=content,
-    )).strip()
+    )
 
 def decode_base64(content):
-    return str(local(
+    return local_output(
         command=['base64', '-d'],
         command_bat=['powershell', '[Text.Encoding]::UTF8.GetString([convert]::FromBase64String($input))'],
         quiet=True,
         echo_off=True,
         stdin=content,
-    ))
+    )
