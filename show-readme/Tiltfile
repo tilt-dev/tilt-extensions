@@ -1,0 +1,37 @@
+load('ext://uibutton', 'cmd_button')
+
+def readme(name, resource, markdown_file_path, text='Show README', location='resource', icon_name='book'):
+    """
+    Adds a button to a Tilt resource that displays a README file when clicked.
+
+    Parameters:
+    - name (str): The unique name for the button.
+    - resource (str): The Tilt resource to which the button will be added.
+    - markdown_file_path (str): The file path of the markdown file to be displayed.
+    - text (str, optional): The text to be displayed on the button. Defaults to 'Show README'.
+    - location (str, optional): The location of the button on the Tilt resource. Defaults to 'resource'.
+    - icon_name (str, optional): The icon to be displayed on the button. Defaults to 'book'.
+
+    Returns:
+    - None
+
+    Example usage:
+    ```
+    readme(
+        name="my_readme_button",
+        resource="my_resource",
+        markdown_file_path="/path/to/README.md"
+    )
+    ```
+
+    This will add a button to the "my_resource" Tilt resource. When clicked, the button will display the 
+    contents of the specified README file. The button will have the text "Show README" and a "book" icon.
+    """
+    cmd_button(
+        name=name,
+        resource=resource,
+        argv=['mdv', markdown_file_path],
+        text=text,
+        location=location,
+        icon_name=icon_name
+    )

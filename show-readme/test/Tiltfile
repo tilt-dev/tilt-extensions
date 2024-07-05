@@ -1,0 +1,9 @@
+load('../Tiltfile', 'readme')
+
+local_resource('hello', cmd='echo "Hello from resource"')
+
+readme(
+    name='render-readme',
+    markdown_file_path='./README.md',
+    resource='hello',
+)
