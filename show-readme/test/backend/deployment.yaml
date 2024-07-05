@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: b
+  name: frontend
 spec:
   containers:
     - name: b

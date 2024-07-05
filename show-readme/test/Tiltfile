@@ -1,9 +1,35 @@
-load('../Tiltfile', 'readme')
+load('../Tiltfile', 'readme_in_html', 'readme_in_cmd')
 
-local_resource('hello', cmd='echo "Hello from resource"')
+k8s_yaml('frontend/deployment.yaml')
+k8s_resource('frontend')
 
-readme(
-    name='render-readme',
-    markdown_file_path='./README.md',
-    resource='hello',
+readme_in_html(
+    name='render-readme-frontend',
+    markdown_file_path='frontend/README.md',
+    resource='frontend',
+    text="README✨",
 )
+
+# readme_in_cmd(
+#     name='render-readme-frontend-cmd',
+#     markdown_file_path='frontend/README.md',
+#     resource='frontend',
+#     text="README🚀",
+# )
+
+k8s_yaml('backend/deployment.yaml')
+k8s_resource('backend')
+
+readme_in_html(
+    name='render-readme-backend',
+    markdown_file_path='backend/README.md',
+    resource='backend',
+    text="README✨",
+)
+
+# readme_in_cmd(
+#     name='render-readme-backend-cmd',
+#     markdown_file_path='backend/README.md',
+#     resource='backend',
+#     text="README🚀",
+# )
