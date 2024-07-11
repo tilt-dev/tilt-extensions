@@ -1,0 +1,44 @@
+def yarn(path, auto_init=[], enabled_workspaces=[], enabled_scripts=[]):
+  config.define_string_list('yarn_auto_init', usage='List of scripts to automatically run. The full tilt name is expected like <script>-<workspace>.')
+  config.define_string_list('yarn_enabled_workspaces', usage='List of workspaces to enable for yarn.')
+  config.define_string_list('yarn_enabled_scripts', usage='List of scripts to enable for yarn. Common examples include `start`, `test`, `build`.')
+  cfg = config.parse()
+  def is_auto_init(script):
+    yarn_auto_init = auto_init + cfg.get('yarn_auto_init', [])
+    return script in yarn_auto_init
+  def workspace_enabled(workspace):
+    workspaces = enabled_workspaces + cfg.get('yarn_enabled_workspaces', [])
+    return workspace in workspaces if workspaces else True
+  def script_enabled(script):
+    scripts = enabled_scripts + cfg.get('yarn_enabled_scripts', [])
+    return script in scripts if scripts else True
+
+  root_package_dir = os.path.dirname(path)
+  workspaces = local(['yarn', 'workspaces', 'list', '--json'], quiet=True, dir=root_package_dir)
+  for workspace_json in str(workspaces).splitlines():
+    workspace = decode_json(workspace_json)
+    sanitized_workspace_name = workspace['name'].replace('@', '').replace('/', '.')
+    if (workspace_enabled(sanitized_workspace_name)):
+      scripts = read_json(os.path.join(workspace['location'], 'package.json')).get('scripts', {})
+      for script in sorted(scripts.keys()):
+        if (script_enabled(script)):
+          script_name = '-'.join([script, sanitized_workspace_name])
+          local_resource(
+            name=script_name,
+            cmd=['yarn', 'workspace', workspace['name'], 'run', script],
+            dir=root_package_dir,
+            labels=sanitized_workspace_name,
+            trigger_mode=TRIGGER_MODE_MANUAL,
+            auto_init=is_auto_init(script_name),
+            allow_parallel=True,
+          )
+
+  local_resource(
+    name='yarn-install',
+    cmd=['yarn', 'install'],
+    dir=root_package_dir,
+    labels='yarn',
+    trigger_mode=TRIGGER_MODE_MANUAL,
+    auto_init=is_auto_init('yarn-install'),
+    allow_parallel=True,
+  )
