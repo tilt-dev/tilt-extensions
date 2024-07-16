@@ -35,7 +35,8 @@ def helm_resource(
     port_forwards=[],
     auto_init=True,
     pod_readiness='',
-    update_dependencies: False):
+    update_dependencies: False
+    links=[]):
   ...
 ```
 
@@ -67,11 +68,11 @@ chart. Must be the same length as `image_deps`. Examples of accepted values:
 - `('image.repository', 'image.tag')`: A chart that accepts an image as a
   separate repository and tag, passed as a 2-element tuple. This is how charts
   created with `helm create` are structured.
-  
+
 - `('image.registry', 'image.repository', 'image.tag')`: A chart that accepts
   an image as a 'registry', 'repository' and a 'tag', passed as a 3-element tuple.
   This is another common pattern used by many charts.
-  
+
 - `[('image.repository', 'image.tag'), ('initImage.repository', 'initImage.tag')]`:
   A chart that uses the same image in two different values. Passed as a list.
 
@@ -85,10 +86,10 @@ chart. Must be the same length as `image_deps`. Examples of accepted values:
 
 `image_selector`: Image reference to determine containers eligible for Live Update.
   Only applicable if there are no images in `image_deps`.
-  
+
 `container_selector`: Container reference to determine containers eligible for Live Update.
   Only applicable if there are no images in `image_deps`.
-  
+
 `live_update`: Live Update steps for images not built by Tilt.
   Only applicable if there are no images in `image_deps`.
 
@@ -106,6 +107,8 @@ can start building). By default, Tilt will wait for pods to be ready if it
 thinks a resource has pods.
 
 `update_dependenices`: Runs `helm dependency update` before installing the chart.
+
+`links`: One or more links to be associated with this resource in the UI. For more info, see [Accessing Resource Endpoints](https://docs.tilt.dev/accessing_resource_endpoints#displaying-a-static-link).
 
 ### helm_repo
 
@@ -147,22 +150,22 @@ In a Tilt environment, there are a few different approaches to installing a Helm
   --install` as a local shell script.  This works and is easy to get
   started. But Tilt has no way to "see" what the shell scripts are installing,
   or monitoring them after they're done.
-  
+
 - Tilt offers a built-in `helm()` command that converts local Helm charts into
   Kubernetes YAML. `k8s_yaml(helm('./path/to/chart'))` registers the resources
   so that Tilt can deploy them. This works well for simple charts. Helm 3 has
   lots of great features for customizing the install process (e.g., waiting on
   CRD installation) that this approach misses out on.
-  
+
 - [Bob Jackman](https://github.com/kogi) wrote a `helm_remote` Tilt extension.
-  `helm_remote` downloaded a remote chart, unpacked it on local disk, converted 
+  `helm_remote` downloaded a remote chart, unpacked it on local disk, converted
   it to Kubernetes YAML, then registered that YAML with Tilt. Because
   people often used this to install Kuberentes CRDs and operators,
   `helm_remote` would register CRDs as a separate resource and use
   Tilt's dependency-management to customize the install process.
-  
+
 You can read more in the [Tilt Helm Docs](https://docs.tilt.dev/helm.html)
-  
+
 ### How this Approach is Different
 
 Tilt now has a `k8s_custom_deploy` built-in that lets you use arbitrary shell
