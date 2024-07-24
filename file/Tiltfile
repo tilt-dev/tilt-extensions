@@ -1,0 +1,21 @@
+def read_file(path):
+  if os.name == "posix": # Linux/Mac implementation
+    return str(local("cat {}".format(path), echo_off=True, quiet=True))
+  elif os.name == "nt": # Windows implementation
+    path = path.replace("/", "\\")
+    return str(local("type {}".format(path), echo_off=True, quiet=True))
+  else:
+    fail("Unknown system architecture: " + os.name)
+
+def write_file(path, content):
+  content = str(content)
+
+  if os.name == "posix": # Linux/Mac implementation
+    local("echo '{}' > {}".format(content, path), echo_off=True, quiet=True)
+  elif os.name == "nt": # Windows implementation
+    path = path.replace("/", "\\")
+    local('type nul > {}'.format(path), echo_off=True, quiet=True)
+    for line in content.splitlines():
+      local('echo {} >> {}'.format(str(line).replace('&', '^&').replace('<', '^<').replace('>', '^>'), path), echo_off=True, quiet=True)
+  else:
+    fail("Unknown system architecture: " + os.name)
