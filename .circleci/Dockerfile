@@ -34,7 +34,7 @@ RUN curl -sSL https://github.com/vmware-tanzu/buildkit-cli-for-kubectl/releases/
   dpkg -i kubectl-buildkit.deb
 
 # install buildpack CLI
-ARG PACK_VERSION=v0.27.0
+ARG PACK_VERSION=v0.35.1
 RUN curl -sSL "https://github.com/buildpacks/pack/releases/download/${PACK_VERSION}/pack-${PACK_VERSION}-linux.tgz" | \
   tar -C /usr/local/bin/ --no-same-owner -xzv pack
 
@@ -53,10 +53,10 @@ RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH=/root/.pulumi/bin:$PATH
 
 # install earthly
-ARG EARTHLY_VERSION=v0.6.28
+ARG EARTHLY_VERSION=v0.8.15
 RUN wget https://github.com/earthly/earthly/releases/download/${EARTHLY_VERSION}/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod a+x /usr/local/bin/earthly
 
-ARG COMPOSE_V2_VERSION="2.24.1"
+ARG COMPOSE_V2_VERSION="2.29.1"
 RUN mkdir -p "${HOME}/.docker/cli-plugins" \
     && curl -sSL "https://github.com/docker/compose/releases/download/v${COMPOSE_V2_VERSION}/docker-compose-linux-$(uname -m)" -o "${HOME}/.docker/cli-plugins/docker-compose" \
     && chmod +x "${HOME}/.docker/cli-plugins/docker-compose" \
