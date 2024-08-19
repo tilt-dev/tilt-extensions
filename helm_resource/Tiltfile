@@ -97,6 +97,8 @@ def helm_resource(
   if flags:
     apply_cmd.extend(flags)
 
+  apply_cmd.extend(["--kube-context", k8s_context()])
+
   dupe_deps = {}
   for i in range(len(image_deps)):
     if image_deps[i] in dupe_deps:
