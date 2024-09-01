@@ -1,0 +1,46 @@
+Invoke-WebRequest "https://github.com/tilt-dev/tilt/releases/download/v0.33.19/tilt.0.33.19.windows.x86_64.zip" -OutFile "tilt.zip"
+Expand-Archive "tilt.zip" -DestinationPath "tilt"
+Move-Item -Force -Path "tilt\tilt.exe" -Destination "$home\bin\tilt.exe"https://github.com/tilt-dev/tilt/releases/download/v0.33.19/tilt.0.33.19.windows.x86_64.zipcurl -fsSL https://github.com/tilt-dev/tilt/releases/download/v0.33.19/tilt.0.33.19.linux.x86_64.tar.gz | tar -xzv tilt && \
+  sudo mv tilt /usr/local/bin/tilthttps://github.com/tilt-dev/tilt/releases/download/v0.33.19/tilt.0.33.19.linux.x86_64.tar.gzcurl -fsSL https://github.com/tilt-dev/tilt/releases/download/v0.33.19/tilt.0.33.19.mac.x86_64.tar.gz | tar -xzv tilt && \
+  sudo mv tilt /usr/local/bin/tilthttps://github.com/tilt-dev/tilt/releases/download/v0.33.19/tilt.0.33.19.mac.x86_64.tar.gzasdf plugin add tilt
+asdf install tilt 0.33.19
+asdf global tilt 0.33.19conda config --add channels conda-forge
+conda install tilt# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest
