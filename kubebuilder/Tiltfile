@@ -1,6 +1,6 @@
 load('ext://restart_process', 'docker_build_with_restart')
 
-def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLERGEN='crd:trivialVersions=true rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;', DISABLE_SECURITY_CONTEXT=True):
+def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLERGEN='rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases;', DISABLE_SECURITY_CONTEXT=True):
 
     DOCKERFILE = '''FROM golang:alpine
     WORKDIR /
