@@ -14,6 +14,7 @@ def helm_resource(
     image_deps=None,
     image_keys=None,
     flags=None,
+    uninstall_flags=None,
     image_selector='',
     container_selector='',
     live_update=None,
@@ -50,6 +51,7 @@ def helm_resource(
         by many charts.
 
     flags: Additional flags to pass to `helm install` (e.g., `['--set', 'key=value']`)
+    uninstall_flags: Additional flags to pass to `helm uninstall` (e.g., `['--no-hooks']`)
     image_selector: Image reference to determine containers eligible for Live Update.
       Only applicable if there are no images in `image_deps`.
     container_selector: Container reference to determine containers eligible for Live Update.
@@ -96,6 +98,9 @@ def helm_resource(
 
   if flags:
     apply_cmd.extend(flags)
+
+  if uninstall_flags:
+    delete_cmd.extend(uninstall_flags)
 
   dupe_deps = {}
   for i in range(len(image_deps)):
