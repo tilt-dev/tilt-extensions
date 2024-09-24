@@ -84,6 +84,8 @@ chart. Must be the same length as `image_deps`. Examples of accepted values:
 
 - Pass a values file as `flags=['--values=./path/to/values.yaml']`.
 
+`uninstall_flags`: Additional flags to pass to `helm uninstall`.
+
 `image_selector`: Image reference to determine containers eligible for Live Update.
   Only applicable if there are no images in `image_deps`.
 
