@@ -57,6 +57,27 @@ metadata:
 
 
 def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password='', allow_duplicates=False, create_namespace=False):
+    # ======== Create Namespace
+    if create_namespace and namespace != '' and namespace != 'default':
+        # avoid a namespace not found error
+        namespace_create(namespace)  # do this early so it manages to register before we attempt to install into it
+
+    install_crds(chart, chart_target)
+
+    # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps,
+    # sometimes the crds haven't yet finished installing before the below tries
+    # to run
+    yaml = helm_remote_yaml(chart, repo_url, repo_name, release_name, values, set, namespace, version, username, password)
+
+    # The allow_duplicates API is only available in 0.17.1+
+    if allow_duplicates and _version_tuple() >= [0, 17, 1]:
+        k8s_yaml(yaml, allow_duplicates=allow_duplicates)
+    else:
+        k8s_yaml(yaml)
+
+    return yaml
+
+def helm_remote_yaml(chart, repo_url='', repo_name='', release_name='', values=[], set=[], namespace='', version='', username='', password=''):
     # ======== Helper methods
     def get_local_repo(repo_name, repo_url):
         # if no repos are present, helm exit code is >0 and stderr output buffered
@@ -140,11 +161,6 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
                 local(build_helm_command(repo_command), quiet=True)
                 _set_skip('True')
 
-    # ======== Create Namespace
-    if create_namespace and namespace != '' and namespace != 'default':
-        # avoid a namespace not found error
-        namespace_create(namespace)  # do this early so it manages to register before we attempt to install into it
-
     # ======== Initialize
     # -------- targets
     pull_target = os.path.join(helm_remote_cache_dir, repo_name.replace(':', ''), version)
@@ -175,18 +191,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
 
         local(build_helm_command(pull_command, (username, password), version), quiet=True)
 
-    install_crds(chart, chart_target)
-
-    # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps,
-    # sometimes the crds haven't yet finished installing before the below tries
-    # to run
     yaml = helm(chart_target, name=release_name, namespace=namespace, values=values, set=set)
-
-    # The allow_duplicates API is only available in 0.17.1+
-    if allow_duplicates and _version_tuple() >= [0, 17, 1]:
-        k8s_yaml(yaml, allow_duplicates=allow_duplicates)
-    else:
-        k8s_yaml(yaml)
 
     return yaml
 
