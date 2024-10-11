@@ -182,7 +182,7 @@ def helm_remote_yaml(chart, repo_url='', repo_name='', release_name='', values=[
 
     if needs_pull:
         # -------- commands
-        pull_command = ['pull', '%s/%s' % (repo_name, chart), '--untar', '--destination', pull_target]
+        pull_command = ['pull', '%s/%s' % (repo_name, chart), '--untar', '--destination', _pull_target(repo_name, version)]
 
         # ======== Perform Installation
         if cached_chart_exists:
@@ -194,9 +194,11 @@ def helm_remote_yaml(chart, repo_url='', repo_name='', release_name='', values=[
 
     return yaml
 
+def _pull_target(repo_name, version):
+    return os.path.join(helm_remote_cache_dir, repo_name.replace(':', ''), version)
+
 def _chart_target(chart, repo_name, version):
-    pull_target = os.path.join(helm_remote_cache_dir, repo_name.replace(':', ''), version)
-    return os.path.join(pull_target, chart)
+    return os.path.join(_pull_target(repo_name, version), chart)
 
 def _version_tuple():
     ver_string = str(local('tilt version', quiet=True))
