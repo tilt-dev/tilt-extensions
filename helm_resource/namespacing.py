@@ -9,20 +9,20 @@ from typing import Dict
 # Add default namespace for a single resource.
 def add_default_namespace_resource(r, namespace, indent=""):
   # Find the part of the yaml that has the metadata: and following indented lines.
-  meta = re.search("^%smetadata:\n(\\s+.*\n)*" % indent, r, re.MULTILINE)
+  meta = re.search("^%smetadata:\r?\n(\\s+.*\r?\n)*" % indent, r, re.MULTILINE)
   if not meta:
     return r
-
+  print(meta.group(0))
   metadata = meta.group(0)
 
   # Remove empty namespace blocks.
-  metadata = re.sub("\n\\s+namespace:\\s*\n", "\n", metadata, flags=re.MULTILINE)
+  metadata = re.sub("\r?\n\\s+namespace:\\s*\r?\n", "\n", metadata, flags=re.MULTILINE)
 
-  has_namespace = re.search("\n\\s+namespace: *\\S", metadata, re.MULTILINE)
+  has_namespace = re.search("\r?\n\\s+namespace: *\\S", metadata, re.MULTILINE)
   if not has_namespace:
     metadata = re.sub("^%smetadata:" % indent,
                       "%smetadata:\n%s  namespace: %s" % (indent, indent, namespace),
-                      metadata, 1)
+                      metadata, count=1)
     return r[0:meta.start()] + metadata + r[meta.end():]
 
   return r
