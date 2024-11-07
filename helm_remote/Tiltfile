@@ -63,7 +63,7 @@ def helm_remote(chart, repo_url='', repo_name='', release_name='', values=[], se
         namespace_create(namespace)  # do this early so it manages to register before we attempt to install into it
 
     if install_crds:
-        install_crds(chart, _chart_target(chart, repo_name, version))
+        _install_crds(chart, _chart_target(chart, repo_name, version))
 
     # TODO: since neither `k8s_yaml()` nor `helm()` accept resource_deps,
     # sometimes the crds haven't yet finished installing before the below tries
@@ -209,7 +209,7 @@ def _version_tuple():
     return [int(str_num) for str_num in version.split(".")]
 
 # install CRDs as a separate resource and wait for them to be ready
-def install_crds(name, directory):
+def _install_crds(name, directory):
     name += '-crds'
     files = str(local(r"grep --include='*.yaml' --include='*.yml' -rEil '\bkind[^\w]+CustomResourceDefinition\s*$' %s || exit 0" % directory, quiet=True)).rstrip('\n')
 
