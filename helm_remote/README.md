@@ -41,6 +41,7 @@ helm_remote(chart, repo_url='', repo_name='', release_name='', namespace='', ver
 * `allow_duplicates` ( bool ) - Allow duplicate resources. Usually duplicate resources indicate a programmer error.
    But some charts specify resources twice.
 * `create_namespace` ( bool ) - Create the namespace specified in `namespace` ( equivalent to helm's `--create_namespace` flag)
+* `install_crds` ( bool ) - extension will try to find CRDs and install them before helm apply (enabled by default)
 
 #### Change the Cache Location
 
