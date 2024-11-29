@@ -48,6 +48,7 @@ chmod a+rw "$TRIGGER"
 "$DIR/watch-namespaces.sh" "$TRIGGER" &
 WATCH_PID="$!"
 
+# shellcheck disable=SC2317
 function cleanup {
     set -x
     set +e

@@ -4,7 +4,6 @@ cd "$(dirname "$0")" || exit
 
 set -uxo pipefail
 tilt ci > tilt.log &
-TILT_PID=$!
 
 sleep 1
 timeout 30 tail -f tilt.log | grep -q "uibutton.tilt.dev/sleep:update:cancel created"

@@ -1,4 +1,5 @@
-FROM alpine
+# distro with bash required as start.sh contains bash specific code
+FROM debian:bookworm-slim
 
 RUN echo 0 > restart_count.txt
 

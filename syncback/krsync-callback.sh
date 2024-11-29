@@ -16,5 +16,6 @@ fi
 
 # $K8S_OBJECT is intentionally not quoted here so -n/-c flags can be
 # parsed by kubectl
+# shellcheck disable=SC2086
 exec kubectl exec -i $K8S_OBJECT -- "$@"
 

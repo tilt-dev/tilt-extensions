@@ -8,9 +8,8 @@ set -u
 touch start.sh
 # seconds
 TIMEOUT=10
-for ((i=0;i<=$TIMEOUT;++i)) do
-  tilt logs | grep -v test_update | grep -q "RESTART_COUNT: 1"
-  if [[ $? -eq 0 ]]; then
+for ((i=0;i<=TIMEOUT;++i)) do
+  if tilt logs | grep -v test_update | grep -q "RESTART_COUNT: 1"; then
     echo restart detected
     exit 0
   fi

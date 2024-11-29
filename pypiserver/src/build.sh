@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [[ $# -eq 1 ]]; then
   printf "Specify path to the package"
   exit 1
@@ -12,4 +14,5 @@ if [[ $# -eq 2 ]]; then
   cmd="${cmd} upload -r ${2}"
 fi
 
+# shellcheck disable=SC2086
 python3 ${cmd}
