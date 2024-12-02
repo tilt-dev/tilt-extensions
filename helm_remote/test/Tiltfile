@@ -9,3 +9,10 @@ if not os.path.exists('./.helm/memcached'):
 docker_build('helm-remote-test-verify', '.')
 k8s_yaml('job.yaml')
 k8s_resource('helm-remote-test-verify', resource_deps=['memcached'])
+
+chart_version = '25.1.0'
+helm_remote('prometheus',
+            repo_url='oci://ghcr.io/prometheus-community/charts',
+            version=chart_version)
+if not os.path.exists('./.helm/oci/ghcr.io/prometheus-community/charts/%s/prometheus' % chart_version):
+  fail('prometheus failed to load in the right directory')
