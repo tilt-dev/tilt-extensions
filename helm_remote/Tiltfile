@@ -143,9 +143,12 @@ def helm_remote_yaml(chart, repo_url='', repo_name='', release_name='', values=[
     if version != 'latest' and version != version.replace('/', '').replace('\\', ''):
         fail('Version cannot contain a forward slash')
 
+    is_oci = repo_url.startswith('oci://')
 
     # ======== Determine state of existing helm repo
-    if repo_url != '':
+    # helm does not support "repo {add, update}" for OCI based charts,
+    # see https://helm.sh/docs/topics/registries/#other-subcommands
+    if repo_url != '' and not is_oci:
         local_helm_repo = get_local_repo(repo_name, repo_url)
 
         if local_helm_repo == None:
@@ -164,6 +167,8 @@ def helm_remote_yaml(chart, repo_url='', repo_name='', release_name='', values=[
 
     # ======== Initialize
     # -------- targets
+    if is_oci:
+        repo_name = repo_url
     chart_target = _chart_target(chart, repo_name, version)
 
     cached_chart_exists = os.path.exists(chart_target)
