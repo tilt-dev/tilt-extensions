@@ -8,8 +8,8 @@ publish-ci-image:
 
 shellcheck:
 	LINT_ERRORS=0; \
-	IFS=$$'\n'; for shellscript in $$(git ls-files -z | xargs -0 file | grep "shell script" | cut -d: -f1 || echo ""); do \
-	   docker run --rm -v "$$PWD:/mnt" koalaman/shellcheck:stable "$${shellscript}" || LINT_ERRORS=$$((LINT_ERRORS+1)); \
+	IFS=$$'\n'; for shellscript in $$(git ls-files "*.sh"); do \
+		docker run --rm -v "$$PWD:/mnt" koalaman/shellcheck:stable "$${shellscript}" || LINT_ERRORS=$$((LINT_ERRORS+1)); \
 	done; \
 	exit "$${LINT_ERRORS}"
 

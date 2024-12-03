@@ -47,8 +47,8 @@ find_rsync_path() {
     # shellcheck disable=SC2181
     if [ $? -eq 0 ]; then
         detected_rsync_version=$(echo "$rsync_output" | head -1 | awk '{ print $3 }')
-        # bash cannot compare versions, like 3.3.0 with 3. So we use sort -V:
-        if [[ $(printf "%s\n%s\n" "$detected_rsync_version" "3" | sort -V | head -n 1) == "3" ]]; then
+        # shellcheck disable=SC2071
+        if [[ "$detected_rsync_version" > 3 ]]; then
             rsync_path=
         fi
     fi

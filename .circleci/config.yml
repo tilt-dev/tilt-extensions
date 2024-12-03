@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  shellcheck: circleci/shellcheck@3.2.0
 jobs:
   validate:
     docker:
@@ -10,6 +8,15 @@ jobs:
       - checkout
       - run: GOBIN=$HOME/.bin go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
       - run: $HOME/.bin/tilt-extensions-ci .
+
+  shellcheck:
+    docker:
+      - image: docker/tilt-extensions-ci@sha256:70127b822dc42d45480dc6cddd97297d7b454503aa75b053728b565533233989
+
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run: make shellcheck
 
   test:
     # A common error is to build an extension that doesn't properly handle
@@ -33,6 +40,5 @@ workflows:
   build:
     jobs:
       - validate
-      - shellcheck/check:
-          dir: ./
+      - shellcheck
       - test

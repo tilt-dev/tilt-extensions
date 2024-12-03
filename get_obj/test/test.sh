@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$(dirname "$0")" || exit
+cd "$(dirname "$0")" || exit 1
 
 # Spinning up initial test deployment
 tilt ci -f setup.Tiltfile
