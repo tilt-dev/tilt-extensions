@@ -9,14 +9,23 @@ jobs:
       - run: GOBIN=$HOME/.bin go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
       - run: $HOME/.bin/tilt-extensions-ci .
 
-  shellcheck:
+  pre-commit:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:70127b822dc42d45480dc6cddd97297d7b454503aa75b053728b565533233989
+      - image: python:3.11.10-bookworm@sha256:5e5ef24d131e78708b5947823f2830ab42328132b6caff002bf6481d64b99593
 
     steps:
-      - setup_remote_docker
       - checkout
-      - run: make shellcheck
+      - run: |
+          python -m pip install pre-commit
+          cp .pre-commit-config.yaml pre-commit-cache-key.txt
+          python --version >> pre-commit-cache-key.txt
+      - restore_cache:
+          key: pre-commit-3-{{ checksum "pre-commit-cache-key.txt" }}
+      - run: make pre-commit
+      - save_cache:
+          key: pre-commit-3-{{ checksum "pre-commit-cache-key.txt" }}
+          paths:
+            - ~/.cache/pre-commit
 
   test:
     # A common error is to build an extension that doesn't properly handle
@@ -40,5 +49,5 @@ workflows:
   build:
     jobs:
       - validate
-      - shellcheck
+      - pre-commit
       - test

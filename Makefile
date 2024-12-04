@@ -6,11 +6,7 @@ test:
 publish-ci-image:
 	docker buildx build --push --pull --platform linux/amd64 -t docker/tilt-extensions-ci -f .circleci/Dockerfile .circleci
 
-shellcheck:
-	LINT_ERRORS=0; \
-	IFS=$$'\n'; for shellscript in $$(git ls-files "*.sh"); do \
-		docker run --rm -v "$$PWD:/mnt" koalaman/shellcheck:stable "$${shellscript}" || LINT_ERRORS=$$((LINT_ERRORS+1)); \
-	done; \
-	exit "$${LINT_ERRORS}"
+pre-commit:
+	pre-commit run --verbose --show-diff-on-failure --color=always --all-files
 
 .PHONY: $(MAKECMDGOALS)
