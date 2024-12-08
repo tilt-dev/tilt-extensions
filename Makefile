@@ -1,4 +1,4 @@
-.PHONY: test publish-ci-image
+SHELL := /bin/bash -o pipefail -o errexit
 
 test:
 	./test.sh
@@ -6,6 +6,7 @@ test:
 publish-ci-image:
 	docker buildx build --push --pull --platform linux/amd64 -t docker/tilt-extensions-ci -f .circleci/Dockerfile .circleci
 
-shellcheck:
-	find . -type f -name '*.sh' -not -path "*/node_modules/*" -not -path "*/.git-sources/*" -not -path "*/.git/*" -exec \
-	    docker run --rm -it -e SHELLCHECK_OPTS="-e SC2001" -v $$(pwd):/mnt nlknguyen/alpine-shellcheck {} \;
+pre-commit:
+	pre-commit run --verbose --show-diff-on-failure --color=always --all-files
+
+.PHONY: $(MAKECMDGOALS)

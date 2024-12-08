@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+# bash shebang required as we are using bash specific features: pipefail + trap
+
 set -euo pipefail
 RESTART_COUNT="$(cat restart_count.txt)"
 echo "RESTART_COUNT: $RESTART_COUNT"

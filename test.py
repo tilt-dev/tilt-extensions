@@ -63,6 +63,7 @@ if args.changed:
 
 # `git ls-files` instead of `find` to ensure we skip stuff like .git and ./git_resource/test/.git-sources
 files = subprocess.check_output(["git", "ls-files", "**/test.sh"]).decode('utf-8').splitlines()
+tests = []
 for f in files:
 
   # don't re-execute itself
@@ -82,5 +83,8 @@ for f in files:
     print("dry run: %s" % f)
     continue
 
-  print("running %s" % f)
+  tests.append(f)
+
+for count, f in enumerate(tests):
+  print("running %d/%d: %s" % (count + 1, len(tests), f))
   subprocess.check_call([f])

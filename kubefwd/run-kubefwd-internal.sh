@@ -6,7 +6,7 @@
 set -euo pipefail
 
 flags=()
-while read namespace; do
+while read -r namespace; do
     if [[ "$namespace" == "" ]]; then
       continue
     fi
