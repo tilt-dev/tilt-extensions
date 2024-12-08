@@ -1,0 +1,13 @@
+[tool.ruff.lint]
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+ignore = [
+  "E501"  # Line too long
+]
+# see https://docs.astral.sh/ruff/rules/
+select = [
+  "F",  # pyflakes (part of flake8)
+  "E",  # pycodestyle errors (part of flake8)
+  "W",  # pycodestyle warnings (part of flake8)
+  "I"  # isort
+]

@@ -7,7 +7,9 @@ import os
 import subprocess
 import sys
 from typing import Dict
+
 from namespacing import add_default_namespace
+
 
 def _parse_image_string(image: str) -> Dict:
   if '.' in image or 'localhost' in image or image.count(":") > 1:

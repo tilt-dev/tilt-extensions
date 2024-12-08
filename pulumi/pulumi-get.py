@@ -21,7 +21,7 @@ def dumpResource(ns, kind, name):
     args = ['kubectl', 'get']
     if ns:
       args.extend(['-n', ns])
-    
+
     args.extend([kind, name, '-o=yaml'])
     print(subprocess.check_output(args).decode('utf-8'))
     print('---')
@@ -38,7 +38,7 @@ for resource in resources:
   is_k8s = isinstance(t, str) and t.find('kubernetes:') == 0
   if not is_k8s:
     continue
-  
+
   o = resource.get('outputs', {})
 
   if t.find('kubernetes:helm.sh/') == 0:
@@ -53,7 +53,7 @@ for resource in resources:
             if helmResource.find('/') > 0:
               ns = helmResource[0:helmResource.find('/')]
               name = helmResource[helmResource.find('/') + 1:len(helmResource)]
-            
+
             dumpResource(ns, kind, name)
   else:
     if not o.get('kind', ''):

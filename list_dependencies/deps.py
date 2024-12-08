@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import subprocess
 import json
+import subprocess
+
 
 def format_list(mylist):
     if len(mylist) < 2:
@@ -10,7 +11,7 @@ def format_list(mylist):
 
 def get_node_dependencies():
     node_str = subprocess.run(
-            ['tilt', 'dump', 'engine'], 
+            ['tilt', 'dump', 'engine'],
             stdout=subprocess.PIPE,
         ).stdout.decode('utf-8')
     node_data = json.loads(node_str)["ManifestTargets"]
@@ -21,12 +22,12 @@ def get_node_dependencies():
         manifest = resInfo["Manifest"]
         resName = manifest["Name"]
         resDeps = manifest["ResourceDependencies"]
-        if resDeps == None:
+        if resDeps is None:
             resDeps = []
         dependencies[resName] = resDeps
 
     return dependencies
-    
+
 def get_node_status():
     ready_str = subprocess.run(
             ['tilt', 'get', 'kubernetesdiscovery', '-o', 'json'],
@@ -40,7 +41,7 @@ def get_node_status():
         resName = resInfo["metadata"]["name"]
         pods = resInfo["status"]["pods"]
         resStatus = False
-        if pods != None:
+        if pods is not None:
             for pod in pods:
                 containers = pod["containers"]
                 for container in containers:

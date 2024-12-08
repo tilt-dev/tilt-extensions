@@ -1,7 +1,8 @@
 import json
 import subprocess
-import unittest
 import time
+import unittest
+
 
 class TestHoneycomb(unittest.TestCase):
   def test_events(self):
