@@ -1,5 +1,5 @@
-import sys
 import socket
+import sys
 
 
 def _is_port_in_use(port):
@@ -11,6 +11,6 @@ def _is_port_in_use(port):
 
 port = sys.argv[1]
 if not port:
-    print("ERROR: You must specify port number!!!") 
+    print("ERROR: You must specify port number!!!")
     sys.exit(1)
 print("true" if _is_port_in_use(int(port)) else "false")

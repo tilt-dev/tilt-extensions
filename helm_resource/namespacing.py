@@ -1,10 +1,7 @@
 # Helper functions for defaulting yaml.
 
-import os
 import re
-import subprocess
-import sys
-from typing import Dict
+
 
 # Add default namespace for a single resource.
 def add_default_namespace_resource(r, namespace, indent=""):

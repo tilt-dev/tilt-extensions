@@ -1,9 +1,9 @@
+import datetime as datetime
 import http.client as http_client
 import json
 import os
 import subprocess
 import time
-import datetime as datetime
 
 api_key = os.environ.get('HONEYCOMB_API_KEY', '')
 dataset = os.environ.get('HONEYCOMB_DATASET', '')

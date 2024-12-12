@@ -1,6 +1,8 @@
 import re
 import unittest
+
 from namespacing import add_default_namespace
+
 
 class TestNamespacing(unittest.TestCase):
   def assert_defaulted(self, expected, original, ns):

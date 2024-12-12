@@ -9,11 +9,9 @@
 # python3 events.py "2021-12-02T14:38:36.551717Z"
 # where the timestamp is in UTC
 
-import json
-import os
-import subprocess
-import time
 import datetime as datetime
+import json
+import subprocess
 import sys
 
 last_report_time = None
@@ -35,7 +33,7 @@ custom_build_list = {}
 try:
   custom_build_list_json = subprocess.check_output(['tilt', 'get', 'cmdimages', '-o=json'])
   custom_build_list = json.loads(custom_build_list_json)
-except:
+except (subprocess.CalledProcessError, json.JSONDecodeError):
   pass
 
 current_report_time = datetime.datetime.now().astimezone(datetime.timezone.utc)
