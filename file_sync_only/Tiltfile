@@ -37,9 +37,9 @@ def file_sync_only(image='', manifests=[], deps=["."], live_update=[], allow_dup
 
 # sync files at first time
 def _first_sync_from_liveupdate(image, live_update, k8s_resources):
-    for l in live_update:
-        if type(l) == "live_update_sync_step":
-            local_path, remote_path = _get_sync_params(l)
+    for step in live_update:
+        if type(step) == "live_update_sync_step":
+            local_path, remote_path = _get_sync_params(step)
             syncname = "firstsync-%s-%s" % (image.replace("/", "_"), local_path.replace("/", "_"))
             local_resource(syncname,
                 'touch %s' % local_path,
@@ -81,4 +81,3 @@ def _get_related_resources(manifests, image):
         fail("found multiple image tags for %s in manifests %s" % (image, manifests))
 
     return k8s_resources, tags_in_manifests[0]
-

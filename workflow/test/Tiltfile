@@ -12,24 +12,24 @@ test_clear = ['echo', 'resetting...']
 
 
 local_resource(
-	name='database',
-	cmd=['echo', 'Workflow Test'],
-)
-
-workflow('test', 
-	resource_name='database',
-	work_cmds=test_cmds,
-	clear_cmd=test_clear,
-)
-
-workflow('test2',
-	resource_name='database',
-	work_cmds=test_cmds,
-	clear_cmd=test_clear,
+    name='database',
+    cmd=['echo', 'Workflow Test'],
 )
 
 workflow('test',
-	resource_name='(Tiltfile)',
-	work_cmds=test_cmds,
-	clear_cmd=test_clear,
+    resource_name='database',
+    work_cmds=test_cmds,
+    clear_cmd=test_clear,
+)
+
+workflow('test2',
+    resource_name='database',
+    work_cmds=test_cmds,
+    clear_cmd=test_clear,
+)
+
+workflow('test',
+    resource_name='(Tiltfile)',
+    work_cmds=test_cmds,
+    clear_cmd=test_clear,
 )

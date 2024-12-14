@@ -77,6 +77,6 @@ ref, context, entrypoint, ignore=None, extra_flags=None, deps=None, live_update=
     ) % (extra_flags_str, shlex.quote(context)),
     ignore=ignore,
     deps=deps,
-	entrypoint=entrypoint,
+    entrypoint=entrypoint,
     live_update=live_update,
   )

@@ -3,10 +3,10 @@ load('ext://uibutton', 'cmd_button')
 display_deps_path = os.path.join(os.getcwd(), 'deps.py')
 
 def display_dependencies():
-	cmd_button(
-		name = 'show_deps',
-		resource = '(Tiltfile)',
-		argv = [display_deps_path],
-		text = 'list pending dependencies',
-		icon_name = 'account_tree'
-	)
+    cmd_button(
+        name = 'show_deps',
+        resource = '(Tiltfile)',
+        argv = [display_deps_path],
+        text = 'list pending dependencies',
+        icon_name = 'account_tree'
+    )

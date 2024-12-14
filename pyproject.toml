@@ -11,3 +11,12 @@ select = [
   "W",  # pycodestyle warnings (part of flake8)
   "I"  # isort
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Tiltfiles are written in Starlark, a subset of Python, so we need to disable
+# some Ruff rules that don't apply.
+"*Tiltfile*" = [
+  "F821",  # Undefined name
+  "E711",  # Comparison to `None` should be `cond is not None`
+  "E721"  # Use `is` and `is not`
+]

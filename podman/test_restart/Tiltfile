@@ -6,7 +6,7 @@ podman_build_with_restart(
     entrypoint='/app/main.sh',
     deps=['main.sh'],
     live_update=[
-	   sync('./main.sh', '/app/main.sh')
+       sync('./main.sh', '/app/main.sh')
     ]
   )
 

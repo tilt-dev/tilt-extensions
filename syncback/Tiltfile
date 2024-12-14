@@ -51,7 +51,7 @@ def syncback_command_args(k8s_object, src_dir, ignore=None, delete=False, paths=
 
     if paths and ignore:
         fail('Paths and ignore are mutually exclusive.')
-    
+
     if not paths:
         if not ignore:
             ignore = []

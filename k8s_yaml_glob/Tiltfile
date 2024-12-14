@@ -10,7 +10,6 @@ def k8s_yaml_glob(*glob_patterns, **kwargs):
 
     for glob_pattern in glob_patterns:
         script = 'import glob; print("|".join( p for p in glob.glob(\"' + glob_pattern + '")))'
-        cmd = python_cmd + " -c '" + script + "'"
         val = str(local(command=python_cmd + " -c '" + script + "'", quiet=False)).strip()
         yaml_paths = val.split("|")
         k8s_yaml(yaml_paths, **kwargs)
