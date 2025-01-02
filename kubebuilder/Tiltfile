@@ -24,16 +24,16 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLE
 
             return encode_yaml_stream(decoded)
         return data
-    
+
     def manifests():
         return 'controller-gen ' + CONTROLLERGEN
-    
+
     def generate():
         return 'controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
-    
+
     def vetfmt():
         return 'go vet ./...; go fmt ./...'
-    
+
     # build to tilt_bin beause kubebuilder has a dockerignore for bin/
     def binary():
         return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -o tilt_bin/manager cmd/main.go'
@@ -43,29 +43,29 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLE
 
     DIRNAME = os.path.basename(os. getcwd())
     # if kubebuilder
-    if os.path.exists('go.mod') == False:
+    if not os.path.exists('go.mod'):
         local("go mod init %s" % DIRNAME)
-    
-    if os.path.exists('PROJECT') == False:
+
+    if not os.path.exists('PROJECT'):
         local("kubebuilder init --domain %s" % DOMAIN)
-    
-    if os.path.exists('api') == False:
+
+    if not os.path.exists('api'):
         local("kubebuilder create api --resource --controller --group %s --version %s --kind %s" % (GROUP, VERSION, KIND))
-    
+
     local(manifests() + generate())
-    
+
     local_resource('CRD', manifests() + 'kustomize build config/crd | kubectl apply -f -', deps=["api"])
-    
+
     k8s_yaml(yaml())
-    
+
     deps = ['internal/controller', 'cmd/main.go']
     deps.append('api')
-    
+
     local_resource('Watch&Compile', generate() + binary(), deps=deps, ignore=['*/*/zz_generated.deepcopy.go'])
-    
+
     local_resource('Sample YAML', 'kubectl apply -f ./config/samples', deps=["./config/samples"], resource_deps=[DIRNAME + "-controller-manager"])
-    
-    docker_build_with_restart(IMG, '.', 
+
+    docker_build_with_restart(IMG, '.',
      dockerfile_contents=DOCKERFILE,
      entrypoint='/manager',
      only=['./tilt_bin/manager'],

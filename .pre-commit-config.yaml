@@ -11,11 +11,11 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.2
+    rev: v0.8.4
     hooks:
       - id: ruff
         args: [--fix]
-        exclude: ^.*/Tiltfile$
+        types_or: [tiltfile]
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1
     hooks:

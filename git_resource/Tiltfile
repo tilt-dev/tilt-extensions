@@ -106,10 +106,12 @@ def git_checkout(repository_url, checkout_dir=None, unsafe_mode=False):
 
 def deploy_from_dir(resource_name, directory, dockerfile='Dockerfile', namespace='default', resource_deps=[], port_forwards=[], build_callback=None, deployment_callback=None):
     if deployment_callback == None:
-        deployment_callback = lambda resource_name, image_name, namespace: _default_deployment_callback(resource_name, image_name, namespace)
+        def deployment_callback(resource_name, image_name, namespace):
+            return _default_deployment_callback(resource_name, image_name, namespace)
 
     if build_callback == None:
-        build_callback = lambda resource_name, directory, dockerfile: _default_build_callback(resource_name, directory, dockerfile=dockerfile)
+        def build_callback(resource_name, directory, dockerfile):
+            return _default_build_callback(resource_name, directory, dockerfile=dockerfile)
 
     image_name = build_callback(resource_name, directory, dockerfile=dockerfile)
     yaml = deployment_callback(resource_name, image_name, namespace)

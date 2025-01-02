@@ -11,7 +11,7 @@ DEFAULT_HASURA_PORT = 8080
 DEFAULT_HASURA_RESOURCE_NAME = 'hasura'
 
 def hasura_console(release_name='',
-            path='.', 
+            path='.',
             hasura_resource_name=None,
             hasura_endpoint= 'http://localhost:8080',
             hasura_secret=DEFAULT_HASURA_SECRET,

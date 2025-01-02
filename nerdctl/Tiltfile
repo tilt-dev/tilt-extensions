@@ -51,7 +51,7 @@ def nerdctl_build(
 
     if secret:
         cmd += ['--secret', secret]
-    
+
     if platform:
         cmd += ['--platform', platform]
 

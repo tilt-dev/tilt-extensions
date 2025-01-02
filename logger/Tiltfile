@@ -9,98 +9,98 @@ _log_level = 'info'
 _log_separator = '\n' + '*' * 20 + '\n'
 
 def _check_bool(value):
-	if not value:
-		return False
-	elif type(value) == 'bool':
-		return value
-	elif type(value) == 'string':
-		return value.lower() == 'true'
-	else:
-		return False
+    if not value:
+        return False
+    elif type(value) == 'bool':
+        return value
+    elif type(value) == 'string':
+        return value.lower() == 'true'
+    else:
+        return False
 
 def _is_log_level_enabled(log_level):
-	default_log_level = os.getenv('LOGGER_LOG_LEVEL', _log_level)
-	# validate default log level
-	if default_log_level not in _all_log_level:
-		fail(_build_message('Unknown log level: ' + default_log_level, True))
-	# debug default log level enables all other log levels
-	if default_log_level == 'debug' and log_level in _all_log_level:
-		return True
-	# info default log level enables info, warning and error log levels
-	elif default_log_level == 'info' and log_level in _info_allowed:
-		return True
-	# warning default log level enables warning and error log levels
-	elif default_log_level == 'warning' and log_level in _warn_allowed:
-		return True
-	# error default log level enables only error log level
-	elif default_log_level == 'error' and log_level in _error_allowed:
-		return True
-	else:
-		return False
+    default_log_level = os.getenv('LOGGER_LOG_LEVEL', _log_level)
+    # validate default log level
+    if default_log_level not in _all_log_level:
+        fail(_build_message('Unknown log level: ' + default_log_level, True))
+    # debug default log level enables all other log levels
+    if default_log_level == 'debug' and log_level in _all_log_level:
+        return True
+    # info default log level enables info, warning and error log levels
+    elif default_log_level == 'info' and log_level in _info_allowed:
+        return True
+    # warning default log level enables warning and error log levels
+    elif default_log_level == 'warning' and log_level in _warn_allowed:
+        return True
+    # error default log level enables only error log level
+    elif default_log_level == 'error' and log_level in _error_allowed:
+        return True
+    else:
+        return False
 
 def _build_message(content, use_log_separator=False):
-	message = content
-	if _check_bool(os.getenv('LOGGER_USE_LOG_SEPARATOR', use_log_separator)):
-		log_separator = os.getenv('LOGGER_LOG_SEPARATOR', _log_separator)
-		message = log_separator + content + log_separator
-	return message
+    message = content
+    if _check_bool(os.getenv('LOGGER_USE_LOG_SEPARATOR', use_log_separator)):
+        log_separator = os.getenv('LOGGER_LOG_SEPARATOR', _log_separator)
+        message = log_separator + content + log_separator
+    return message
 
 def is_debug_enabled():
-	return _is_log_level_enabled('debug')
+    return _is_log_level_enabled('debug')
 
 def debug(content, use_log_separator=False):
-	if is_debug_enabled():
-		print(_build_message(color.magenta('[DEBUG] ') + content, use_log_separator))
+    if is_debug_enabled():
+        print(_build_message(color.magenta('[DEBUG] ') + content, use_log_separator))
 
 def is_info_enabled():
-	return _is_log_level_enabled('info')
+    return _is_log_level_enabled('info')
 
 def info(content, use_log_separator=False):
-	if is_info_enabled():
-		print(_build_message(color.blue('[INFO] ') + content, use_log_separator))
+    if is_info_enabled():
+        print(_build_message(color.blue('[INFO] ') + content, use_log_separator))
 
 def is_warning_enabled():
-	return _is_log_level_enabled('warning')
+    return _is_log_level_enabled('warning')
 
 def warning(content, force_warn=True, use_log_separator=False):
-	if is_warning_enabled():
-		message = _build_message(color.yellow('[WARN] ') + content, use_log_separator)
-		if _check_bool(os.getenv('LOGGER_FORCE_WARN', force_warn)):
-			warn(message)
-		else:
-			print(message)
+    if is_warning_enabled():
+        message = _build_message(color.yellow('[WARN] ') + content, use_log_separator)
+        if _check_bool(os.getenv('LOGGER_FORCE_WARN', force_warn)):
+            warn(message)
+        else:
+            print(message)
 
 def is_error_enabled():
-	return _is_log_level_enabled('error')
+    return _is_log_level_enabled('error')
 
 def error(content, force_fail=True, use_log_separator=True):
-	if is_error_enabled():
-		message = _build_message(color.red('[ERROR] ') + content, use_log_separator)
-		if _check_bool(os.getenv('LOGGER_FORCE_FAIL', force_fail)):
-			fail(message)
-		else:
-			print(message)
+    if is_error_enabled():
+        message = _build_message(color.red('[ERROR] ') + content, use_log_separator)
+        if _check_bool(os.getenv('LOGGER_FORCE_FAIL', force_fail)):
+            fail(message)
+        else:
+            print(message)
 
 def log(log_level, content, force=False, use_log_separator=False):
-	if log_level == 'debug':
-		debug(content, use_log_separator)
-	elif log_level == 'info':
-		info(content, use_log_separator)
-	elif log_level == 'warning':
-		warning(content, force, use_log_separator)
-	elif log_level == 'error':
-		error(content, force, use_log_separator)
-	else:
-		print(content)
+    if log_level == 'debug':
+        debug(content, use_log_separator)
+    elif log_level == 'info':
+        info(content, use_log_separator)
+    elif log_level == 'warning':
+        warning(content, force, use_log_separator)
+    elif log_level == 'error':
+        error(content, force, use_log_separator)
+    else:
+        print(content)
 
 logger = struct(
-	is_debug_enabled = is_debug_enabled,
-	debug = debug,
-	is_info_enabled = is_info_enabled,
-	info = info,
-	is_warning_enabled = is_warning_enabled,
-	warning = warning,
-	is_error_enabled = is_error_enabled,
-	error = error,
-	log = log
+    is_debug_enabled = is_debug_enabled,
+    debug = debug,
+    is_info_enabled = is_info_enabled,
+    info = info,
+    is_warning_enabled = is_warning_enabled,
+    warning = warning,
+    is_error_enabled = is_error_enabled,
+    error = error,
+    log = log
 )

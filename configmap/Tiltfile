@@ -40,8 +40,8 @@ def configmap_yaml(name, namespace="", from_file=None, watch=True, from_env_file
       for f in from_file:
         args.extend(["--from-file", f])
         if watch:
-          l = f.split('=')
-          watch_file(l[len(l)-1])
+          line = f.split('=')
+          watch_file(line[len(line)-1])
       generator = True
     else:
       fail("Bad from_file argument: %s" % from_file)

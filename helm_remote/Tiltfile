@@ -131,11 +131,11 @@ def helm_remote_yaml(chart, repo_url='', repo_name='', release_name='', values=[
     # str.isalnum accepts dots, which is only dangerous when slashes are allowed
     # https://helm.sh/docs/chart_best_practices/conventions/#chart-names
 
-    if chart.replace('-', '').isalnum() == False or chart != chart.replace('.', ''):
+    if not chart.replace('-', '').isalnum() or chart != chart.replace('.', ''):
         # https://helm.sh/docs/chart_best_practices/conventions/#chart-names
         fail('Chart name is not valid')
 
-    if repo_name != chart and repo_name.replace('-', '').isalnum() == False or repo_name != repo_name.replace('.', ''):
+    if repo_name != chart and not repo_name.replace('-', '').isalnum() or repo_name != repo_name.replace('.', ''):
         # https://helm.sh/docs/chart_best_practices/conventions/#chart-names
         if not repo_name.startswith('oci://'):
             fail('Repo name is not valid')

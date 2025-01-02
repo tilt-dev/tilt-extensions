@@ -1,11 +1,10 @@
 def get_container(decoded_yaml, container_selector):
   containers=decoded_yaml["spec"]["template"]["spec"]["containers"]
-  found_containers=[]
 
   for container in containers:
     if container["name"] == container_selector:
       return container
-    
+
     fail("failed to find container %s in the manifest %s" % (container_selector, containers))
 
 def get_image(container):
@@ -13,7 +12,7 @@ def get_image(container):
 
 def remove_probe(container, probe):
   if container.get(probe):
-    container.pop(probe)  
+    container.pop(probe)
 
 def get_obj(name, kind, container_selector = None, namespace = None, disable_probes = False):
   """

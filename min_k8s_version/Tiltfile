@@ -2,7 +2,7 @@ def min_k8s_version(min_version):
     version_str = _get_server_version()
     cur_ver = _version_tuple(version_str)
     min_ver = _version_tuple(min_version)
-    
+
     if cur_ver < min_ver:
         print(" ---------------------------------------------------------- ")
         print("|                                                          |")
@@ -18,7 +18,7 @@ def max_k8s_version(max_version):
     version_str = _get_server_version()
     cur_ver = _version_tuple(version_str)
     max_ver = _version_tuple(max_version)
-    
+
     if cur_ver > max_ver:
         print(" ---------------------------------------------------------- ")
         print("|                                                          |")
@@ -46,10 +46,10 @@ def _get_server_version():
                return _get_server_version_pre_1_28_kubectl()
             else:
                return version_string.replace('v', '')
-            
+
     return ""
 
-def _get_server_version_pre_1_28_kubectl():   
+def _get_server_version_pre_1_28_kubectl():
     kubectl_version_output = str(local('kubectl version --short', quiet=True))
     version_str = ''
     for line in kubectl_version_output.split('\n'):

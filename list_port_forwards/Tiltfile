@@ -3,10 +3,10 @@ load('ext://uibutton', 'cmd_button')
 display_pf_script_path = os.path.join(os.getcwd(), "display_port_forwards.sh")
 
 def display_port_forwards():
-	cmd_button(
-		name = 'which_ports',
-		resource = '(Tiltfile)',
-		argv = [display_pf_script_path],
-		text='List port forwards',
-		icon_name='travel_explore',
-	)
+    cmd_button(
+        name = 'which_ports',
+        resource = '(Tiltfile)',
+        argv = [display_pf_script_path],
+        text='List port forwards',
+        icon_name='travel_explore',
+    )

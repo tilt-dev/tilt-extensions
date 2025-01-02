@@ -8,7 +8,7 @@ def procfile_resources(procfile='Procfile', set_port=False, starting_port=5000, 
     procfile (Str): the path to the Procfile to load
     set_port (Bool): if True, give each process a unique $PORT value
     starting_port (Int): the number from which to start assigning ports
-  """ 
+  """
   port = starting_port
   lines = str(read_file(procfile)).splitlines()
   for line in lines:

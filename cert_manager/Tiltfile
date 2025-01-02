@@ -33,7 +33,7 @@ def deploy_cert_manager(registry="quay.io/jetstack", version="v1.3.1", load_to_k
     else:
       cert_manager_test_resources_versioned = cert_manager_test_resources.format(cert_manager_api_version='v1')
 
-    if load_to_kind == True:
+    if load_to_kind:
         print("Loading images to kind")
         # Prepull all the cert-manager images to your local environment and then load them directly into kind. This speeds up
         # setup if you're repeatedly destroying and recreating your kind cluster, as it doesn't have to pull the images over

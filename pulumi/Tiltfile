@@ -57,7 +57,6 @@ def pulumi_resource(
 
   apply_cmd = ['python3', pulumi_apply_path]
   delete_cmd = ["pulumi", "destroy", "-y"]
-  flags = []
   for i in range(len(image_deps)):
     config = image_configs[i]
     if type(config) == 'string':
