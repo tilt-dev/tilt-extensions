@@ -60,7 +60,7 @@ func main() {
 
 	// Set up a signal forwarding handler
 	sigs := make(chan os.Signal, 10)
-	signal.Notify(sigs)
+	signal.Notify(sigs, syscall.SIGKILL, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		for sig := range sigs {
 			if *verboseSignals {
