@@ -45,7 +45,7 @@ def _helper(base_ref, ref, entrypoint, live_update, restart_file=RESTART_FILE, t
     # (which makes use of `entr` to watch files and restart processes) to the user's image
     # we also set the image's entrypoint to give k8s_custom_deploy a chance of working: https://github.com/tilt-dev/tilt-extensions/issues/391
     df = '''
-    FROM tiltdev/restart-helper:2024-06-06 as restart-helper
+    FROM tiltdev/restart-helper:2025-02-17 as restart-helper
 
     FROM {ref}
     RUN ["touch", "{file}"]
