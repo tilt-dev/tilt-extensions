@@ -2,17 +2,14 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: docker/tilt-extensions-ci@sha256:70127b822dc42d45480dc6cddd97297d7b454503aa75b053728b565533233989
-
+      - image: "docker/tilt-extensions-ci@sha256:08666fe775fbe6e7c7f12cd106759911bf37a1df2fe2e1e37b662f9e7ebff177"
     steps:
       - checkout
       - run: GOBIN=$HOME/.bin go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
       - run: $HOME/.bin/tilt-extensions-ci .
-
   pre-commit:
     docker:
       - image: python:3.11.10-bookworm@sha256:5e5ef24d131e78708b5947823f2830ab42328132b6caff002bf6481d64b99593
-
     steps:
       - checkout
       - run: |
@@ -26,14 +23,12 @@ jobs:
           key: pre-commit-3-{{ checksum "pre-commit-cache-key.txt" }}
           paths:
             - ~/.cache/pre-commit
-
   test:
     # A common error is to build an extension that doesn't properly handle
     # spaces in paths, which is common on macOS (/Application Support/)
     working_directory: ~/tilt extensions
     docker:
-      - image: docker/tilt-extensions-ci@sha256:70127b822dc42d45480dc6cddd97297d7b454503aa75b053728b565533233989
-
+      - image: "docker/tilt-extensions-ci@sha256:08666fe775fbe6e7c7f12cd106759911bf37a1df2fe2e1e37b662f9e7ebff177"
     steps:
       - setup_remote_docker
       - checkout
@@ -43,7 +38,6 @@ jobs:
           curl -sL https://github.com/tilt-dev/tilt/releases/download/v$TILT_VERSION/tilt.$TILT_VERSION.linux.x86_64.tar.gz | \
             tar -C /usr/local/bin -zxf - tilt
       - run: ctlptl create cluster kind --registry=ctlptl-registry && timeout -v -k 60s 20m ./test.py --changed
-
 workflows:
   version: 2
   build:
