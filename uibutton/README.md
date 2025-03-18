@@ -39,6 +39,7 @@ cmd_button(name='foo',
            # If you need env var expansion *within the command itself*
            # you'll need to run it via a shell.
            argv=['/bin/sh', '-c', './reseed_database.sh --shard="$SHARD"'],
+           env={"HOST": "localhost", "PORT": "5432"},
    )
 ```
 
@@ -68,7 +69,7 @@ Creates a button for a resource that runs the given command when clicked.
 | `name`                  | `str`                                        | Unique ID for button                                                                                                                      |
 | `resource`              | `str`                                        | Resource to associate button with (required if `location=location.RESOURCE`)                                                              |
 | `argv`                  | `List[str]`                                  | Local command to run when button is clicked                                                                                               |
-| `env`                   | `List[str]`                                  | Environment variables to pass to the executed command                                                                                     |
+| `env`                   | `List[str]` or `Dict[str,str]                | Environment variables to pass to the executed command in ["key=value"] or Dict[key] = value format                                    |
 | `text`                  | `str`                                        | Text to display on button (optional: defaults to `name`)                                                                                  |
 | `location`              | `str` (enum)                                 | Button placement in UI (see `location` section below)                                                                                     |
 | `icon_name`             | `str`                                        | Name of [Material Icons font ligature][material-icons-font] to use as icon (at most one of `icon_name` or `icon_svg` should be specified) |
