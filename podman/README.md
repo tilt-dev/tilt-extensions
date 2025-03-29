@@ -14,6 +14,7 @@ Use Podman (https://podman.io/) to build images for Tilt.
 - **ignore**: Changes to the given files or directories do not trigger rebuilds.
       Does not affect the build context.
 - **extra_flags**: Extra flags to pass to podman build.
+- **push_extra_flags**: Extra flags to pass to podman push.
 - **live_update**: Set of steps for updating a running container
       (see https://docs.tilt.dev/live_update_reference.html)
 
@@ -26,6 +27,7 @@ Use Podman (https://podman.io/) to build images for Tilt.
 - **ignore**: Changes to the given files or directories do not trigger rebuilds.
       Does not affect the build context.
 - **extra_flags**: Extra flags to pass to podman build.
+- **push_extra_flags**: Extra flags to pass to podman push.
 - **live_update**: Set of steps for updating a running container
       (see https://docs.tilt.dev/live_update_reference.html)
 
