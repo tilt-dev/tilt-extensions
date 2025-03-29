@@ -43,6 +43,13 @@ def cmd_button(name, resource='', argv=[], text=None,
             fail('Unsupported location {}'.format(location))
         location = struct(type=loc_type, id=loc_id)
 
+    # transform dict to list of string "key=value" required by v1alpha1.cmd
+    if type(env) == "dict":
+      env_list = []
+      for key, value in env.items():
+        env_list.append(key + "=" + value)
+      env = env_list
+
     text = text or name
 
     v1alpha1.ui_button(
