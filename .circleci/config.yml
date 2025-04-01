@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   validate:
     docker:
-      - image: "docker/tilt-extensions-ci@sha256:08666fe775fbe6e7c7f12cd106759911bf37a1df2fe2e1e37b662f9e7ebff177"
+      - image: "docker/tilt-extensions-ci@sha256:c22a39c287c7c3afba182f4f46044475b43bd2d4e2bb89f41136eae7d4f4b94d"
     steps:
       - checkout
       - run: GOBIN=$HOME/.bin go install 'github.com/tilt-dev/tilt-extensions-ci@v1.1.0'
@@ -28,7 +28,7 @@ jobs:
     # spaces in paths, which is common on macOS (/Application Support/)
     working_directory: ~/tilt extensions
     docker:
-      - image: "docker/tilt-extensions-ci@sha256:08666fe775fbe6e7c7f12cd106759911bf37a1df2fe2e1e37b662f9e7ebff177"
+      - image: "docker/tilt-extensions-ci@sha256:c22a39c287c7c3afba182f4f46044475b43bd2d4e2bb89f41136eae7d4f4b94d"
     steps:
       - setup_remote_docker
       - checkout
