@@ -23,7 +23,6 @@ def podman_build(
   deps = deps or [context]
   extra_flags = extra_flags or []
   push_extra_flags = push_extra_flags or []
-  
   extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
   push_extra_flags_str = ' '.join([shlex.quote(f) for f in push_extra_flags])
 
