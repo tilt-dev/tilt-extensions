@@ -4,7 +4,7 @@
 load('ext://restart_process', 'custom_build_with_restart')
 
 def podman_build(
-  ref, context, ignore=None, extra_flags=None, deps=None, live_update=[]
+  ref, context, ignore=None, extra_flags=None, deps=None, live_update=[], push_extra_flags=None
 ):
   """Use Podman (https://podman.io/) to build images for Tilt.
   Args:
@@ -16,17 +16,20 @@ def podman_build(
     ignore: Changes to the given files or directories do not trigger rebuilds.
       Does not affect the build context.
     extra_flags: Extra flags to pass to podman build. Expressed as an argv-style array.
+    push_extra_flags: Extra flags to pass to podman push. Expressed as an argv-style array.
     live_update: Set of steps for updating a running container
       (see https://docs.tilt.dev/live_update_reference.html)
   """
   deps = deps or [context]
   extra_flags = extra_flags or []
+  push_extra_flags = push_extra_flags or []
   extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
+  push_extra_flags_str = ' '.join([shlex.quote(f) for f in push_extra_flags])
 
   # We use --format=docker due to
   # https://github.com/containers/buildah/issues/1589
   # which lots of people are still reporting, even though it's closed :shrug:
-  push_cmd = "podman push --format=docker $EXPECTED_REF\n"
+  push_cmd = "podman push %s --format=docker $EXPECTED_REF\n" % push_extra_flags_str
 
   custom_build(
     ref=ref,
@@ -42,7 +45,7 @@ def podman_build(
   )
 
 def podman_build_with_restart(
-ref, context, entrypoint, ignore=None, extra_flags=None, deps=None, live_update=[]
+    ref, context, entrypoint, ignore=None, extra_flags=None, deps=None, live_update=[], push_extra_flags=None
 ):
   """Use Podman (https://podman.io/) to build images for Tilt. Wrap a custom_build_with_restart so that the last step
     of any live update is to rerun the given entrypoint.
@@ -56,17 +59,19 @@ ref, context, entrypoint, ignore=None, extra_flags=None, deps=None, live_update=
     ignore: Changes to the given files or directories do not trigger rebuilds.
       Does not affect the build context.
     extra_flags: Extra flags to pass to podman build. Expressed as an argv-style array.
+    push_extra_flags: Extra flags to pass to podman push. Expressed as an argv-style array.
     live_update: Set of steps for updating a running container
       (see https://docs.tilt.dev/live_update_reference.html)
   """
   deps = deps or [context]
   extra_flags = extra_flags or []
+  push_extra_flags = push_extra_flags or []
   extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
-
+  push_extra_flags_str = ' '.join([shlex.quote(f) for f in push_extra_flags])
   # We use --format=docker due to
   # https://github.com/containers/buildah/issues/1589
   # which lots of people are still reporting, even though it's closed :shrug:
-  push_cmd = "podman push --format=docker $EXPECTED_REF\n"
+  push_cmd = "podman push %s --format=docker $EXPECTED_REF\n" % push_extra_flags_str
 
   custom_build_with_restart(
     ref=ref,
