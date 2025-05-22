@@ -3,7 +3,7 @@
 def pack(
   name,
   path=".",
-  builder="gcr.io/paketo-buildpacks/builder:base",
+  builder="docker.io/paketobuildpacks/builder:base",
   buildpacks=[],
   env_vars=[],
   pull_policy="if-not-present",
