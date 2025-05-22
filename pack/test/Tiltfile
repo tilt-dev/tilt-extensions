@@ -10,8 +10,8 @@ pack(
   deps=['httpd.conf', './htdocs'],
   builder='paketobuildpacks/builder:full',
   buildpacks=[
-    'gcr.io/paketo-buildpacks/watchexec:3.2.2',
-    'gcr.io/paketo-buildpacks/httpd:0.7.2',
+    'docker.io/paketobuildpacks/watchexec:3.2.2',
+    'docker.io/paketobuildpacks/httpd:0.7.2',
   ],
   live_update=[
     sync('./httpd.conf', '/workspace/httpd.conf'),

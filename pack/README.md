@@ -37,7 +37,7 @@ you would do the following:
 ```python
 pack(
   'example-image',
-  builder='gcr.io/paketo-buildpacks/builder:tiny'
+  builder='docker.io/paketobuildpacks/builder:tiny'
 )
 ```
 
