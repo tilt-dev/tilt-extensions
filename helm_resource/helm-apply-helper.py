@@ -72,6 +72,11 @@ if os.environ.get('TILT_HELM_RELEASE_DEPENDENCY_UPDATE', False) == 'true':
   print("Running cmd: %s" % dependency_update_cmd, file=sys.stderr)
   subprocess.check_call(dependency_update_cmd, stdout=sys.stderr)
 
+if os.environ.get('TILT_HELM_RELEASE_DEPENDENCY_BUILD', False) == 'true':
+  dependency_build_cmd = ['helm', 'dependency', 'build', chart, '--skip-refresh']
+  print("Running cmd: %s" % dependency_build_cmd, file=sys.stderr)
+  subprocess.check_call(dependency_build_cmd, stdout=sys.stderr)
+
 print("Running cmd: %s" % install_cmd, file=sys.stderr)
 subprocess.check_call(install_cmd, stdout=sys.stderr)
 

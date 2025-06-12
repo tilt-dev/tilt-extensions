@@ -24,6 +24,7 @@ def helm_resource(
     auto_init=True,
     pod_readiness='',
     update_dependencies=False,
+    build_dependencies=False,
     links=[]):
   """Installs a helm chart to a cluster.
 
@@ -68,6 +69,7 @@ def helm_resource(
       can start building). By default, Tilt will wait for pods to be ready if it
       thinks a resource has pods.
     update_dependencies: Runs `helm dependency update` before installing the chart.
+    build_dependencies: Runs `helm dependency build --skip-refresh` before installing the chart.
     links: One or more links to be associated with this resource in the UI.
   """
   if not release_name:
@@ -95,6 +97,9 @@ def helm_resource(
 
   if update_dependencies:
     env['TILT_HELM_RELEASE_DEPENDENCY_UPDATE'] = 'true'
+
+  if build_dependencies:
+    env['TILT_HELM_RELEASE_DEPENDENCY_BUILD'] = 'true'
 
   if flags:
     apply_cmd.extend(flags)
