@@ -52,7 +52,7 @@ def replace_target(src, target):
 def download_files():
     cachedir = _find_cache_dir()
 
-    kube_prometheus_version = '0.14.0'
+    kube_prometheus_version = '0.15.0'
     kube_prometheus_tarball = os.path.join(cachedir, 'coreos-kube-prometheus-%s.tar.gz' % kube_prometheus_version)
     kube_prometheus_tarball_quoted = shlex.quote(kube_prometheus_tarball)
 
@@ -113,7 +113,6 @@ def setup_monitoring():
     k8s_resource(
         new_name='prometheus-crds',
         objects = [('%s' % name(c)) for c in crds],
-        resource_deps=['prometheus-operator'],
     )
 
     resources = {
