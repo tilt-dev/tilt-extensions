@@ -1,0 +1,8 @@
+load('../../helm_resource/Tiltfile', 'helm_repo')
+load('../Tiltfile', 'run_once')
+
+for i in range(0, 5):
+  run_once(
+    name='bitnami',
+    fn=lambda: helm_repo('bitnami', 'https://charts.bitnami.com/bitnami', labels=['charts'])
+  )

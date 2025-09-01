@@ -1,0 +1,71 @@
+quiet = os.getenv('TILT_RUN_ONCE_QUIET', 'True') == 'True'
+
+
+def _create_temp_dir():
+    from_env = os.getenv('TILT_RUN_ONCE_TEMP_DIR', '')
+
+    if from_env != '':
+        return from_env
+
+    tmpdir = str(local("mktemp -d", echo_off=quiet, quiet=quiet)).strip()
+    os.putenv('TILT_RUN_ONCE_TEMP_DIR', tmpdir)
+
+    return tmpdir
+
+def _get_state_file_path():
+  tilt_dir = _create_temp_dir()
+  return os.path.join(tilt_dir, 'run-once-state')
+
+def _add_resource_to_state_file(name):
+  """
+  Add a resource name to the state file if it doesn't exist
+  Args:
+    name: The resource name to add
+  Returns:
+    True if the resource was newly added, False if it already existed
+  """
+  read_cmd = 'cat {} 2>/dev/null || echo ""'.format(state_file)
+  state_content = str(local(read_cmd, quiet=quiet, echo_off=quiet)).strip()
+
+  # Parse existing resources
+  resources = [r for r in state_content.split('\n') if r.strip()]
+
+  # Check if resource already exists
+  if name in resources:
+    return False
+
+  resources.append(name)
+
+  content = '\n'.join(resources)
+  local('echo "{}" > {}'.format(content, state_file), quiet=quiet, echo_off=quiet)
+  return True
+
+def run_once(name, fn=None):
+  """
+  Execute a function once based on a persistent state file
+  Args:
+    name: The name of the resource to track
+    fn: A function to execute if the resource hasn't been created before
+  Returns:
+    The result of the function execution, or None if the resource already exists
+  """
+  if _add_resource_to_state_file(name):
+    print("Resource '{}' not found in state file, creating it...".format(name))
+    return fn()
+  else:
+    print("Resource '{}' already exists in state file, skipping creation".format(name))
+    return None
+
+
+state_file = _get_state_file_path()
+tilt_dir = os.path.dirname(state_file)
+
+if not quiet:
+  print("📄 Using state file: {}".format(state_file))
+
+
+# Always reset the state file at the beginning of a Tilt run
+local('mkdir -p {} && rm -f {}'.format(tilt_dir, state_file), quiet=quiet, echo_off=quiet)
+
+if not quiet:
+  print("🔄 Starting fresh Tilt session, run_once state reset")

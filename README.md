@@ -52,6 +52,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`pulumi`](/pulumi): Install Kubernetes resources with [Pulumi](https://www.pulumi.com/).
 - [`pypiserver`](/pypiserver): Run [pypiserver](https://pypi.org/project/pypiserver/) local container.
 - [`restart_process`](/restart_process): Wrap a `docker_build` or `custom_build` to restart the given entrypoint after a Live Update (replaces `restart_container()`)
+- [`run_once`](/run_once): Execute a function only once during a Tilt session.
 - [`secret`](/secret): Functions for creating secrets.
 - [`snyk`](/snyk): Use [Snyk](https://snyk.io) to test your containers, configuration files, and open source dependencies.
 - [`syncback`](/syncback): Sync files/directories from your container back to your local FS.
