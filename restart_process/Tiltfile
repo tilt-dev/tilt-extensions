@@ -19,6 +19,7 @@ _CUSTOM_BUILD_KWARGS_BLACKLIST = [
     'disable_push',
     'dir',
     'env',
+    'image_deps',
 ]
 
 _ext_dir = os.getcwd()
@@ -109,7 +110,7 @@ def docker_build_with_restart(ref, context, entrypoint, live_update,
 
 def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
                               base_suffix='-tilt_docker_build_with_restart_base', restart_file=RESTART_FILE,
-                              trigger=None, exit_policy='restart', **kwargs):
+                              trigger=None, exit_policy='restart', platform=None, **kwargs):
     """Wrap a custom_build call and its associated live_update steps so that the last step
     of any live update is to rerun the given entrypoint.
 
@@ -123,6 +124,7 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
       restart_file: file that Tilt will update during a live_update to signal the entrypoint to rerun
       trigger: (optional) list of local paths. If specified, the process will ONLY be restarted when there are changes
                to the given file(s); as the parameter of the same name in the LiveUpdate `run` step.
+      platform: (optional) will be passed to the underlying `docker_build` (e.g. 'linux/amd64'). `command` must still specify platform itself.
       **kwargs: will be passed to the underlying `custom_build` call
     """
 
@@ -144,7 +146,10 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
 
     # rename the original image to make it a base image and declare a custom_build for it
     base_ref = '{}{}'.format(ref, base_suffix)
-    custom_build(base_ref, command=command, deps=deps, **kwargs)
+    
+    # Create kwargs for custom_build (remove platform since custom_build handles multiplatform in its script)
+    custom_build_kwargs = {k: v for k, v in kwargs.items() if k != 'platform'}
+    custom_build(base_ref, command=command, deps=deps, **custom_build_kwargs)
 
     # A few arguments aren't applicable to the docker_build, so remove them.
     cleaned_kwargs = {k: v for k, v in kwargs.items() if k not in _CUSTOM_BUILD_KWARGS_BLACKLIST}
