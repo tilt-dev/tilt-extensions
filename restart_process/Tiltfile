@@ -146,7 +146,7 @@ def custom_build_with_restart(ref, command, deps, entrypoint, live_update,
 
     # rename the original image to make it a base image and declare a custom_build for it
     base_ref = '{}{}'.format(ref, base_suffix)
-    
+
     # Create kwargs for custom_build (remove platform since custom_build handles multiplatform in its script)
     custom_build_kwargs = {k: v for k, v in kwargs.items() if k != 'platform'}
     custom_build(base_ref, command=command, deps=deps, **custom_build_kwargs)
