@@ -89,6 +89,7 @@ def helm_resource(
   apply_cmd = python_cmd + [_helm_apply_path]
   delete_cmd = python_cmd + [_helm_delete_path]
   env = {
+    'K8S_CONTEXT': k8s_context(),
     'CHART': chart,
     'RELEASE_NAME': release_name,
     'NAMESPACE': namespace or '',

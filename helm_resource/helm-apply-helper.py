@@ -19,6 +19,7 @@ def _parse_image_string(image: str) -> Dict:
   repository, tag = image.rsplit(':', 1)
   return {"registry": None, "repository": repository, "tag": tag}
 
+k8s_context = os.environ["K8S_CONTEXT"]
 flags = sys.argv[1:]
 
 image_count = int(os.environ['TILT_IMAGE_COUNT'])
@@ -50,11 +51,11 @@ for i in range(image_count):
       flags.extend(['--set', '%s=%s' % (key1, image_parts["repository"])])
     flags.extend(['--set', '%s=%s' % (key2, image_parts["tag"])])
 
-install_cmd = ['helm', 'upgrade', '--install']
+install_cmd = ['helm', '--kube-context', k8s_context, 'upgrade', '--install']
 install_cmd.extend(flags)
 
-get_cmd = ['helm', 'get', 'manifest']
-kubectl_cmd = ['kubectl', 'get']
+get_cmd = ['helm', '--kube-context', k8s_context, 'get', 'manifest']
+kubectl_cmd = ['kubectl', '--context', k8s_context, 'get']
 
 release_name = os.environ['RELEASE_NAME']
 chart = os.environ['CHART']
