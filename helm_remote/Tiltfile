@@ -82,14 +82,18 @@ def helm_remote_yaml(chart, repo_url='', repo_name='', release_name='', values=[
     # ======== Helper methods
     def get_local_repo(repo_name, repo_url):
         # if no repos are present, helm exit code is >0 and stderr output buffered
-        added_helm_repos = decode_yaml(local('helm repo list --output yaml 2>/dev/null || true', command_bat='helm repo list --output yaml 2> nul || ver>nul', quiet=True))
+        added_helm_repos = decode_yaml(local(
+            'helm --kube-context {kctx} repo list --output yaml 2>/dev/null || true'.format(kctx=k8s_context()),
+            command_bat='helm --kube-context {kctx} repo list --output yaml 2> nul || ver>nul'.format(kctx=k8s_context()),
+            quiet=True
+        ))
         repo = [item for item in added_helm_repos if item['name'] == repo_name and item['url'] == repo_url] if added_helm_repos != None else []
 
         return repo[0] if len(repo) > 0 else None
 
     # Command string builder with common argument logic
     def build_helm_command(command, auth=None, version=None):
-        args = ['helm']
+        args = ['helm', '--kube-context', k8s_context()]
         args.extend(command)
 
         if auth != None:
