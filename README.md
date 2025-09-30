@@ -17,7 +17,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`custom_build_with_restart`](/restart_process): Wrap a `custom_build` to restart the given entrypoint after a Live Update
 - [`deployment`](/deployment): Create K8s deployments, jobs, and services without manifest YAML files.
 - [`docker_build_sub`](/docker_build_sub): Specify extra Dockerfile directives in your Tiltfile beyond [`docker_build`](https://docs.tilt.dev/api.html#api.docker_build).
-- [`docker_build_with_restart`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update
+- [`docker_build_with_restart`](/restart_process): Wrap a `docker_build` to restart the given entrypoint after a Live Update.
 - [`dotenv`](/dotenv): Load environment variables from `.env` or another file.
 - [`earthly`](/earthly): Build container images using [earthly](https://earthly.dev)
 - [`execute_in_pod`](/execute_in_pod): Execute a command on a pod container.
