@@ -1,7 +1,5 @@
-FROM alpine
+FROM curlimages/curl
 
-RUN apk update && apk add expect busybox-extras
+ADD ./verify.sh ./verify.sh
 
-ADD ./verify.exp ./verify.exp
-
-ENTRYPOINT expect < verify.exp
+ENTRYPOINT ./verify.sh

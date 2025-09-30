@@ -2,13 +2,13 @@ os.putenv('TILT_HELM_REMOTE_CACHE_DIR', os.path.abspath('./.helm'))
 load('../Tiltfile', 'helm_remote')
 
 # Note that .helm is in the .tiltignore!
-helm_remote('memcached', repo_url='https://charts.bitnami.com/bitnami')
-if not os.path.exists('./.helm/memcached'):
+helm_remote('hello-world', repo_url='https://helm.github.io/examples')
+if not os.path.exists('./.helm/hello-world'):
   fail('memcached failed to load in the right directory')
 
 docker_build('helm-remote-test-verify', '.')
 k8s_yaml('job.yaml')
-k8s_resource('helm-remote-test-verify', resource_deps=['memcached'])
+k8s_resource('helm-remote-test-verify', resource_deps=['hello-world'])
 
 chart_version = '25.1.0'
 helm_remote('prometheus',

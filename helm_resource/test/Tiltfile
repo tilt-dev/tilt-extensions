@@ -80,21 +80,21 @@ k8s_resource(
 )
 
 helm_repo(
-  'bitnami',
-  'https://charts.bitnami.com/bitnami',
-  labels=['memcached'],
-  resource_name='helm-repo-bitnami')
+  'examples',
+  'https://helm.github.io/examples',
+  labels=['examples-hello-world'],
+  resource_name='helm-repo-examples')
 
 helm_resource(
-  'memcached',
-  'bitnami/memcached',
-  labels=['memcached'],
-  flags=['--version=6.3.14'],
-  resource_deps=['helm-repo-bitnami'])
+  'examples-hello-world',
+  'examples/hello-world',
+  labels=['examples-hello-world'],
+  flags=['--version=0.1.0'],
+  resource_deps=['helm-repo-examples'])
 
 helm_resource(
-  'memcached-no-init',
-  'bitnami/memcached',
-  labels=['memcached'],
-  resource_deps=['helm-repo-bitnami'],
+  'examples-hello-world-no-init',
+  'examples/hello-world',
+  labels=['examples-hello-world'],
+  resource_deps=['helm-repo-examples'],
   auto_init=False)
