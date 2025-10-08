@@ -1,0 +1,106 @@
+# -*- mode: Python -*-
+
+# Local Tilt extension: expand glob-like patterns into real file paths for use in deps
+# Note: deps only accepts real paths; this helper uses bash/find to resolve common
+# patterns at Tiltfile load time (e.g., '**/*.ext', 'dir/*.ext', '*.ext').
+
+
+def _base_dir_from_pattern(pat):
+    # Determine a base directory from a pattern for watch_file
+    # Treat patterns that start with '**/' (or are '**' variants) as repo root
+    if pat.startswith('**/') or pat == '**' or pat == '**/*' or pat.startswith('./**/'):
+        return '.'
+    # Handle patterns ending with '/**' or '/**/*' -> base dir before the **
+    if pat.endswith('/**') or pat.endswith('/**/*'):
+        base = pat.rsplit('/**', 1)[0]
+        return base if base else '.'
+    # Handle recursive patterns with '/**/' inside
+    if '/**/' in pat:
+        base = pat.split('/**/', 1)[0]
+        return base if base else '.'
+    # For simple 'dir/*.ext' or 'dir/name'
+    if '/' in pat:
+        base = pat.rsplit('/', 1)[0]
+        return base if base else '.'
+    # For '*.ext' or literal file name, base is current dir
+    return '.'
+
+
+def watch_glob(*patterns):
+    # Add Tiltfile reload watches for base dirs implied by patterns
+    seen = {}
+    for pat in patterns:
+        base = _base_dir_from_pattern(pat)
+        if base not in seen:
+            seen[base] = True
+            watch_file(base)
+
+
+def files_glob(*glob_patterns, **kwargs):
+    """
+    Expand one or more patterns into a list of real file paths using bash/find.
+    Supported patterns (good enough for most Tilt workflows):
+      - 'dir/**/*.ext'   => find dir -type f -name "*.ext"
+      - 'dir/*.ext'      => find dir -maxdepth 1 -type f -name "*.ext"
+      - '*.ext'          => find . -maxdepth 1 -type f -name "*.ext"
+      - literal file/dir => included as-is
+    Returns a de-duplicated list of paths.
+    """
+    # Ensure Tiltfile reloads when new files matching these patterns are added
+    watch_glob(*glob_patterns)
+    results = []
+    for pat in glob_patterns:
+        # Handle recursive patterns with '**/' anywhere in the string (e.g., 'dir/**/x', '**/*.go')
+        if '/**/' in pat:
+            parts = pat.split('/**/', 1)
+            base = parts[0] if parts[0] else '.'
+            tail = parts[1] if len(parts) > 1 else ''
+            if not tail or tail == '*':
+                find_cmd = "bash --noprofile --norc -lc 'find " + base + " -type f -print'"
+            else:
+                if '/' in tail:
+                    # Fallback to -path for complex tails
+                    find_cmd = "bash --noprofile --norc -lc 'find " + base + " -type f -path \"*" + tail + "\" -print'"
+                else:
+                    find_cmd = "bash --noprofile --norc -lc 'find " + base + " -type f -name \"" + tail + "\" -print'"
+        # Handle patterns that START with '**/' (e.g., '**/*.go')
+        elif pat.startswith('**/'):
+            tail = pat[len('**/'):]
+            if not tail or tail == '*':
+                find_cmd = "bash --noprofile --norc -lc 'find . -type f -print'"
+            else:
+                if '/' in tail:
+                    find_cmd = "bash --noprofile --norc -lc 'find . -type f -path \"*" + tail + "\" -print'"
+                else:
+                    find_cmd = "bash --noprofile --norc -lc 'find . -type f -name \"" + tail + "\" -print'"
+        # Root-level wildcard like '*.go'
+        elif pat.startswith('*.') or (pat and '*' in pat and '/' not in pat):
+            find_cmd = "bash --noprofile --norc -lc 'find . -maxdepth 1 -type f -name \"" + pat + "\" -print'"
+        # Directory-limited wildcard like 'dir/*.templ'
+        elif '*' in pat and '/' in pat:
+            dir_part, name_pat = pat.rsplit('/', 1)
+            find_cmd = "bash --noprofile --norc -lc 'find " + dir_part + " -maxdepth 1 -type f -name \"" + name_pat + "\" -print'"
+        else:
+            # Literal path (file or dir). deps can watch directories too; include as-is.
+            results.append(pat)
+            continue
+
+        out = local(command=find_cmd, quiet=True)
+        s = str(out).strip()
+        if s:
+            for line in s.split('\n'):
+                p = line.strip()
+                if p.startswith('./'):
+                    p = p[2:]
+                if p:
+                    results.append(p)
+
+    # Deduplicate while preserving order
+    seen = {}
+    deduped = []
+    for p in results:
+        if p not in seen:
+            seen[p] = True
+            deduped.append(p)
+    return deduped
+

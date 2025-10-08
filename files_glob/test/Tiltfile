@@ -1,0 +1,34 @@
+load('../Tiltfile', 'files_glob')
+
+# Doesn't use any kubernetes context, therefore safe
+allow_k8s_contexts(k8s_context())
+
+# Create some sample files for matching
+# (These are committed to the repo; tests assume files exist on disk.)
+
+# Validate root-level pattern
+paths_root_txt = files_glob('*.txt')
+expected_root_txt = ['root.txt']
+if set(paths_root_txt) != set(expected_root_txt):
+    fail('root-level pattern failed: got %s, expected %s' % (paths_root_txt, expected_root_txt))
+
+# Validate non-recursive dir pattern
+paths_dir1_txt = files_glob('dir1/*.txt')
+expected_dir1_txt = ['dir1/a.txt', 'dir1/b.txt']
+if set(paths_dir1_txt) != set(expected_dir1_txt):
+    fail('dir1/*.txt pattern failed: got %s, expected %s' % (paths_dir1_txt, expected_dir1_txt))
+
+# Validate recursive pattern
+paths_dir2_txt = files_glob('dir2/**/*.txt')
+expected_dir2_txt = ['dir2/nested/t1.txt', 'dir2/nested/t2.txt']
+if set(paths_dir2_txt) != set(expected_dir2_txt):
+    fail('dir2/**/*.txt pattern failed: got %s, expected %s' % (paths_dir2_txt, expected_dir2_txt))
+
+# Validate deduplication (same files via two overlapping patterns)
+paths_dedupe = files_glob('dir1/*.txt', 'dir1/**/*.txt')
+if len(paths_dedupe) != len(set(paths_dedupe)):
+    fail('deduplication failed: got %d items with duplicates: %s' % (len(paths_dedupe), paths_dedupe))
+
+# CI expects at least one resource
+local_resource('dummy', 'echo ok')
+
