@@ -7,6 +7,8 @@ import os
 import subprocess
 import sys
 
+sys.tracebacklimit = 0
+
 release_name = os.environ['RELEASE_NAME']
 namespace = os.environ.get('NAMESPACE', '')
 namespace_args = ['--namespace', namespace] if namespace else []
