@@ -15,7 +15,8 @@ def dotenv(fn=".env", verbose=False, showValues=False):
     lines = str(f).splitlines()
 
     # Parse lines
-    for lineNumber in range(len(lines)):
+    lineNumber = 0
+    while lineNumber < len(lines):
 
         # Set line by line number
         line = lines[lineNumber]
@@ -35,6 +36,7 @@ def dotenv(fn=".env", verbose=False, showValues=False):
         if len(v) < 2:
             if len(line) > 0:
                 fail("Invalid format for dotenv file: '%s' in '%s:%s'" % (line, fn, lineNumber+1))
+            lineNumber += 1
             continue # skip empty lines
 
         # Remove whitespace around the varible name
@@ -42,6 +44,21 @@ def dotenv(fn=".env", verbose=False, showValues=False):
 
         # Remove whitespace around the varible value
         varValue = v[1].strip()
+
+        # Multi-line quoted value support
+        if varValue.startswith('"') and not varValue.endswith('"'):
+            # Start of multi-line quoted value
+            value_lines = [varValue]
+            lineNumber += 1
+            while lineNumber < len(lines):
+                next_line = lines[lineNumber]
+                stripped = next_line.strip()
+                if stripped.endswith('"'):
+                    value_lines.append(stripped)
+                    break
+                value_lines.append(next_line)
+                lineNumber += 1
+            varValue = "\n".join(value_lines)
 
         # if varValue starts and ends with quotes, remove them
         if varValue.startswith('"') and varValue.endswith('"'):
@@ -58,3 +75,4 @@ def dotenv(fn=".env", verbose=False, showValues=False):
 
         # Set environment variable
         os.putenv(varName, varValue)
+        lineNumber += 1

@@ -9,7 +9,9 @@ expected_variables = {
     "ENV_VAR_WITH_QUOTES_1": " quotes 'and' spaces       ",
     "ENV_VAR_WITH_QUOTES_2": ' quotes "and" spaces       ',
     "ENV_VAR_WITH_QUOTES_3": " mixed 'quotes' \"and\" spaces       ",
-    "ENV_VAR_WITH_QUOTES_4": "\" value with non-matching quote characters and trailing spaces   '"
+    "ENV_VAR_WITH_QUOTES_4": "\" value with non-matching quote characters and trailing spaces   '",
+    "MULTILINE": "This is a multi-line\nvalue that spans\nthree lines.",
+    "MULTILINE_WITH_SPACES": "   This is a multi-line\n   value that spans  \n   three lines with leading spaces.   ",
 }
 
 unexpected_variables = [
