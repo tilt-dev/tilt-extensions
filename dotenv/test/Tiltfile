@@ -24,4 +24,7 @@ for key in unexpected_variables:
     if os.getenv(key) != None:
         fail("env variable '%s' is set, but it shouldn't" % key)
 
-exit()
+local_resource(
+    'echo-env-vars',
+    'echo "All expected env vars are set correctly!"',
+)
