@@ -224,4 +224,4 @@ To run a script, invoke the interpreter and then pass the script as an argument,
 ## Known Issues
 * Renamed/deleted buttons will not be removed until Tilt is restarted ([#193](https://github.com/tilt-dev/tilt-extensions/issues/193))
 
-[material-icons-font]: https://fonts.google.com/icons
+[material-icons-font]: https://fonts.google.com/icons?icon.set=Material+Icons
