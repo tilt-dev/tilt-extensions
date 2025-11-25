@@ -15,10 +15,12 @@ def dotenv(fn=".env", verbose=False, showValues=False):
     lines = str(f).splitlines()
 
     # Parse lines
-    for lineNumber in range(len(lines)):
+    lineNumber = 0
+    while lineNumber < len(lines):
 
         # Set line by line number
         line = lines[lineNumber]
+        lineNumber += 1
 
         # Skip comments
         if line.startswith("#"):
@@ -42,6 +44,20 @@ def dotenv(fn=".env", verbose=False, showValues=False):
 
         # Remove whitespace around the varible value
         varValue = v[1].strip()
+
+        # Multi-line quoted value support
+        if varValue.startswith('"') and not varValue.endswith('"'):
+            # Start of multi-line quoted value
+            value_lines = [v[1].lstrip()]
+            while lineNumber < len(lines):
+                next_line = lines[lineNumber]
+                lineNumber += 1
+                stripped = next_line.rstrip()
+                if stripped.endswith('"'):
+                    value_lines.append(stripped)
+                    break
+                value_lines.append(next_line)
+            varValue = "\n".join(value_lines)
 
         # if varValue starts and ends with quotes, remove them
         if varValue.startswith('"') and varValue.endswith('"'):
