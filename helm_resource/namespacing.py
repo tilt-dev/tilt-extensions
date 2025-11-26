@@ -9,7 +9,6 @@ def add_default_namespace_resource(r, namespace, indent=""):
   meta = re.search("^%smetadata:\r?\n(\\s+.*\r?\n)*" % indent, r, re.MULTILINE)
   if not meta:
     return r
-  print(meta.group(0))
   metadata = meta.group(0)
 
   # Remove empty namespace blocks.
