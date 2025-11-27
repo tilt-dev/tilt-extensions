@@ -137,6 +137,68 @@ metadata:
       ""
     ]), "my-namespace")
 
+  def test_add_namespace_with_4_space_indent(self):
+    self.assert_defaulted("""
+apiVersion:   v1
+kind:         ConfigMap
+metadata:
+    namespace: my-namespace
+    name:       test-configmap
+data:
+    hello_world.txt: |
+        Hello, world.
+""", """
+apiVersion:   v1
+kind:         ConfigMap
+metadata:
+    name:       test-configmap
+data:
+    hello_world.txt: |
+        Hello, world.
+""", "my-namespace")
+
+  def test_add_namespace_with_4_space_indent_and_annotations(self):
+    self.assert_defaulted("""
+apiVersion: v1
+kind: Service
+metadata:
+    namespace: my-namespace
+    name:       test-service
+    labels:
+        app:                test-app
+        component:          test-component
+    annotations:
+        example.com/app: 
+        example.com/env: test
+spec:
+    type:       "ClusterIP"
+    ports:
+      - name:       metrics
+        port:       9095
+        targetPort: 9095
+    selector:
+        app:    test-app
+""", """
+apiVersion: v1
+kind: Service
+metadata:
+    name:       test-service
+    labels:
+        app:                test-app
+        component:          test-component
+    annotations:
+        example.com/app: 
+        example.com/env: test
+spec:
+    type:       "ClusterIP"
+    ports:
+      - name:       metrics
+        port:       9095
+        targetPort: 9095
+    selector:
+        app:    test-app
+""", "my-namespace")
+
 
 if __name__ == '__main__':
     unittest.main()
