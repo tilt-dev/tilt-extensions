@@ -16,8 +16,17 @@ def add_default_namespace_resource(r, namespace, indent=""):
 
   has_namespace = re.search("\r?\n\\s+namespace: *\\S", metadata, re.MULTILINE)
   if not has_namespace:
+    # Detect the indentation level of fields within metadata
+    # by finding the first indented field after "metadata:"
+    field_indent_match = re.search("^%smetadata:\r?\n(\\s+)" % indent, metadata, re.MULTILINE)
+    if field_indent_match:
+      field_indent = field_indent_match.group(1)
+    else:
+      # Default to 2 spaces if we can't detect the indentation
+      field_indent = indent + "  "
+    
     metadata = re.sub("^%smetadata:" % indent,
-                      "%smetadata:\n%s  namespace: %s" % (indent, indent, namespace),
+                      "%smetadata:\n%snamespace: %s" % (indent, field_indent, namespace),
                       metadata, count=1)
     return r[0:meta.start()] + metadata + r[meta.end():]
 
