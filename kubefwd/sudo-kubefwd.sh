@@ -6,6 +6,7 @@
 ENTR=$(command -v entr)
 OSASCRIPT=$(command -v osascript)
 PKEXEC=$(command -v pkexec)
+SUDO=$(command -v sudo)
 KDESUDO=$(command -v kdesudo)
 GKSUDO=$(command -v gksudo)
 KUBEFWD=$(command -v kubefwd)
@@ -77,6 +78,12 @@ function cleanup {
     fi
 }
 trap cleanup EXIT
+
+if [[ "${TILT_SUDO_NON_INTERACTIVE:-false}" == "true" ]] && [[ "$SUDO" != "" ]]; then
+    set -x
+    "$SUDO" -n "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
+    exit "$?"
+fi
 
 if [[ "$OSASCRIPT" != "" ]]; then
     set -x

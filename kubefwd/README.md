@@ -44,6 +44,11 @@ v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefw
 v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
 v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-purge=true'])
 ```
+
+```python
+# Use non-interactive sudo (sudo -n) instead of graphical prompts (useful in WSL).
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-sudo-non-interactive=true'])
 ```
 
 ## Usage
