@@ -31,9 +31,11 @@ until curl -s -f -o /dev/null "http://kubefwd.internal/api/health"; do
 done
 
 function get_api_namespaces {
-    curl -s http://kubefwd.internal/api/v1/namespaces | \
-        jq -r '.data.namespaces[]?.namespace // empty' | \
-        sort -u || true
+    local resp
+    if ! resp=$(curl -s -f http://kubefwd.internal/api/v1/namespaces); then
+        return 1
+    fi
+    echo "$resp" | jq -r '.data.namespaces[]?.namespace // empty' | sort -u
 }
 
 function reconcile {
@@ -41,7 +43,11 @@ function reconcile {
     NEW_NAMESPACES=$(echo "$NEW_NAMESPACES ${TILT_CFG_NAMESPACES:-}" | tr -s ' ' '\n' | sort -u)
 
     # In kubefwd, we need to add missing namespaces and remove extra ones
-    ACTIVE_NAMESPACES=$(get_api_namespaces)
+    local ACTIVE_NAMESPACES
+    if ! ACTIVE_NAMESPACES=$(get_api_namespaces); then
+        # API is not healthy/reachable right now. Wait for the next tick.
+        return 0
+    fi
 
     for ns in $NEW_NAMESPACES; do
         if [[ "$ns" == "" ]]; then continue; fi
