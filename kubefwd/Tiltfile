@@ -1,18 +1,44 @@
 # Accept namespaces as args. This requires tilt > v0.22.7
 
 config.define_string_list("namespaces")
+config.define_string("kubefwd-mode", usage="Set to 'idle' or 'legacy'. Defaults to auto-detect based on kubefwd version.")
 cfg = config.parse()
 
 namespaces = cfg.get('namespaces', [])
+mode = cfg.get('kubefwd-mode', None)
 
-trigger_file = str(local('mktemp "${TMPDIR:-/tmp}/tilt-kubefwd.XXXXXXXXX"')).strip()
+# Auto-detect mode based on kubefwd version if not explicitly provided
+if not mode:
+    # Attempt to parse version from `kubefwd version` output
+    # Expected output: "Kubefwd version: 1.22.4" or "Version 1.25.0"
+    version_output = str(local('kubefwd version 2>&1 | grep -i "version" | grep --max-count=1 -oE "[0-9]+\\.[0-9]+" || echo ""')).strip()
+
+    mode = "legacy" # Fallback to legacy if we can't parse the version
+    if version_output:
+        parts = version_output.split('.')
+        if len(parts) >= 2:
+            major = int(parts[0])
+            minor = int(parts[1])
+            if major > 1 or (major == 1 and minor >= 25):
+                mode = "idle"
+
+trigger_file = ""
+deps = ['sudo-kubefwd.sh', 'run-kubefwd.sh', 'watch-namespaces.sh']
+
+if mode == "legacy":
+    trigger_file = str(local('mktemp "${TMPDIR:-/tmp}/tilt-kubefwd.XXXXXXXXX"')).strip()
+    deps.append('run-kubefwd-internal.sh')
 
 # Creates a button that refreshes the kubefwd without
 # requiring new credentials.
-local(['./create-refresh-button.sh', trigger_file])
+local(['./create-refresh-button.sh'])
 
 local_resource(
   name='kubefwd:run',
-  serve_cmd=['./sudo-kubefwd.sh', trigger_file],
-  deps=['sudo-kubefwd.sh', 'run-kubefwd.sh', 'run-kubefwd-internal.sh', 'watch-namespaces.sh'],
-  serve_env={'TILT_CFG_NAMESPACES': ' '.join(namespaces)})
+  serve_cmd=['./sudo-kubefwd.sh'],
+  deps=deps,
+  serve_env={
+      'TILT_CFG_NAMESPACES': ' '.join(namespaces),
+      'TILT_KUBEFWD_MODE': mode,
+      'TILT_KUBEFWD_TRIGGER': trigger_file
+  })

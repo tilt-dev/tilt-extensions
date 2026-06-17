@@ -11,7 +11,7 @@ while read -r namespace; do
       continue
     fi
     flags+=("-n=$namespace")
-done < "$TRIGGER"
+done < "$TILT_KUBEFWD_TRIGGER"
 
 if [ ${#flags[@]} -eq 0 ]; then
     echo "No namespaces to kubefwd"

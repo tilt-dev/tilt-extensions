@@ -2,7 +2,11 @@
 
 set -euo pipefail
 
-TRIGGER="$1"
+if [[ "${TILT_KUBEFWD_MODE:-idle}" == "legacy" ]]; then
+    BTN_ARGS="[\"touch\", \"${TILT_KUBEFWD_TRIGGER}\"]"
+else
+    BTN_ARGS="[\"curl\", \"-s\", \"-X\", \"POST\", \"http://kubefwd.internal/api/v1/services/reconnect?force=true\"]"
+fi
 
 cat <<EOF | tilt apply -f -
 apiVersion: tilt.dev/v1alpha1
@@ -11,6 +15,7 @@ metadata:
   name: kubefwd:refresh
 spec:
   text: Refresh
+  iconName: refresh
   location:
     componentType: resource
     componentID: kubefwd:run
@@ -22,7 +27,7 @@ metadata:
   annotations:
     "tilt.dev/resource": "kubefwd:run"
 spec:
-  args: ["touch", "$TRIGGER"]
+  args: ${BTN_ARGS}
   startOn:
     uiButtons:
     - kubefwd:refresh

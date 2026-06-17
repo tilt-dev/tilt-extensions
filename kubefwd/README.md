@@ -15,7 +15,8 @@ https://kubefwd.com/
 
 - `bash`
 - `kubefwd`
-- `entr`
+- `entr` (required if kubefwd < 1.25.0)
+- `jq` (required if kubefwd >= 1.25.0)
 - GNU core utils (`tr`, `sort`) - `brew install coreutils`
 
 ## Examples
@@ -30,6 +31,12 @@ v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefw
 # kubefwd all namespaces Tilt deploys to + manually configured additional namespace 'kubesystem'.
 v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
 v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--namespaces=kubesystem'])
+```
+
+```python
+# explicitly override the kubefwd mode (idle or legacy) instead of auto-detecting.
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-mode=legacy'])
 ```
 
 ## Usage
@@ -60,7 +67,7 @@ Possible solutions:
 2) Even better, a version of `kubefwd` that reads the pods from the Tilt API.
 
 Currently, this extension uses `entr` to restart `kubefwd`
-without requesting new credentials.
+without requesting new credentials when `kubefwd` < 1.25.0.
 
 ### Multi-cluster kubefwd
 
