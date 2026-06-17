@@ -2,10 +2,12 @@
 
 config.define_string_list("namespaces")
 config.define_string("kubefwd-mode", usage="Set to 'idle' or 'legacy'. Defaults to auto-detect based on kubefwd version.")
+config.define_bool("kubefwd-purge", usage="Remove stale kubefwd host entries before starting")
 cfg = config.parse()
 
 namespaces = cfg.get('namespaces', [])
 mode = cfg.get('kubefwd-mode', None)
+purge = cfg.get('kubefwd-purge', False)
 
 # Auto-detect mode based on kubefwd version if not explicitly provided
 if not mode:
@@ -40,5 +42,6 @@ local_resource(
   serve_env={
       'TILT_CFG_NAMESPACES': ' '.join(namespaces),
       'TILT_KUBEFWD_MODE': mode,
-      'TILT_KUBEFWD_TRIGGER': trigger_file
+      'TILT_KUBEFWD_TRIGGER': trigger_file,
+      'KUBEFWD_PURGE': str(purge).lower()
   })

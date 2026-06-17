@@ -39,6 +39,13 @@ v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-ex
 v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-mode=legacy'])
 ```
 
+```python
+# kubefwd all namespaces Tilt deploys to, but purge stale IPs first.
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-purge=true'])
+```
+```
+
 ## Usage
 
 When Tilt starts up for the first time, it will prompt up your native OS GUI for

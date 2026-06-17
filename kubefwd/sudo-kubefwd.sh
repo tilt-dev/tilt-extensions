@@ -14,6 +14,7 @@ DIR=$(realpath "$(dirname "$0")")
 KUBECONFIG=${KUBECONFIG:-${HOME}/.kube/config}
 TILT_KUBEFWD_MODE=${TILT_KUBEFWD_MODE:-idle}
 TILT_KUBEFWD_TRIGGER=${TILT_KUBEFWD_TRIGGER:-}
+KUBEFWD_PURGE=${KUBEFWD_PURGE:-false}
 
 set -euo pipefail
 
@@ -79,26 +80,26 @@ trap cleanup EXIT
 
 if [[ "$OSASCRIPT" != "" ]]; then
     set -x
-    CMD="'$RUN_KUBEFWD' '$KUBEFWD' '$KUBECONFIG' '$ENTR' '$TILT_KUBEFWD_MODE' '$TILT_KUBEFWD_TRIGGER'"
+    CMD="'$RUN_KUBEFWD' '$KUBEFWD' '$KUBECONFIG' '$ENTR' '$TILT_KUBEFWD_MODE' '$TILT_KUBEFWD_TRIGGER' '$KUBEFWD_PURGE'"
     "$OSASCRIPT" -e "do shell script \"$CMD\" with administrator privileges"
     exit "$?"
 fi
 
 if [[ "$PKEXEC" != "" ]]; then
     set -x
-    "$PKEXEC" --disable-internal-agent "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER"
+    "$PKEXEC" --disable-internal-agent "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
     exit "$?"
 fi
 
 if [[ "$KDESUDO" != "" ]]; then
     set -x
-    "$KDESUDO" --comment 'Tilt needs admin privs to run kubefwd. Please enter your password.' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER"
+    "$KDESUDO" --comment 'Tilt needs admin privs to run kubefwd. Please enter your password.' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
     exit "$?"
 fi
 
 if [[ "$GKSUDO" != "" ]]; then
     set -x
-    "$GKSUDO" --preserve-env --sudo-mode --description 'tilt/kubefwd' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER"
+    "$GKSUDO" --preserve-env --sudo-mode --description 'tilt/kubefwd' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
     exit "$?"
 fi
 
