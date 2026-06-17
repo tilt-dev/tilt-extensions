@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+trap 'kill $(jobs -p) 2>/dev/null || true' EXIT
+
 # Legacy mode: file-based trigger
 if [[ "${TILT_KUBEFWD_MODE:-idle}" == "legacy" ]]; then
     function reconcile_legacy {
@@ -31,11 +33,12 @@ done
 function get_api_namespaces {
     curl -s http://kubefwd.internal/api/v1/namespaces | \
         jq -r '.data.namespaces[]?.namespace // empty' | \
-        sort -u
+        sort -u || true
 }
 
 function reconcile {
-    NEW_NAMESPACES=$(tilt get kd -o=jsonpath='{.items[*].spec.watches[*].namespace}' | echo "$(cat -) $TILT_CFG_NAMESPACES" | tr -s ' ' '\n' | sort -u)
+    NEW_NAMESPACES=$(tilt get kd -o=jsonpath='{.items[*].spec.watches[*].namespace}' 2>/dev/null || true)
+    NEW_NAMESPACES=$(echo "$NEW_NAMESPACES ${TILT_CFG_NAMESPACES:-}" | tr -s ' ' '\n' | sort -u)
 
     # In kubefwd, we need to add missing namespaces and remove extra ones
     ACTIVE_NAMESPACES=$(get_api_namespaces)
@@ -56,7 +59,7 @@ function reconcile {
             echo "Removing namespace from kubefwd: $ns"
             # Get the exact key for this namespace to delete it
             KEY=$(curl -s http://kubefwd.internal/api/v1/namespaces | \
-                  jq -r --arg ns "$ns" '.data.namespaces[]? | select(.namespace == $ns) | .key // empty')
+                  jq -r --arg ns "$ns" '.data.namespaces[]? | select(.namespace == $ns) | .key // empty' || true)
             if [[ "$KEY" != "" ]]; then
                 curl -s -X DELETE "http://kubefwd.internal/api/v1/namespaces/$KEY" >/dev/null || true
             fi
@@ -66,6 +69,9 @@ function reconcile {
 
 reconcile
 
-tilt get kd --watch -o name | while read -r; do
+{
+    tilt get kd --watch -o name &
+    while true; do sleep 5; echo "tick"; done
+} | while read -r; do
     reconcile
 done
