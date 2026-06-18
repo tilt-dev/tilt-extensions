@@ -63,6 +63,35 @@ to, then configure `kubefwd` for that namespace.
 If `kubefwd` gets wedged, Tilt has a custom button to the UI to refresh it.
 Click the `kubefwd:run` resource and press the button labelled "Refresh".
 
+## Bypassing the Sudo Prompt
+
+To avoid entering your password every time Tilt starts `kubefwd`, you can permanently grant passwordless execution rights to the `run-kubefwd.sh` script. You can achieve this using one of the following methods, depending on your system's configuration.
+
+### Method 1: sudoers (for `sudo`)
+If your system uses `sudo` (e.g., when using `--kubefwd-sudo-non-interactive=true`), you can add a rule to your `sudoers` configuration.
+
+Run `sudo visudo -f /etc/sudoers.d/tilt-kubefwd` and add the following line, replacing `<username>` with your actual username:
+
+```
+<username> ALL=(ALL:ALL) NOPASSWD: /tmp/kubefwd.tilt/run-kubefwd.sh
+```
+
+### Method 2: PolicyKit / polkit (for `pkexec`)
+If your system uses `pkexec` for graphical prompts, you can add a polkit rule.
+
+Create a file at `/etc/polkit-1/rules.d/49-nopasswd-kubefwd.rules` and add the following content, replacing `<username>` with your actual username:
+
+```javascript
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/tmp/kubefwd.tilt/run-kubefwd.sh" &&
+        subject.user == "<username>") {
+        return polkit.Result.YES;
+    }
+});
+```
+
+
 ## Future Work
 
 ### Pod Discovery
