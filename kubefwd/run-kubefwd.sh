@@ -21,7 +21,8 @@ else
     fi
 
     # Kill any lingering kubefwd processes from previous Tilt runs
-    pkill -x kubefwd || true
+    # and wait for them to exit to prevent race conditions with /etc/hosts
+    (pkill -x kubefwd && pidwait -x kubefwd) || true
 
     # Check array length before expanding to avoid unbound variable errors
     # in Bash 3.2 (macOS default) when 'set -u' is enabled and the array is empty.
