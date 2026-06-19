@@ -16,6 +16,7 @@ KUBECONFIG=${KUBECONFIG:-${HOME}/.kube/config}
 TILT_KUBEFWD_MODE=${TILT_KUBEFWD_MODE:-idle}
 TILT_KUBEFWD_TRIGGER=${TILT_KUBEFWD_TRIGGER:-}
 KUBEFWD_PURGE=${KUBEFWD_PURGE:-false}
+KUBEFWD_API_KEY=${KUBEFWD_API_KEY:-}
 
 set -euo pipefail
 
@@ -81,32 +82,32 @@ trap cleanup EXIT
 
 if [[ "${TILT_SUDO_NON_INTERACTIVE:-false}" == "true" ]] && [[ "$SUDO" != "" ]]; then
     set -x
-    "$SUDO" -n "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
+    "$SUDO" -n "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE" "$KUBEFWD_API_KEY"
     exit "$?"
 fi
 
 if [[ "$OSASCRIPT" != "" ]]; then
     set -x
-    CMD="'$RUN_KUBEFWD' '$KUBEFWD' '$KUBECONFIG' '$ENTR' '$TILT_KUBEFWD_MODE' '$TILT_KUBEFWD_TRIGGER' '$KUBEFWD_PURGE'"
+    CMD="'$RUN_KUBEFWD' '$KUBEFWD' '$KUBECONFIG' '$ENTR' '$TILT_KUBEFWD_MODE' '$TILT_KUBEFWD_TRIGGER' '$KUBEFWD_PURGE' '$KUBEFWD_API_KEY'"
     "$OSASCRIPT" -e "do shell script \"$CMD\" with administrator privileges"
     exit "$?"
 fi
 
 if [[ "$PKEXEC" != "" ]]; then
     set -x
-    "$PKEXEC" --disable-internal-agent "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
+    "$PKEXEC" --disable-internal-agent "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE" "$KUBEFWD_API_KEY"
     exit "$?"
 fi
 
 if [[ "$KDESUDO" != "" ]]; then
     set -x
-    "$KDESUDO" --comment 'Tilt needs admin privs to run kubefwd. Please enter your password.' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
+    "$KDESUDO" --comment 'Tilt needs admin privs to run kubefwd. Please enter your password.' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE" "$KUBEFWD_API_KEY"
     exit "$?"
 fi
 
 if [[ "$GKSUDO" != "" ]]; then
     set -x
-    "$GKSUDO" --preserve-env --sudo-mode --description 'tilt/kubefwd' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE"
+    "$GKSUDO" --preserve-env --sudo-mode --description 'tilt/kubefwd' "$RUN_KUBEFWD" "$KUBEFWD" "$KUBECONFIG" "$ENTR" "$TILT_KUBEFWD_MODE" "$TILT_KUBEFWD_TRIGGER" "$KUBEFWD_PURGE" "$KUBEFWD_API_KEY"
     exit "$?"
 fi
 

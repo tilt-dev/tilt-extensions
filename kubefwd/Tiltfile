@@ -29,13 +29,18 @@ if not mode:
 trigger_file = ""
 deps = ['sudo-kubefwd.sh', 'run-kubefwd.sh', 'watch-namespaces.sh']
 
+# Generate a static API key for the session so our scripts can talk to kubefwd
+api_key = str(local('uuidgen 2>/dev/null || od -vN "16" -An -tx1 /dev/urandom | tr -d " \n" 2>/dev/null || echo ""')).strip()
+if not api_key:
+    fail("kubefwd extension requires 'uuidgen' or 'od' to generate an API key. Please install uuidgen or coreutils.")
+
 if mode == "legacy":
     trigger_file = str(local('mktemp "${TMPDIR:-/tmp}/tilt-kubefwd.XXXXXXXXX"')).strip()
     deps.append('run-kubefwd-internal.sh')
 
 # Creates a button that refreshes the kubefwd without
 # requiring new credentials.
-local(['./create-refresh-button.sh'])
+local(['./create-refresh-button.sh'], env={'KUBEFWD_API_KEY': api_key, 'TILT_KUBEFWD_MODE': mode, 'TILT_KUBEFWD_TRIGGER': trigger_file})
 
 local_resource(
   name='kubefwd:run',
@@ -46,5 +51,6 @@ local_resource(
       'TILT_KUBEFWD_MODE': mode,
       'TILT_KUBEFWD_TRIGGER': trigger_file,
       'KUBEFWD_PURGE': str(purge).lower(),
-      'TILT_SUDO_NON_INTERACTIVE': str(sudo_non_interactive).lower()
+      'TILT_SUDO_NON_INTERACTIVE': str(sudo_non_interactive).lower(),
+      'KUBEFWD_API_KEY': api_key
   })

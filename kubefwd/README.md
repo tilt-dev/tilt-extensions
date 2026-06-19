@@ -15,9 +15,10 @@ https://kubefwd.com/
 
 - `bash`
 - `kubefwd`
+- `uuidgen` (or `od` via GNU core utils)
 - `entr` (required if kubefwd < 1.25.0)
 - `jq` (required if kubefwd >= 1.25.0)
-- GNU core utils (`tr`, `sort`) - `brew install coreutils`
+- GNU core utils (`tr`, `sort`, `od`) - `brew install coreutils`
 
 ## Examples
 

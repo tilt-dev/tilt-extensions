@@ -25,14 +25,20 @@ if [[ "${TILT_KUBEFWD_MODE:-idle}" == "legacy" ]]; then
 fi
 
 # Idle mode: API-based sync
+
+CURL_OPTS=("-s" "-f")
+if [[ -n "${KUBEFWD_API_KEY:-}" ]]; then
+    CURL_OPTS+=("-H" "Authorization: Bearer ${KUBEFWD_API_KEY}")
+fi
+
 # Wait for kubefwd API to become healthy
-until curl -s -f -o /dev/null "http://kubefwd.internal/api/health"; do
+until curl "${CURL_OPTS[@]}" -o /dev/null "http://kubefwd.internal/api/health"; do
     sleep 1
 done
 
 function get_api_namespaces {
     local resp
-    if ! resp=$(curl -s -f http://kubefwd.internal/api/v1/namespaces); then
+    if ! resp=$(curl "${CURL_OPTS[@]}" http://kubefwd.internal/api/v1/namespaces); then
         return 1
     fi
     echo "$resp" | jq -r '.data.namespaces[]?.namespace // empty' | sort -u
@@ -53,9 +59,9 @@ function reconcile {
         if [[ "$ns" == "" ]]; then continue; fi
         if ! echo "$ACTIVE_NAMESPACES" | grep -q "^${ns}$"; then
             echo "Adding namespace to kubefwd: $ns"
-            curl -s -X POST "http://kubefwd.internal/api/v1/namespaces" \
+            curl -s -X POST -H "Authorization: Bearer ${KUBEFWD_API_KEY:-}" \
                  -H "Content-Type: application/json" \
-                 -d "{\"namespace\": \"$ns\"}" >/dev/null || true
+                 -d "{\"namespace\": \"$ns\"}" "http://kubefwd.internal/api/v1/namespaces" >/dev/null || true
         fi
     done
 
@@ -64,10 +70,10 @@ function reconcile {
         if ! echo "$NEW_NAMESPACES" | grep -q "^${ns}$"; then
             echo "Removing namespace from kubefwd: $ns"
             # Get the exact key for this namespace to delete it
-            KEY=$(curl -s http://kubefwd.internal/api/v1/namespaces | \
+            KEY=$(curl "${CURL_OPTS[@]}" http://kubefwd.internal/api/v1/namespaces | \
                   jq -r --arg ns "$ns" '.data.namespaces[]? | select(.namespace == $ns) | .key // empty' || true)
             if [[ "$KEY" != "" ]]; then
-                curl -s -X DELETE "http://kubefwd.internal/api/v1/namespaces/$KEY" >/dev/null || true
+                curl -s -X DELETE -H "Authorization: Bearer ${KUBEFWD_API_KEY:-}" "http://kubefwd.internal/api/v1/namespaces/$KEY" >/dev/null || true
             fi
         fi
     done

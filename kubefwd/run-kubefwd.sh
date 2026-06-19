@@ -7,6 +7,7 @@ export ENTR="$3"
 export TILT_KUBEFWD_MODE="$4"
 export TILT_KUBEFWD_TRIGGER="$5"
 export KUBEFWD_PURGE="$6"
+export KUBEFWD_API_KEY="$7"
 
 DIR=$(realpath "$(dirname "$0")")
 
@@ -26,6 +27,9 @@ else
 
     # Check array length before expanding to avoid unbound variable errors
     # in Bash 3.2 (macOS default) when 'set -u' is enabled and the array is empty.
+
+    echo "API Key: ${KUBEFWD_API_KEY}"
+
     if [ ${#flags[@]} -eq 0 ]; then
         exec "$KUBEFWD"
     else
