@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Runs kubefwd with admin privileges.
 # Invokes an OS-specific sudo UI.

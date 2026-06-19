@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Run kubefwd, assuming we already have sudo privs.
 
 export KUBEFWD="$1"

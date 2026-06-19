@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Run kubefwd, assuming we already have sudo privs.
 # Build up the arguments to kubefwd from the namespaces in the trigger file.

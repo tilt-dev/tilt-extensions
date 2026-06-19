@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Continuously watch the namespaces that we're deploying to, and sync them.
 
