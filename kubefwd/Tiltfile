@@ -37,10 +37,29 @@ if not api_key:
 if mode == "legacy":
     trigger_file = str(local('mktemp "${TMPDIR:-/tmp}/tilt-kubefwd.XXXXXXXXX"')).strip()
     deps.append('run-kubefwd-internal.sh')
+    btn_args = ["touch", trigger_file]
+else:
+    btn_args = ["curl", "-s", "-X", "POST", "-H", "Authorization: Bearer %s" % api_key, "http://kubefwd.internal/api/v1/services/reconnect?force=true"]
 
 # Creates a button that refreshes the kubefwd without
 # requiring new credentials.
-local(['./create-refresh-button.sh'], env={'KUBEFWD_API_KEY': api_key, 'TILT_KUBEFWD_MODE': mode, 'TILT_KUBEFWD_TRIGGER': trigger_file})
+# Use ui_button function. This requires tilt >= v0.22.10
+v1alpha1.ui_button(
+    name='kubefwd:refresh',
+    text='Refresh',
+    icon_name='refresh',
+    location={
+        'component_type': 'Resource',
+        'component_id': 'kubefwd:run'
+    }
+)
+
+v1alpha1.cmd(
+    name='kubefwd:refresh',
+    args=btn_args,
+    annotations={'tilt.dev/resource': 'kubefwd:run'},
+    start_on=v1alpha1.start_on_spec(ui_buttons=['kubefwd:refresh'])
+)
 
 local_resource(
   name='kubefwd:run',
