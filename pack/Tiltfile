@@ -37,6 +37,9 @@ def pack(
     pack_build_cmd = " ".join([
       "pack build",
       caching_ref,
+      # Ensure lifecycle containers use the same daemon as the pack CLI when
+      # DOCKER_HOST points at a remote or proxied daemon.
+      "--docker-host inherit",
       "--path " + path,
       "--builder " + builder,
       "--pull-policy " + pull_policy,
