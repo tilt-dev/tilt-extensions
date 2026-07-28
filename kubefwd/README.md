@@ -15,8 +15,10 @@ https://kubefwd.com/
 
 - `bash`
 - `kubefwd`
-- `entr`
-- GNU core utils (`tr`, `sort`) - `brew install coreutils`
+- `uuidgen` (or `od` via GNU core utils)
+- `entr` (required if kubefwd < 1.25.0)
+- `jq` (required if kubefwd >= 1.25.0)
+- GNU core utils (`tr`, `sort`, `od`) - `brew install coreutils`
 
 ## Examples
 
@@ -32,6 +34,24 @@ v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-ex
 v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--namespaces=kubesystem'])
 ```
 
+```python
+# explicitly override the kubefwd mode (idle or legacy) instead of auto-detecting.
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-mode=legacy'])
+```
+
+```python
+# kubefwd all namespaces Tilt deploys to, but purge stale IPs first.
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-purge=true'])
+```
+
+```python
+# Use non-interactive sudo (sudo -n) instead of graphical prompts (useful in WSL).
+v1alpha1.extension_repo(name='default', url='https://github.com/tilt-dev/tilt-extensions')
+v1alpha1.extension(name='kubefwd:config', repo_name='default', repo_path='kubefwd', args=['--kubefwd-sudo-non-interactive=true'])
+```
+
 ## Usage
 
 When Tilt starts up for the first time, it will prompt up your native OS GUI for
@@ -43,6 +63,35 @@ to, then configure `kubefwd` for that namespace.
 
 If `kubefwd` gets wedged, Tilt has a custom button to the UI to refresh it.
 Click the `kubefwd:run` resource and press the button labelled "Refresh".
+
+## Bypassing the Sudo Prompt
+
+To avoid entering your password every time Tilt starts `kubefwd`, you can permanently grant passwordless execution rights to the `run-kubefwd.sh` script. You can achieve this using one of the following methods, depending on your system's configuration.
+
+### Method 1: sudoers (for `sudo`)
+If your system uses `sudo` (e.g., when using `--kubefwd-sudo-non-interactive=true`), you can add a rule to your `sudoers` configuration.
+
+Run `sudo visudo -f /etc/sudoers.d/tilt-kubefwd` and add the following line, replacing `<username>` with your actual username:
+
+```
+<username> ALL=(ALL:ALL) NOPASSWD: /tmp/kubefwd.tilt/run-kubefwd.sh
+```
+
+### Method 2: PolicyKit / polkit (for `pkexec`)
+If your system uses `pkexec` for graphical prompts, you can add a polkit rule.
+
+Create a file at `/etc/polkit-1/rules.d/49-nopasswd-kubefwd.rules` and add the following content, replacing `<username>` with your actual username:
+
+```javascript
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/tmp/kubefwd.tilt/run-kubefwd.sh" &&
+        subject.user == "<username>") {
+        return polkit.Result.YES;
+    }
+});
+```
+
 
 ## Future Work
 
@@ -60,7 +109,7 @@ Possible solutions:
 2) Even better, a version of `kubefwd` that reads the pods from the Tilt API.
 
 Currently, this extension uses `entr` to restart `kubefwd`
-without requesting new credentials.
+without requesting new credentials when `kubefwd` < 1.25.0.
 
 ### Multi-cluster kubefwd
 
