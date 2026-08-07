@@ -1,4 +1,4 @@
-# nix-flake
+# nix_flake
 
 Use build_flake_image to build images for Tilt from one or more flakes. Heavily inspired by the existing nix plugin.
 
@@ -25,7 +25,7 @@ One advantage to using flakes for building Tilt containers is that you can compo
 This plugin runs `nix build {path}#{output}` to construct the container, so any valid flake path can be used by the plugin. A somewhat complete list of those can be found here (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html#examples)
 
 ```
-load('ext://nix-flake', 'build_flake_image')
+load('ext://nix_flake', 'build_flake_image')
 build_flake_image("some-container", ".", "container")
 build_flake_image("some-other-container", "git+ssh://git@github.example.com/org/some-other-project", "container")
 build_flake_image("yet-another-container", "~/some_other_project", "container")
