@@ -21,6 +21,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`dotenv`](/dotenv): Load environment variables from `.env` or another file.
 - [`earthly`](/earthly): Build container images using [earthly](https://earthly.dev)
 - [`execute_in_pod`](/execute_in_pod): Execute a command on a pod container.
+- [`files_glob`](/files_glob): Expand glob-like patterns into real file paths for use in deps and other APIs.
 - [`file_sync_only`](/file_sync_only): No-build, no-push, file sync-only development. Useful when you want to live-reload a single config file into an existing public image, like nginx.
 - [`get_obj`](/get_obj): Get object yaml and the container's registry and image from an existing k8s resource such as deployment or statefulset
 - [`git_resource`](/git_resource): Deploy a dockerfile from a remote repository -- or specify the path to a local checkout for local development.
