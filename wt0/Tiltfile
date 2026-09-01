@@ -1,0 +1,70 @@
+# Worktree Zero Tilt extension.
+#
+# Maps Worktree Zero's per-runtime identities (WT0_SLOT, WT0_PORT_BASE,
+# WT0_RUNTIME_ID — exported by `wt0 run` and lifecycle hooks) into Tilt, so
+# every worktree gets an isolated, collision-free dev/test environment:
+# its own namespace, its own port windows, its own Compose project.
+#
+# Load from a project Tiltfile:
+#
+#   load('ext://wt0', 'wt0_slot', 'wt0_port', 'wt0_namespace', 'wt0_short_id')
+#
+# Outside a Worktree Zero runtime every helper degrades to slot 0 and the
+# 'wt0-local' identity, so one Tiltfile serves humans and agent fleets alike.
+
+def wt0_slot():
+    """The runtime's slot index; 0 outside a Worktree Zero runtime."""
+    return int(os.getenv('WT0_SLOT', '0'))
+
+def wt0_port(offset=0):
+    """A port inside this runtime's hundred-port window.
+
+    WT0_PORT_BASE is claimed from wt0's machine-global port registry, so the
+    window never overlaps another runtime's — not even one from a different
+    repository on the same machine — and the base port was bind-probed free
+    when the runtime was created.
+    """
+    if offset < 0 or offset > 99:
+        fail('wt0_port offset must be 0..99 so runtimes stay disjoint, got %s' % offset)
+    return int(os.getenv('WT0_PORT_BASE', '20000')) + offset
+
+def wt0_runtime_id():
+    """The full runtime UUID, or 'wt0-local' outside a runtime."""
+    return os.getenv('WT0_RUNTIME_ID', 'wt0-local')
+
+def wt0_short_id():
+    """The first eight characters of the runtime id — stable, label-safe."""
+    return wt0_runtime_id()[:8]
+
+def wt0_branch():
+    """The runtime's branch, or '' outside a runtime."""
+    return os.getenv('WT0_BRANCH', '')
+
+def wt0_namespace(prefix='wt0'):
+    """A per-runtime Kubernetes namespace name, e.g. wt0-0198f3a2."""
+    return '%s-%s' % (prefix, wt0_short_id())
+
+def wt0_compose_project():
+    """The runtime's Docker Compose project name."""
+    return os.getenv('COMPOSE_PROJECT_NAME', 'wt0-%s' % wt0_short_id())
+
+# --- Tier 1: shared services, private app -----------------------------------
+# See docs/dev-environments.md. The services tier (databases, queues,
+# emulators) boots once under a STABLE identity; each worktree's app tier
+# connects under a per-runtime resource name.
+
+def wt0_shared_namespace(prefix='wt0-shared'):
+    """The stable namespace for the once-per-cluster services tier."""
+    return prefix
+
+def wt0_resource_name(base):
+    """A per-runtime tenant name inside a shared service, e.g. a database
+    name: appdb_0198f3a2. Unique per runtime; a pre-remove hook must drop
+    it so tenant state never outlives the worktree."""
+    return '%s_%s' % (base, wt0_short_id())
+
+def wt0_slot_resource(base):
+    """A slot-keyed tenant name, e.g. appdb_wt0_3. Bounded and reusable,
+    but a reused slot inherits the previous tenant's state — use only for
+    resources a post-create hook resets."""
+    return '%s_wt0_%s' % (base, wt0_slot())

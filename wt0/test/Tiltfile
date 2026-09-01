@@ -1,0 +1,25 @@
+load(
+    '../Tiltfile',
+    'wt0_slot',
+    'wt0_port',
+    'wt0_runtime_id',
+    'wt0_short_id',
+    'wt0_namespace',
+    'wt0_compose_project',
+    'wt0_shared_namespace',
+    'wt0_resource_name',
+    'wt0_slot_resource',
+)
+
+print('slot=%s' % wt0_slot())
+print('port=%s' % wt0_port(7))
+print('runtime=%s' % wt0_runtime_id())
+print('short=%s' % wt0_short_id())
+print('ns=%s' % wt0_namespace())
+print('compose=%s' % wt0_compose_project())
+print('shared=%s' % wt0_shared_namespace())
+print('resource=%s' % wt0_resource_name('appdb'))
+print('slotresource=%s' % wt0_slot_resource('appdb'))
+
+# tilt ci requires at least one resource.
+local_resource('dummy', 'echo dummy')

@@ -62,6 +62,7 @@ All extensions have been vetted and approved by the Tilt team.
 - [`vault_client`](/vault_client): Retrieve secrets from a Vault instance.
 - [`wait_for_it`](/wait_for_it): Wait until command output is equal to given output.
 - [`base64`](/base64): Base64 encode or decode a string.
+- [`wt0`](/wt0): Run one Tilt environment per [Worktree Zero](https://github.com/lonormaly/worktree-zero) Git worktree — per-runtime namespaces and non-overlapping port windows for parallel coding agents.
 - [`yarn`](/yarn): Create Tilt resources from package.json scripts in a yarn workspace.
 
 ## Contribute an Extension
