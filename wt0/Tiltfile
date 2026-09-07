@@ -33,15 +33,20 @@ def wt0_runtime_id():
     return os.getenv('WT0_RUNTIME_ID', 'wt0-local')
 
 def wt0_short_id():
-    """The first eight characters of the runtime id — stable, label-safe."""
-    return wt0_runtime_id()[:8]
+    """The runtime id's last 12 characters — stable and label-safe.
+
+    wt0 runtime ids are UUIDv7 values, whose leading characters encode time.
+    Concurrent runtimes can therefore share the same prefix; the random tail
+    keeps their Kubernetes, Compose, and tenant identities distinct.
+    """
+    return wt0_runtime_id()[-12:]
 
 def wt0_branch():
     """The runtime's branch, or '' outside a runtime."""
     return os.getenv('WT0_BRANCH', '')
 
 def wt0_namespace(prefix='wt0'):
-    """A per-runtime Kubernetes namespace name, e.g. wt0-0198f3a2."""
+    """A per-runtime Kubernetes namespace name, e.g. wt0-1234567890ab."""
     return '%s-%s' % (prefix, wt0_short_id())
 
 def wt0_compose_project():
@@ -59,7 +64,7 @@ def wt0_shared_namespace(prefix='wt0-shared'):
 
 def wt0_resource_name(base):
     """A per-runtime tenant name inside a shared service, e.g. a database
-    name: appdb_0198f3a2. Unique per runtime; a pre-remove hook must drop
+    name: appdb_1234567890ab. Unique per runtime; a pre-remove hook must drop
     it so tenant state never outlives the worktree."""
     return '%s_%s' % (base, wt0_short_id())
 
