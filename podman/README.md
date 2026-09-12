@@ -72,6 +72,26 @@ to add 'localhost' under the 'registries.insecure' heading.
 registries = ['localhost']
 ```
 
+### Could not find image in Docker
+
+If you see this error message:
+
+```
+Build Failed: Could not find image in Docker
+: Error response from daemon: No such image: localhost:5000/my-image-tilt_docker_build_with_restart_base:tilt-build-1788425710
+```
+
+`podman_build_with_restart` needs Tilt to reach the built image over a Docker API,
+because the `custom_build_with_restart` it wraps cannot use `skips_local_docker`.
+Point `DOCKER_HOST` at Podman's socket, so that Tilt talks to Podman rather than to
+a Docker daemon:
+
+```
+export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
+```
+
+(see https://github.com/tilt-dev/tilt-extensions/issues/571 for more details)
+
 ### GRPC error
 
 If you see this error message:
