@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Run kubefwd, assuming we already have sudo privs.
 # Build up the arguments to kubefwd from the namespaces in the trigger file.
@@ -11,7 +11,7 @@ while read -r namespace; do
       continue
     fi
     flags+=("-n=$namespace")
-done < "$TRIGGER"
+done < "$TILT_KUBEFWD_TRIGGER"
 
 if [ ${#flags[@]} -eq 0 ]; then
     echo "No namespaces to kubefwd"
