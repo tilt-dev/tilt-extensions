@@ -8,7 +8,7 @@ RUN git checkout c564e6bdca1dfe2177d1224363cad734158863ad
 RUN cp Makefile.linux Makefile
 RUN CFLAGS="-static" make install
 
-FROM golang AS go-build
+FROM golang:1.25 AS go-build
 WORKDIR /src
 ADD ./tilt-restart-wrapper.go ./tilt-restart-wrapper.go
 RUN GO111MODULE=auto go build ./tilt-restart-wrapper.go
