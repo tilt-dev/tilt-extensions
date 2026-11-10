@@ -9,6 +9,7 @@ import sys
 from typing import Dict
 
 from namespacing import add_default_namespace
+from readback import attempts_from_env, delay_from_env, run_readback
 
 sys.tracebacklimit = 0
 
@@ -89,5 +90,12 @@ out_with_right_line_endings = out.replace(os.linesep, '\n') if is_windows else o
 input = add_default_namespace(out_with_right_line_endings, namespace).encode('utf-8')
 
 print("Running cmd: %s" % kubectl_cmd, file=sys.stderr)
-completed = subprocess.run(kubectl_cmd, input=input)
+completed = run_readback(kubectl_cmd, input,
+                         attempts=attempts_from_env(os.environ),
+                         delay=delay_from_env(os.environ),
+                         log=lambda msg: print(msg, file=sys.stderr))
+sys.stdout.buffer.write(completed.stdout)
+sys.stdout.buffer.flush()
+sys.stderr.buffer.write(completed.stderr)
+sys.stderr.buffer.flush()
 completed.check_returncode()

@@ -112,6 +112,20 @@ thinks a resource has pods.
 
 `links`: One or more links to be associated with this resource in the UI. For more info, see [Accessing Resource Endpoints](https://docs.tilt.dev/accessing_resource_endpoints#displaying-a-static-link).
 
+### Read-back retries
+
+After installing, `helm_resource` reads the release's objects back from the
+cluster so Tilt can track them. Some controllers delete and recreate an object
+right after it is created (for example, vCluster's service syncer does this to
+every ClusterIP Service), so this read can fail with `NotFound` for an object
+that exists a moment later. The read-back is retried while it fails with
+`NotFound`; any other error fails immediately.
+
+| Environment variable | Default | Meaning |
+|---|---|---|
+| `TILT_HELM_READBACK_ATTEMPTS` | `5` | Total read-back attempts. |
+| `TILT_HELM_READBACK_DELAY_SECONDS` | `1.0` | Delay between attempts. |
+
 ### helm_repo
 
 ```
