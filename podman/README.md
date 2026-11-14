@@ -15,8 +15,14 @@ Use Podman (https://podman.io/) to build images for Tilt.
       Does not affect the build context.
 - **extra_flags**: Extra flags to pass to podman build.
 - **push_extra_flags**: Extra flags to pass to podman push.
+      When set, the image is always pushed with `podman push`.
 - **live_update**: Set of steps for updating a running container
       (see https://docs.tilt.dev/live_update_reference.html)
+
+When Tilt talks to Podman's socket (see [Could not find image in Docker](#could-not-find-image-in-docker)),
+Tilt tags the image by content and pushes it. An unchanged image keeps its tag, so your pods are not restarted.
+Otherwise, or when `push_extra_flags` is set, `podman_build` pushes the image with `podman push`,
+with a new tag on every build.
 
 ### `podman_build_with_restart(ref: str, context: str, entrypoint: str, extra_flags?: [str])`
 

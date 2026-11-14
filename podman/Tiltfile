@@ -3,10 +3,27 @@
 # * Load extensions
 load('ext://restart_process', 'custom_build_with_restart')
 
+def _uses_podman_socket():
+  """Whether Tilt reaches the podman image storage through the Docker API."""
+  # Both commands print a storage path. They print the same path when the
+  # Docker API endpoint is the podman socket of the podman CLI user.
+  out = str(local(
+    "docker info --format '{{.DockerRootDir}}' 2>/dev/null & " +
+    "podman info --format '{{.Store.GraphRoot}}' 2>/dev/null; wait",
+    quiet=True,
+    echo_off=True,
+  )).strip()
+  roots = out.split('\n')
+  return len(roots) == 2 and roots[0] != '' and roots[0] == roots[1]
+
 def podman_build(
   ref, context, ignore=None, extra_flags=None, deps=None, live_update=[], push_extra_flags=None
 ):
   """Use Podman (https://podman.io/) to build images for Tilt.
+
+  When Tilt talks to the podman socket, Tilt tags the image by content and pushes it.
+  Otherwise, or when push_extra_flags is set, the image is pushed with podman push.
+
   Args:
     ref: The name of the image to build. Must match the image
       name in the Kubernetes resources you're deploying.
@@ -17,27 +34,42 @@ def podman_build(
       Does not affect the build context.
     extra_flags: Extra flags to pass to podman build. Expressed as an argv-style array.
     push_extra_flags: Extra flags to pass to podman push. Expressed as an argv-style array.
+      When set, the image is always pushed with podman push.
     live_update: Set of steps for updating a running container
       (see https://docs.tilt.dev/live_update_reference.html)
   """
   deps = deps or [context]
   extra_flags = extra_flags or []
   push_extra_flags = push_extra_flags or []
-  extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
-  push_extra_flags_str = ' '.join([shlex.quote(f) for f in push_extra_flags])
 
   # We use --format=docker due to
   # https://github.com/containers/buildah/issues/1589
   # which lots of people are still reporting, even though it's closed :shrug:
+  # Tilt pushes through the podman socket without asking for a format,
+  # so the image must be built in the docker format.
+  use_socket = not push_extra_flags and _uses_podman_socket()
+  if use_socket:
+    extra_flags = ['--format=docker'] + extra_flags
+
+  extra_flags_str = ' '.join([shlex.quote(f) for f in extra_flags])
+  build_cmd = "set -ex\npodman build -t $EXPECTED_REF %s %s\n" % (extra_flags_str, shlex.quote(context))
+
+  if use_socket:
+    custom_build(
+      ref=ref,
+      command=build_cmd,
+      ignore=ignore,
+      deps=deps,
+      live_update=live_update,
+    )
+    return
+
+  push_extra_flags_str = ' '.join([shlex.quote(f) for f in push_extra_flags])
   push_cmd = "podman push %s --format=docker $EXPECTED_REF\n" % push_extra_flags_str
 
   custom_build(
     ref=ref,
-    command=(
-      "set -ex\n" +
-      "podman build -t $EXPECTED_REF %s %s\n" +
-      push_cmd
-    ) % (extra_flags_str, shlex.quote(context)),
+    command=build_cmd + push_cmd,
     ignore=ignore,
     deps=deps,
     live_update=live_update,
