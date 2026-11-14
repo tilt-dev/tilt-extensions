@@ -25,7 +25,8 @@ def helm_resource(
     pod_readiness='',
     update_dependencies=False,
     build_dependencies=False,
-    links=[]):
+    links=[],
+    skip_unchanged=False):
   """Installs a helm chart to a cluster.
 
   Args:
@@ -71,6 +72,8 @@ def helm_resource(
     update_dependencies: Runs `helm dependency update` before installing the chart.
     build_dependencies: Runs `helm dependency build --skip-refresh` before installing the chart.
     links: One or more links to be associated with this resource in the UI.
+    skip_unchanged: Skip the upgrade when the chart, the flags and the values did not change
+      and all the objects of the release still exist. Defaults to `False`.
   """
   if not release_name:
     release_name=name
@@ -100,6 +103,9 @@ def helm_resource(
 
   if build_dependencies:
     env['TILT_HELM_RELEASE_DEPENDENCY_BUILD'] = 'true'
+
+  if skip_unchanged:
+    env['TILT_HELM_SKIP_UNCHANGED'] = 'true'
 
   if flags:
     apply_cmd.extend(flags)

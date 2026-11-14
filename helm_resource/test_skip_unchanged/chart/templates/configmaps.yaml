@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skip-unchanged-one
+data:
+  hello: {{ .Values.hello | default "world" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skip-unchanged-two
+data:
+  hello: world
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skip-unchanged-three
+  namespace: kube-public
+data:
+  hello: world

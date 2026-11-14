@@ -1,0 +1,15 @@
+# -*- mode: Python -*-
+
+load('../Tiltfile', 'helm_resource')
+
+# The chart has three ConfigMaps and no pods. One ConfigMap is in another namespace, to test
+# a release that spans two namespaces.
+helm_resource(
+  'skip-unchanged',
+  './chart',
+  namespace='helm-resource-skip-unchanged',
+  deps=['./chart'],
+  flags=['--create-namespace'],
+  labels=['skip-unchanged'],
+  pod_readiness='ignore',
+  skip_unchanged=True)

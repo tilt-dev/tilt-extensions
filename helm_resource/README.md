@@ -36,7 +36,8 @@ def helm_resource(
     auto_init=True,
     pod_readiness='',
     update_dependencies: False
-    links=[]):
+    links=[],
+    skip_unchanged=False):
   ...
 ```
 
@@ -111,6 +112,12 @@ thinks a resource has pods.
 `update_dependenices`: Runs `helm dependency update` before installing the chart.
 
 `links`: One or more links to be associated with this resource in the UI. For more info, see [Accessing Resource Endpoints](https://docs.tilt.dev/accessing_resource_endpoints#displaying-a-static-link).
+
+`skip_unchanged`: Skip `helm upgrade` when nothing changed since the last deploy. Defaults to `False`.
+
+Tilt stores a digest of the chart, the flags (including the injected images) and the values
+files in the release description. If the digest matches and all the objects of the release
+still exist, Tilt skips the upgrade.
 
 ### helm_repo
 
