@@ -1,11 +1,6 @@
 import unittest
 
-from readback import (
-  attempts_from_env,
-  delay_from_env,
-  is_transient_not_found,
-  run_readback,
-)
+from readback import is_transient_not_found, run_readback
 
 
 class FakeCompleted:
@@ -84,18 +79,6 @@ class TestNotFoundDetection(unittest.TestCase):
 
   def test_ignores_unrelated_errors(self):
     self.assertFalse(is_transient_not_found('connection refused'))
-
-
-class TestEnvOverrides(unittest.TestCase):
-  def test_defaults(self):
-    self.assertEqual(5, attempts_from_env({}))
-    self.assertEqual(1.0, delay_from_env({}))
-
-  def test_overrides(self):
-    self.assertEqual(9, attempts_from_env(
-      {'TILT_HELM_READBACK_ATTEMPTS': '9'}))
-    self.assertEqual(0.25, delay_from_env(
-      {'TILT_HELM_READBACK_DELAY_SECONDS': '0.25'}))
 
 
 if __name__ == '__main__':

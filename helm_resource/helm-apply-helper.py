@@ -9,7 +9,7 @@ import sys
 from typing import Dict
 
 from namespacing import add_default_namespace
-from readback import attempts_from_env, delay_from_env, run_readback
+from readback import run_readback
 
 sys.tracebacklimit = 0
 
@@ -91,8 +91,6 @@ input = add_default_namespace(out_with_right_line_endings, namespace).encode('ut
 
 print("Running cmd: %s" % kubectl_cmd, file=sys.stderr)
 completed = run_readback(kubectl_cmd, input,
-                         attempts=attempts_from_env(os.environ),
-                         delay=delay_from_env(os.environ),
                          log=lambda msg: print(msg, file=sys.stderr))
 sys.stdout.buffer.write(completed.stdout)
 sys.stdout.buffer.flush()

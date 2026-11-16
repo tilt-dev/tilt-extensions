@@ -38,12 +38,3 @@ def run_readback(cmd, input_bytes, attempts=DEFAULT_ATTEMPTS,
       log('read-back attempt %d/%d hit NotFound, retrying in %ss: %s'
           % (attempt, attempts, delay, stderr.strip()))
     sleeper(delay)
-
-
-def attempts_from_env(env):
-  return int(env.get('TILT_HELM_READBACK_ATTEMPTS', DEFAULT_ATTEMPTS))
-
-
-def delay_from_env(env):
-  return float(env.get('TILT_HELM_READBACK_DELAY_SECONDS',
-                       DEFAULT_DELAY_SECONDS))
